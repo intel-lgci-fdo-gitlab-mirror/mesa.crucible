@@ -51,6 +51,222 @@ check_requirements(uint32_t num_color_attachments)
 #define ALIGN(val, align) (((val) + (align) - 1) & ~((align) - 1))
 
 static void
+test_color_view_one(void)
+{
+    static const uint32_t num_attachments = 4;
+    static const uint32_t width = 64;
+    static const uint32_t height = 64;
+
+    VkFormat formats[4] =
+            { VK_FORMAT_R32_UINT, VK_FORMAT_R32_SFLOAT,
+              VK_FORMAT_R32_UINT, VK_FORMAT_R32_SFLOAT };
+    VkFormat view_formats[4] =
+            { VK_FORMAT_R32_SFLOAT, VK_FORMAT_R32_UINT,
+              VK_FORMAT_R32_SFLOAT, VK_FORMAT_R32_UINT };
+    VkImageFormatListCreateInfoKHR list = {
+            .sType = VK_STRUCTURE_TYPE_IMAGE_FORMAT_LIST_CREATE_INFO_KHR,
+            .viewFormatCount = 2,
+            .pViewFormats = &view_formats[0],
+    };
+    VkImageFormatListCreateInfoKHR *fmt_list[4] = {NULL, NULL, &list, &list};
+
+    VkClearValue clear_values[num_attachments];
+
+    /* Prior to the mesa commit 85d0bec9616bc1ffa8e4ab5e7c5d12ff4e414872
+     * ("anv: Be more careful about fast-clear colors"), anv checked all
+     * components of the clear color regardless of the view format. Memset the
+     * components to zero for reproducibility prior to that commit.
+     */
+    memset(clear_values, 0, sizeof(VkClearValue) * num_attachments);
+    clear_values[0].color.float32[0] = 1.0f;
+    clear_values[1].color.uint32[0] = 1;
+    clear_values[2].color.float32[0] = 1.0f;
+    clear_values[3].color.uint32[0] = 1;
+
+    VkImage images[num_attachments];
+    VkImageView att_views[num_attachments];
+    VkAttachmentDescription att_descs[num_attachments];
+    VkAttachmentReference att_references[num_attachments];
+
+
+    VkBuffer dest_buffers[num_attachments];
+    cru_image_t *ref_images[num_attachments];
+    cru_image_t *actual_images[num_attachments];
+
+    check_requirements(num_attachments);
+
+    for (uint32_t i = 0; i < num_attachments; ++i) {
+        const cru_format_info_t *format_info = t_format_info(formats[i]);
+
+        images[i] = qoCreateImage(t_device,
+            .pNext = fmt_list[i],
+            .imageType = VK_IMAGE_TYPE_2D,
+            .format = formats[i],
+            .mipLevels = 1,
+            .arrayLayers = 1,
+            .extent = {
+                .width = width,
+                .height = height,
+                .depth = 1,
+            },
+            .flags = VK_IMAGE_CREATE_MUTABLE_FORMAT_BIT,
+            .tiling = VK_IMAGE_TILING_OPTIMAL,
+            .usage = VK_IMAGE_USAGE_TRANSFER_SRC_BIT |
+                     VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT);
+
+        VkDeviceMemory mem = qoAllocImageMemory(t_device, images[i],
+            .properties = VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
+
+        qoBindImageMemory(t_device, images[i], mem, 0);
+
+        att_views[i] = qoCreateImageView(t_device,
+            .image = images[i],
+            .viewType = VK_IMAGE_VIEW_TYPE_2D,
+            .format = view_formats[i],
+            .subresourceRange = {
+                .aspectMask = VK_IMAGE_ASPECT_COLOR_BIT,
+                .baseMipLevel = 0,
+                .levelCount = 1,
+                .baseArrayLayer = 0,
+                .layerCount = 1,
+            });
+
+        att_descs[i] = (VkAttachmentDescription) {
+            .format = view_formats[i],
+            .samples = 1,
+            .loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR,
+            .storeOp = VK_ATTACHMENT_STORE_OP_STORE,
+            .initialLayout = VK_IMAGE_LAYOUT_UNDEFINED,
+            .finalLayout = VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL,
+        };
+
+        att_references[i] = (VkAttachmentReference) {
+            .attachment = i,
+            .layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
+        };
+
+        size_t dest_buffer_size = format_info->cpp * width * height;
+
+        dest_buffers[i] = qoCreateBuffer(t_device,
+            .size = dest_buffer_size,
+            .usage = VK_BUFFER_USAGE_TRANSFER_DST_BIT);
+
+        VkDeviceMemory dest_buffer_mem =
+            qoAllocBufferMemory(t_device, dest_buffers[i],
+                .properties = VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
+
+        qoBindBufferMemory(t_device, dest_buffers[i], dest_buffer_mem,
+                           /*offset*/ 0);
+
+        void *dest_buffer_map = qoMapMemory(t_device, dest_buffer_mem,
+            /*offset*/ 0, dest_buffer_size, /*flags*/ 0);
+
+        actual_images[i] = t_new_cru_image_from_pixels(dest_buffer_map,
+            formats[i], width, height);
+
+        void *ref_image_mem = xmalloc(dest_buffer_size);
+        t_cleanup_push_free(ref_image_mem);
+
+        ref_images[i] = t_new_cru_image_from_pixels(ref_image_mem,
+                formats[i], width, height);
+
+        for (uint32_t j = 0; j < width * height; ++j) {
+            uint32_t *pixel_u32 = ref_image_mem + format_info->cpp * j;
+            *pixel_u32 = clear_values[i].color.uint32[0];
+        }
+    }
+
+    VkRenderPass pass = qoCreateRenderPass(t_device,
+        .attachmentCount = num_attachments,
+        .pAttachments = att_descs,
+        .subpassCount = 1,
+        .pSubpasses = (VkSubpassDescription[]) {
+            {
+                .pipelineBindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS,
+                .colorAttachmentCount = num_attachments,
+                .pColorAttachments = att_references,
+            },
+        },
+        .dependencyCount = 1,
+        .pDependencies = &(VkSubpassDependency) {
+            .srcSubpass = 0,
+            .dstSubpass = VK_SUBPASS_EXTERNAL,
+            .srcStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT,
+            .dstStageMask = VK_PIPELINE_STAGE_TRANSFER_BIT,
+            .srcAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT,
+            .dstAccessMask = VK_ACCESS_TRANSFER_READ_BIT,
+        });
+
+    VkFramebuffer fb = qoCreateFramebuffer(t_device,
+        .renderPass = pass,
+        .attachmentCount = num_attachments,
+        .pAttachments = att_views,
+        .width = width,
+        .height = height,
+        .layers = 1);
+
+    vkCmdBeginRenderPass(t_cmd_buffer,
+        &(VkRenderPassBeginInfo) {
+            .sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO,
+            .renderPass = pass,
+            .framebuffer = fb,
+            .renderArea = {{0, 0}, {width, height}},
+            .clearValueCount = num_attachments,
+            .pClearValues = clear_values,
+        },
+        VK_SUBPASS_CONTENTS_INLINE);
+    vkCmdEndRenderPass(t_cmd_buffer);
+
+    for (uint32_t i = 0; i < num_attachments; ++i) {
+
+        vkCmdCopyImageToBuffer(t_cmd_buffer, images[i],
+            VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL,
+            dest_buffers[i],
+            /*regionCount*/ 1,
+            &(VkBufferImageCopy) {
+                .bufferOffset = 0,
+                .imageSubresource = {
+                    .aspectMask = VK_IMAGE_ASPECT_COLOR_BIT,
+                    .mipLevel = 0,
+                    .baseArrayLayer= 0,
+                    .layerCount = 1,
+                },
+                .imageOffset = { 0, 0, 0 },
+                .imageExtent = { width, height, 1 },
+            });
+
+        vkCmdPipelineBarrier(t_cmd_buffer,
+            VK_PIPELINE_STAGE_TRANSFER_BIT,
+            VK_PIPELINE_STAGE_HOST_BIT,
+            0, 0, NULL, 1,
+            &(VkBufferMemoryBarrier) {
+                .sType = VK_STRUCTURE_TYPE_BUFFER_MEMORY_BARRIER,
+                .srcAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT,
+                .dstAccessMask = VK_ACCESS_HOST_READ_BIT,
+                .buffer = dest_buffers[i],
+                .size = VK_WHOLE_SIZE,
+            }, 0, NULL);
+    }
+
+
+    qoEndCommandBuffer(t_cmd_buffer);
+    qoQueueSubmit(t_queue, 1, &t_cmd_buffer, VK_NULL_HANDLE);
+    qoQueueWaitIdle(t_queue);
+
+    test_result_t result = TEST_RESULT_PASS;
+
+    for (uint32_t i = 0; i < num_attachments; ++i) {
+        t_dump_image_f(ref_images[i], "attachment%02d.ref.png", i);
+        t_dump_image_f(actual_images[i], "attachment%02d.actual.png", i);
+
+        if (!cru_image_compare(ref_images[i], actual_images[i])) {
+            result = TEST_RESULT_FAIL;
+        }
+    }
+
+    t_end(result);
+}
+static void
 test_color8(void)
 {
     static const uint32_t num_attachments = 8;
@@ -584,6 +800,18 @@ test_color_render_area(void)
 test_define {
     .name = "func.renderpass.clear.color08",
     .start = test_color8,
+    .no_image = true,
+};
+
+/// Create a render pass that clears a float view of an integer image to 1.0f
+/// and an integer view of a float image to 1 using
+/// VK_ATTACHMENT_LOAD_OP_CLEAR.  Submit a command buffer that trivially
+/// begins then ends the render pass.  Then confirm that each attachment is
+/// filled with the expected clear color. This tests a fast-clear case on
+/// gen7-8 (https://bugs.freedesktop.org/show_bug.cgi?id=105826).
+test_define {
+    .name = "func.renderpass.clear.color-view-one",
+    .start = test_color_view_one,
     .no_image = true,
 };
 
