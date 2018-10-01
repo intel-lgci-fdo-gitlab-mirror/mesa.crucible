@@ -515,6 +515,8 @@ write_indirect_to_png(cru_image_t *image, const string_t *filename)
         tmp_format = image->format_info->format;
         break;
     case VK_FORMAT_D32_SFLOAT:
+    case VK_FORMAT_R32_SFLOAT:
+    case VK_FORMAT_R32_UINT:
     case VK_FORMAT_S8_UINT:
         tmp_format = VK_FORMAT_R8_UNORM;
         break;

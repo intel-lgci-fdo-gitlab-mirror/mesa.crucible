@@ -48,6 +48,20 @@ cru_format_info_table[] = {
         .is_color = true,
     },
     {
+        FMT(VK_FORMAT_R32_SFLOAT),
+        .num_type = CRU_NUM_TYPE_SFLOAT,
+        .num_channels = 1,
+        .cpp = 4,
+        .is_color = true,
+    },
+    {
+        FMT(VK_FORMAT_R32_UINT),
+        .num_type = CRU_NUM_TYPE_UINT,
+        .num_channels = 1,
+        .cpp = 4,
+        .is_color = true,
+    },
+    {
         FMT(VK_FORMAT_D16_UNORM),
         .num_type = CRU_NUM_TYPE_UNORM,
         .num_channels = 1,
