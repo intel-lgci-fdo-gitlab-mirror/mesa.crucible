@@ -197,10 +197,7 @@ test_color8(void)
         .height = height,
         .layers = 1);
 
-    VkCommandBuffer cmd = qoAllocateCommandBuffer(t_device, t_cmd_pool);
-
-    qoBeginCommandBuffer(cmd);
-    vkCmdBeginRenderPass(cmd,
+    vkCmdBeginRenderPass(t_cmd_buffer,
         &(VkRenderPassBeginInfo) {
             .sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO,
             .renderPass = pass,
@@ -210,11 +207,11 @@ test_color8(void)
             .pClearValues = clear_values,
         },
         VK_SUBPASS_CONTENTS_INLINE);
-    vkCmdEndRenderPass(cmd);
+    vkCmdEndRenderPass(t_cmd_buffer);
 
     for (uint32_t i = 0; i < num_attachments; ++i) {
 
-        vkCmdCopyImageToBuffer(cmd, images[i],
+        vkCmdCopyImageToBuffer(t_cmd_buffer, images[i],
             VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL,
             dest_buffers[i],
             /*regionCount*/ 1,
@@ -231,8 +228,8 @@ test_color8(void)
             });
     }
 
-    qoEndCommandBuffer(cmd);
-    qoQueueSubmit(t_queue, 1, &cmd, VK_NULL_HANDLE);
+    qoEndCommandBuffer(t_cmd_buffer);
+    qoQueueSubmit(t_queue, 1, &t_cmd_buffer, VK_NULL_HANDLE);
     qoQueueWaitIdle(t_queue);
 
     test_result_t result = TEST_RESULT_PASS;
@@ -418,10 +415,7 @@ test_color8_shared_memory(void)
         .height = height,
         .layers = 1);
 
-    VkCommandBuffer cmd = qoAllocateCommandBuffer(t_device, t_cmd_pool);
-
-    qoBeginCommandBuffer(cmd);
-    vkCmdBeginRenderPass(cmd,
+    vkCmdBeginRenderPass(t_cmd_buffer,
         &(VkRenderPassBeginInfo) {
             .sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO,
             .renderPass = pass,
@@ -431,11 +425,11 @@ test_color8_shared_memory(void)
             .pClearValues = clear_values,
         },
         VK_SUBPASS_CONTENTS_INLINE);
-    vkCmdEndRenderPass(cmd);
+    vkCmdEndRenderPass(t_cmd_buffer);
 
     for (uint32_t i = 0; i < num_attachments; ++i) {
 
-        vkCmdCopyImageToBuffer(cmd, images[i],
+        vkCmdCopyImageToBuffer(t_cmd_buffer, images[i],
             VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL,
             dest_buffers[i],
             /*regionCount*/ 1,
@@ -452,8 +446,8 @@ test_color8_shared_memory(void)
             });
     }
 
-    qoEndCommandBuffer(cmd);
-    qoQueueSubmit(t_queue, 1, &cmd, VK_NULL_HANDLE);
+    qoEndCommandBuffer(t_cmd_buffer);
+    qoQueueSubmit(t_queue, 1, &t_cmd_buffer, VK_NULL_HANDLE);
     qoQueueWaitIdle(t_queue);
 
     test_result_t result = TEST_RESULT_PASS;
