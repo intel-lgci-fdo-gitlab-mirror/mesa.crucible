@@ -187,6 +187,15 @@ test_color8(void)
                 .colorAttachmentCount = num_attachments,
                 .pColorAttachments = att_references,
             },
+        },
+        .dependencyCount = 1,
+        .pDependencies = &(VkSubpassDependency) {
+            .srcSubpass = 0,
+            .dstSubpass = VK_SUBPASS_EXTERNAL,
+            .srcStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT,
+            .dstStageMask = VK_PIPELINE_STAGE_TRANSFER_BIT,
+            .srcAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT,
+            .dstAccessMask = VK_ACCESS_TRANSFER_READ_BIT,
         });
 
     VkFramebuffer fb = qoCreateFramebuffer(t_device,
@@ -226,6 +235,18 @@ test_color8(void)
                 .imageOffset = { 0, 0, 0 },
                 .imageExtent = { width, height, 1 },
             });
+
+        vkCmdPipelineBarrier(t_cmd_buffer,
+            VK_PIPELINE_STAGE_TRANSFER_BIT,
+            VK_PIPELINE_STAGE_HOST_BIT,
+            0, 0, NULL, 1,
+            &(VkBufferMemoryBarrier) {
+                .sType = VK_STRUCTURE_TYPE_BUFFER_MEMORY_BARRIER,
+                .srcAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT,
+                .dstAccessMask = VK_ACCESS_HOST_READ_BIT,
+                .buffer = dest_buffers[i],
+                .size = VK_WHOLE_SIZE,
+            }, 0, NULL);
     }
 
     qoEndCommandBuffer(t_cmd_buffer);
@@ -405,6 +426,15 @@ test_color8_shared_memory(void)
                 .colorAttachmentCount = num_attachments,
                 .pColorAttachments = att_references,
             },
+        },
+        .dependencyCount = 1,
+        .pDependencies = &(VkSubpassDependency) {
+            .srcSubpass = 0,
+            .dstSubpass = VK_SUBPASS_EXTERNAL,
+            .srcStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT,
+            .dstStageMask = VK_PIPELINE_STAGE_TRANSFER_BIT,
+            .srcAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT,
+            .dstAccessMask = VK_ACCESS_TRANSFER_READ_BIT,
         });
 
     VkFramebuffer fb = qoCreateFramebuffer(t_device,
@@ -444,6 +474,18 @@ test_color8_shared_memory(void)
                 .imageOffset = { 0, 0, 0 },
                 .imageExtent = { width, height, 1 },
             });
+
+        vkCmdPipelineBarrier(t_cmd_buffer,
+            VK_PIPELINE_STAGE_TRANSFER_BIT,
+            VK_PIPELINE_STAGE_HOST_BIT,
+            0, 0, NULL, 1,
+            &(VkBufferMemoryBarrier) {
+                .sType = VK_STRUCTURE_TYPE_BUFFER_MEMORY_BARRIER,
+                .srcAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT,
+                .dstAccessMask = VK_ACCESS_HOST_READ_BIT,
+                .buffer = dest_buffers[i],
+                .size = VK_WHOLE_SIZE,
+            }, 0, NULL);
     }
 
     qoEndCommandBuffer(t_cmd_buffer);
