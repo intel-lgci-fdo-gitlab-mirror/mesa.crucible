@@ -44,6 +44,26 @@ generate_results_commutative_no_diagonal(void *dest, const void *src_data,
     }
 }
 
+/**
+ * Generate results for an operator that is commutative.
+ *
+ * Commutative operators will only generate an upper-right triangular matrix
+ * of results, but the diagonal must also be explicitly stored.
+ */
+void
+generate_results_commutative(void *dest, const void *src_data,
+                             unsigned num_srcs, results_cb f)
+{
+    unsigned k = 0;
+
+    for (unsigned i = 0; i < num_srcs; i++) {
+        for (unsigned j = i; j < num_srcs; j++) {
+            f(dest, k, src_data, i, j);
+            k++;
+        }
+    }
+}
+
 void
 run_integer_functions2_test(const QoShaderModuleCreateInfo *fs_info,
                             const void *src, unsigned src_size,

@@ -30,6 +30,9 @@ typedef void (*results_cb)(void *, unsigned, const void *, unsigned, unsigned);
 void generate_results_commutative_no_diagonal(void *dest, const void *src_data,
                                               unsigned num_srcs, results_cb f);
 
+void generate_results_commutative(void *dest, const void *src_data,
+                                  unsigned num_srcs, results_cb f);
+
 void run_integer_functions2_test(const QoShaderModuleCreateInfo *fs_info,
                                  const void *src, unsigned src_size,
                                  const void *expected, unsigned expected_size);
