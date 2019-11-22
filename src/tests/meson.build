@@ -65,6 +65,8 @@ test_sources_with_spirv = [
   'func/compute-num-workgroups.c',
   'func/compute-shared-memory.c',
   'func/compute-subgroup-quad.c',
+  'func/intel_shader_integer_functions2/absoluteDifference.c',
+  'func/intel_shader_integer_functions2/intel_shader_integer_functions2_common.c',
   'func/mesh/basic.c',
   'func/mesh/buffers.c',
   'func/mesh/push-constants.c',

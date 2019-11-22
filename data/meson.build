@@ -123,6 +123,8 @@ endforeach
 
 data_ref_files = [
   '32x32-green.ref.png',
+  '64x64-green.ref.png',
+  '128x128-green.ref.png',
   '32x32-smile.ref.png',
   'example.image.copy-ref-image.ref.png',
   'example.image.map-ref-image.ref.png',
