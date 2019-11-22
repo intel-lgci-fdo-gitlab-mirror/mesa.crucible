@@ -78,3 +78,56 @@ test_define {
     .start = countLeadingZeros_uint32,
     .image_filename = "64x64-green.ref.png",
 };
+
+static void
+countTrailingZeros_uint32(void)
+{
+    const QoShaderModuleCreateInfo fs_info = qoShaderModuleCreateInfoGLSL(FRAGMENT,
+        QO_EXTENSION GL_INTEL_shader_integer_functions2: require
+
+        const uint len = 4096u;
+
+        layout(set = 0, binding = 0) uniform Data {
+            uvec4 data[(len + 3u) / 4u];
+        };
+
+        layout(location = 0) out vec4 f_color;
+
+        void main()
+        {
+            uint i = uint(gl_FragCoord.x) % 64u;
+            uint j = uint(gl_FragCoord.y) % 64u;
+            uint idx = (i * 64u) | j;
+
+            uint value = data[idx / 4u][idx % 4u];
+            uint expected = idx != (len - 1) ? idx % 32u : 32u;
+
+            if (countTrailingZeros(value) == expected)
+                f_color = vec4(0.0, 1.0, 0.0, 1.0);
+            else
+                f_color = vec4(1.0, 0.0, 0.0, 1.0);
+        }
+    );
+
+    uint32_t src[4096];
+
+    /* Generate source data so that the expected results follow a sequence 0,
+     * 1, 2, 3, ... 30, 31, 0, 1, ...
+     */
+    for (unsigned i = 0; i < 4095; i++) {
+        unsigned bit = i % 32u;
+        unsigned mask = ~((1 << bit) - 1);
+
+        src[i] = (1u << bit) | (rand() & mask);
+    }
+
+    src[4095] = 0;
+
+    run_integer_functions2_test(&fs_info, src, sizeof(src), NULL, 0);
+}
+
+test_define {
+    .name = "func.shader.countTrailingZeros.uint",
+    .start = countTrailingZeros_uint32,
+    .image_filename = "64x64-green.ref.png",
+};
