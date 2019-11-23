@@ -599,3 +599,461 @@ test_define {
     .start = absoluteDifference_uint64,
     .image_filename = "64x64-green.ref.png",
 };
+
+#define hadd_template(name, type)                                       \
+static void                                                             \
+name(void *_dest, unsigned dest_index,                                  \
+     const void *_src_data, unsigned i, unsigned j)                     \
+{                                                                       \
+    type *dest = (type *) _dest;                                        \
+    const type *src_data = (const type *) _src_data;                    \
+    const type a = src_data[i];                                         \
+    const type b = src_data[j];                                         \
+                                                                        \
+    dest[dest_index] = (a >> 1) + (b >> 1) + ((a & b) & 1);             \
+}
+
+hadd_template(s_hadd16, int16_t);
+hadd_template(u_hadd16, uint16_t);
+hadd_template(s_hadd32, int);
+hadd_template(u_hadd32, uint);
+hadd_template(s_hadd64, int64_t);
+hadd_template(u_hadd64, uint64_t);
+
+static void
+average_int16(void)
+{
+    VkPhysicalDeviceFeatures features = {};
+    vkGetPhysicalDeviceFeatures(t_physical_dev, &features);
+    if (!features.shaderInt16)
+        t_skipf("shaderInt16 not supported");
+
+    const QoShaderModuleCreateInfo fs_info = qoShaderModuleCreateInfoGLSL(FRAGMENT,
+        QO_EXTENSION GL_INTEL_shader_integer_functions2: require
+        QO_EXTENSION GL_EXT_shader_explicit_arithmetic_types_int16: require
+
+        QO_DEFINE SUM_N_to_1(x)  (((uint(x)+1u)*uint(x))/2u)
+        const int len = 127;
+
+        layout(set = 0, binding = 0, std140) uniform Data {
+            /* Store everything in one array to avoid any unused components. */
+            ivec4 data[(len + int(SUM_N_to_1(len)) - len + 7) / 8];
+        };
+
+        int16_t get_word(uint i)
+        {
+            return int16_t(bitfieldExtract(data[i / 8u][(i % 8u) / 2u],
+                                           int((i % 2u) * 16u),
+                                           16));
+        }
+
+        int16_t get_expected_result(uint i, uint j)
+        {
+            if (i == j)
+                return get_word(i);
+
+            uint row = min(i, j);
+            uint col = max(i, j) - row;
+
+            uint k = uint(len - 1) - row;
+            uint idx = len + SUM_N_to_1(len - 1) - SUM_N_to_1(k) + (col - 1u);
+
+            return get_word(idx);
+        }
+
+        layout(location = 0) out vec4 f_color;
+
+        void main()
+        {
+            uint i = uint(gl_FragCoord.x) % uint(len);
+            uint j = uint(gl_FragCoord.y) % uint(len);
+
+            int16_t a = get_word(i);
+            int16_t b = get_word(j);
+            if (average(a, b) == get_expected_result(i, j))
+                f_color = vec4(0.0, 1.0, 0.0, 1.0);
+            else
+                f_color = vec4(1.0, 0.0, 0.0, 1.0);
+        }
+    );
+
+    // This ensures that there are the correct number of data elements listed
+    // in the array definition.
+    assert(ARRAY_SIZE(src_16bit) == 127);
+
+    const unsigned len = ARRAY_SIZE(src_16bit);
+    uint16_t expected[SUM_N_to_1(len) - len];
+
+    generate_results_commutative_no_diagonal(expected, src_16bit, len,
+                                             s_hadd16);
+    run_integer_functions2_test(&fs_info, src_16bit, sizeof(src_16bit),
+                                expected, sizeof(expected));
+}
+
+test_define {
+    .name = "func.shader.average.int16_t",
+    .start = average_int16,
+    .image_filename = "128x128-green.ref.png",
+};
+
+static void
+average_uint16(void)
+{
+    VkPhysicalDeviceFeatures features = {};
+    vkGetPhysicalDeviceFeatures(t_physical_dev, &features);
+    if (!features.shaderInt16)
+        t_skipf("shaderInt16 not supported");
+
+    const QoShaderModuleCreateInfo fs_info = qoShaderModuleCreateInfoGLSL(FRAGMENT,
+        QO_EXTENSION GL_INTEL_shader_integer_functions2: require
+        QO_EXTENSION GL_EXT_shader_explicit_arithmetic_types_int16: require
+
+        QO_DEFINE SUM_N_to_1(x)  (((uint(x)+1u)*uint(x))/2u)
+        const int len = 127;
+
+        layout(set = 0, binding = 0, std140) uniform Data {
+            /* Store everything in one array to avoid any unused components. */
+            uvec4 data[(len + int(SUM_N_to_1(len)) - len + 7) / 8];
+        };
+
+        uint16_t get_word(uint i)
+        {
+            return int16_t(bitfieldExtract(data[i / 8u][(i % 8u) / 2u],
+                                           int((i % 2u) * 16u),
+                                           16));
+        }
+
+        uint16_t get_expected_result(uint i, uint j)
+        {
+            if (i == j)
+                return get_word(i);
+
+            uint row = min(i, j);
+            uint col = max(i, j) - row;
+
+            uint k = uint(len - 1) - row;
+            uint idx = len + SUM_N_to_1(len - 1) - SUM_N_to_1(k) + (col - 1u);
+
+            return get_word(idx);
+        }
+
+        layout(location = 0) out vec4 f_color;
+
+        void main()
+        {
+            uint i = uint(gl_FragCoord.x) % uint(len);
+            uint j = uint(gl_FragCoord.y) % uint(len);
+
+            uint16_t a = get_word(i);
+            uint16_t b = get_word(j);
+            if (average(a, b) == get_expected_result(i, j))
+                f_color = vec4(0.0, 1.0, 0.0, 1.0);
+            else
+                f_color = vec4(1.0, 0.0, 0.0, 1.0);
+        }
+    );
+
+    // This ensures that there are the correct number of data elements listed
+    // in the array definition.
+    assert(ARRAY_SIZE(src_16bit) == 127);
+
+    const unsigned len = ARRAY_SIZE(src_16bit);
+    uint16_t expected[SUM_N_to_1(len) - len];
+
+    generate_results_commutative_no_diagonal(expected, src_16bit, len,
+                                             u_hadd16);
+    run_integer_functions2_test(&fs_info, src_16bit, sizeof(src_16bit),
+                                expected, sizeof(expected));
+}
+
+test_define {
+    .name = "func.shader.average.uint16_t",
+    .start = average_uint16,
+    .image_filename = "128x128-green.ref.png",
+};
+
+static void
+average_int32(void)
+{
+    const QoShaderModuleCreateInfo fs_info = qoShaderModuleCreateInfoGLSL(FRAGMENT,
+        QO_EXTENSION GL_INTEL_shader_integer_functions2: require
+        QO_EXTENSION GL_EXT_shader_explicit_arithmetic_types_int16: require
+
+        QO_DEFINE SUM_N_to_1(x)  (((uint(x)+1u)*uint(x))/2u)
+        const int len = 90;
+
+        layout(set = 0, binding = 0, std140) uniform Data {
+            /* Store everything in one array to avoid any unused components. */
+            ivec4 data[(len + int(SUM_N_to_1(len)) - len + 3) / 4];
+        };
+
+        int get_word(uint i)
+        {
+            return data[i / 4u][i % 4u];
+        }
+
+        int get_expected_result(uint i, uint j)
+        {
+            if (i == j)
+                return get_word(i);
+
+            uint row = min(i, j);
+            uint col = max(i, j) - row;
+
+            uint k = uint(len - 1) - row;
+            uint idx = len + SUM_N_to_1(len - 1) - SUM_N_to_1(k) + (col - 1u);
+
+            return get_word(idx);
+        }
+
+        layout(location = 0) out vec4 f_color;
+
+        void main()
+        {
+            uint i = uint(gl_FragCoord.x) % uint(len);
+            uint j = uint(gl_FragCoord.y) % uint(len);
+
+            int a = get_word(i);
+            int b = get_word(j);
+            if (average(a, b) == get_expected_result(i, j))
+                f_color = vec4(0.0, 1.0, 0.0, 1.0);
+            else
+                f_color = vec4(1.0, 0.0, 0.0, 1.0);
+        }
+    );
+
+    // This ensures that there are the correct number of data elements listed
+    // in the array definition.
+    assert(ARRAY_SIZE(src_32bit) == 90);
+
+    const unsigned len = ARRAY_SIZE(src_32bit);
+    int32_t expected[SUM_N_to_1(len) - len];
+
+    generate_results_commutative_no_diagonal(expected, src_32bit, len,
+                                             s_hadd32);
+    run_integer_functions2_test(&fs_info, src_32bit, sizeof(src_32bit),
+                                expected, sizeof(expected));
+}
+
+test_define {
+    .name = "func.shader.average.int",
+    .start = average_int32,
+    .image_filename = "128x128-green.ref.png",
+};
+
+static void
+average_uint32(void)
+{
+        const QoShaderModuleCreateInfo fs_info = qoShaderModuleCreateInfoGLSL(FRAGMENT,
+        QO_EXTENSION GL_INTEL_shader_integer_functions2: require
+        QO_EXTENSION GL_EXT_shader_explicit_arithmetic_types_int16: require
+
+        QO_DEFINE SUM_N_to_1(x)  (((uint(x)+1u)*uint(x))/2u)
+        const int len = 90;
+
+        layout(set = 0, binding = 0, std140) uniform Data {
+            /* Store everything in one array to avoid any unused components. */
+            uvec4 data[(len + int(SUM_N_to_1(len)) - len + 3) / 4];
+        };
+
+        uint get_word(uint i)
+        {
+            return data[i / 4u][i % 4u];
+        }
+
+        uint get_expected_result(uint i, uint j)
+        {
+            if (i == j)
+                return get_word(i);
+
+            uint row = min(i, j);
+            uint col = max(i, j) - row;
+
+            uint k = uint(len - 1) - row;
+            uint idx = len + SUM_N_to_1(len - 1) - SUM_N_to_1(k) + (col - 1u);
+
+            return get_word(idx);
+        }
+
+        layout(location = 0) out vec4 f_color;
+
+        void main()
+        {
+            uint i = uint(gl_FragCoord.x) % uint(len);
+            uint j = uint(gl_FragCoord.y) % uint(len);
+
+            uint a = get_word(i);
+            uint b = get_word(j);
+            if (average(a, b) == get_expected_result(i, j))
+                f_color = vec4(0.0, 1.0, 0.0, 1.0);
+            else
+                f_color = vec4(1.0, 0.0, 0.0, 1.0);
+        }
+    );
+
+    // This ensures that there are the correct number of data elements listed
+    // in the array definition.
+    assert(ARRAY_SIZE(src_32bit) == 90);
+
+    const unsigned len = ARRAY_SIZE(src_32bit);
+    uint32_t expected[SUM_N_to_1(len) - len];
+
+    generate_results_commutative_no_diagonal(expected, src_32bit, len,
+                                             u_hadd32);
+    run_integer_functions2_test(&fs_info, src_32bit, sizeof(src_32bit),
+                                expected, sizeof(expected));
+}
+
+test_define {
+    .name = "func.shader.average.uint",
+    .start = average_uint32,
+    .image_filename = "128x128-green.ref.png",
+};
+
+static void
+average_int64(void)
+{
+    VkPhysicalDeviceFeatures features = {};
+    vkGetPhysicalDeviceFeatures(t_physical_dev, &features);
+    if (!features.shaderInt64)
+        t_skipf("shaderInt64 not supported");
+
+    const QoShaderModuleCreateInfo fs_info = qoShaderModuleCreateInfoGLSL(FRAGMENT,
+        QO_EXTENSION GL_INTEL_shader_integer_functions2: require
+        QO_EXTENSION GL_ARB_gpu_shader_int64: require
+
+        QO_DEFINE SUM_N_to_1(x)  (((uint(x)+1u)*uint(x))/2u)
+        const int len = 63;
+
+        layout(set = 0, binding = 0, std140) uniform Data {
+            /* Store everything in one array to avoid any unused components. */
+            i64vec2 data[(len + int(SUM_N_to_1(len)) - len + 1) / 2];
+        };
+
+        int64_t get_word(uint i)
+        {
+            return data[i / 2u][i % 2u];
+        }
+
+        int64_t get_expected_result(uint i, uint j)
+        {
+            if (i == j)
+                return get_word(i);
+
+            uint row = min(i, j);
+            uint col = max(i, j) - row;
+
+            uint k = uint(len - 1) - row;
+            uint idx = len + SUM_N_to_1(len - 1) - SUM_N_to_1(k) + (col - 1u);
+
+            return get_word(idx);
+        }
+
+        layout(location = 0) out vec4 f_color;
+
+        void main()
+        {
+            uint i = uint(gl_FragCoord.x) % uint(len);
+            uint j = uint(gl_FragCoord.y) % uint(len);
+
+            int64_t a = get_word(i);
+            int64_t b = get_word(j);
+            if (average(a, b) == get_expected_result(i, j))
+                f_color = vec4(0.0, 1.0, 0.0, 1.0);
+            else
+                f_color = vec4(1.0, 0.0, 0.0, 1.0);
+        }
+    );
+
+    // This ensures that there are the correct number of data elements listed
+    // in the array definition.
+    assert(ARRAY_SIZE(src_64bit) == 63);
+
+    const unsigned len = ARRAY_SIZE(src_64bit);
+    int64_t expected[SUM_N_to_1(len) - len];
+
+    generate_results_commutative_no_diagonal(expected, src_64bit, len,
+                                             s_hadd64);
+    run_integer_functions2_test(&fs_info, src_64bit, sizeof(src_64bit),
+                                expected, sizeof(expected));
+}
+
+test_define {
+    .name = "func.shader.average.int64_t",
+    .start = average_int64,
+    .image_filename = "64x64-green.ref.png",
+};
+
+static void
+average_uint64(void)
+{
+    VkPhysicalDeviceFeatures features = {};
+    vkGetPhysicalDeviceFeatures(t_physical_dev, &features);
+    if (!features.shaderInt64)
+        t_skipf("shaderInt64 not supported");
+
+    const QoShaderModuleCreateInfo fs_info = qoShaderModuleCreateInfoGLSL(FRAGMENT,
+        QO_EXTENSION GL_INTEL_shader_integer_functions2: require
+        QO_EXTENSION GL_ARB_gpu_shader_int64: require
+
+        QO_DEFINE SUM_N_to_1(x)  (((uint(x)+1u)*uint(x))/2u)
+        const int len = 63;
+
+        layout(set = 0, binding = 0, std140) uniform Data {
+            /* Store everything in one array to avoid any unused components. */
+            u64vec2 data[(len + int(SUM_N_to_1(len)) - len + 1) / 2];
+        };
+
+        uint64_t get_word(uint i)
+        {
+            return data[i / 2u][i % 2u];
+        }
+
+        uint64_t get_expected_result(uint i, uint j)
+        {
+            if (i == j)
+                return get_word(i);
+
+            uint row = min(i, j);
+            uint col = max(i, j) - row;
+
+            uint k = uint(len - 1) - row;
+            uint idx = len + SUM_N_to_1(len - 1) - SUM_N_to_1(k) + (col - 1u);
+
+            return get_word(idx);
+        }
+
+        layout(location = 0) out vec4 f_color;
+
+        void main()
+        {
+            uint i = uint(gl_FragCoord.x) % uint(len);
+            uint j = uint(gl_FragCoord.y) % uint(len);
+
+            uint64_t a = get_word(i);
+            uint64_t b = get_word(j);
+            if (average(a, b) == get_expected_result(i, j))
+                f_color = vec4(0.0, 1.0, 0.0, 1.0);
+            else
+                f_color = vec4(1.0, 0.0, 0.0, 1.0);
+        }
+    );
+
+    // This ensures that there are the correct number of data elements listed
+    // in the array definition.
+    assert(ARRAY_SIZE(src_64bit) == 63);
+
+    const unsigned len = ARRAY_SIZE(src_64bit);
+    uint64_t expected[SUM_N_to_1(len) - len];
+
+    generate_results_commutative_no_diagonal(expected, src_64bit, len,
+                                             u_hadd64);
+    run_integer_functions2_test(&fs_info, src_64bit, sizeof(src_64bit),
+                                expected, sizeof(expected));
+}
+
+test_define {
+    .name = "func.shader.average.uint64_t",
+    .start = average_uint64,
+    .image_filename = "64x64-green.ref.png",
+};
