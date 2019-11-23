@@ -69,6 +69,7 @@ test_sources_with_spirv = [
   'func/intel_shader_integer_functions2/addSaturate.c',
   'func/intel_shader_integer_functions2/countZeros.c',
   'func/intel_shader_integer_functions2/intel_shader_integer_functions2_common.c',
+  'func/intel_shader_integer_functions2/multiply32x16.c',
   'func/intel_shader_integer_functions2/subtractSaturate.c',
   'func/mesh/basic.c',
   'func/mesh/buffers.c',
