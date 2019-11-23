@@ -64,6 +64,25 @@ generate_results_commutative(void *dest, const void *src_data,
     }
 }
 
+/**
+ * Generate full matrix of results without the diagonal.
+ */
+void
+generate_results_no_diagonal(void *dest, const void *src_data,
+                             unsigned num_srcs, results_cb f)
+{
+    unsigned k = 0;
+
+    for (unsigned i = 0; i < num_srcs; i++) {
+        for (unsigned j = 0; j < num_srcs; j++) {
+            if (i != j) {
+                f(dest, k, src_data, i, j);
+                k++;
+            }
+        }
+    }
+}
+
 void
 run_integer_functions2_test(const QoShaderModuleCreateInfo *fs_info,
                             const void *src, unsigned src_size,
