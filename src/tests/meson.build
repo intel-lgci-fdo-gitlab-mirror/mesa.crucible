@@ -71,6 +71,7 @@ test_sources_with_spirv = [
   'func/shader/constants.c',
   'func/shader/fragcoord.c',
   'func/shader/pack_unpack.c',
+  'func/shader/shaderInt8Int16-shift.c',
   'func/shader_ballot/ext_shader_ballot.c',
   'func/shader_ballot/amd_shader_ballot.c',
   'func/shader_group_vote/ext_shader_subgroup_vote.c',
