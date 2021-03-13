@@ -22,10 +22,11 @@
 /// \file
 /// \brief Crucible Test Runner
 ///
-/// The runner consists of two processes: dispatcher and worker. The dispatcher forks
-/// the worker. The tests execute in the worker process. The dispatcher collects the
-/// test results and prints their summary. The separation ensures that test
-/// results and summary are printed even when a test crashes its process.
+/// The runner consists of two processes: dispatcher and worker. The
+/// dispatcher forks the worker. The tests execute in the worker process. The
+/// dispatcher collects the test results and prints their summary. The
+/// separation ensures that test results and summary are printed even when a
+/// test crashes its process.
 
 #include <stdatomic.h>
 #include <stdint.h>

@@ -145,7 +145,7 @@ static void dispatcher_dispatch_loop_no_fork(void);
 static void dispatcher_dispatch_loop_with_fork(void);
 
 static void dispatcher_dispatch_test(const test_def_t *def,
-                                 uint32_t queue_num);
+                                     uint32_t queue_num);
 static worker_t * dispatcher_get_open_worker(void);
 static worker_t * dispatcher_get_new_worker(void);
 static worker_t * dispatcher_find_unborn_worker(void);
@@ -154,8 +154,9 @@ static void dispatcher_cleanup_dead_worker(worker_t *worker);
 static void dispatcher_collect_result(int timeout_ms);
 
 static void dispatcher_report_result(const test_def_t *def, uint32_t queue_num,
-                                 pid_t pid, test_result_t result);
-static bool dispatcher_send_packet(worker_t *worker, const dispatch_packet_t *pk);
+                                     pid_t pid, test_result_t result);
+static bool dispatcher_send_packet(worker_t *worker,
+                                   const dispatch_packet_t *pk);
 
 static void dispatcher_kill_all_workers(void);
 
@@ -176,7 +177,7 @@ static bool worker_insert_test(worker_t *worker, const test_def_t *def);
 static void worker_rm_test(worker_t *worker, const test_def_t *def);
 
 static bool worker_start_test(worker_t *worker, const test_def_t *def,
-                             uint32_t queue_num);
+                              uint32_t queue_num);
 static void worker_send_sentinel(worker_t *worker);
 static void worker_drain_result_pipe(worker_t *worker);
 
@@ -188,9 +189,9 @@ static void worker_pipe_drain_to_fd(worker_pipe_t *pipe, int fd);
 
 static worker_t *find_worker_by_pid(pid_t pid);
 
-#define dispatcher_for_each_worker_slot(s)                                       \
-    for ((s) = dispatcher.workers;                                               \
-         (s) < dispatcher.workers + ARRAY_LENGTH(dispatcher.workers);                 \
+#define dispatcher_for_each_worker_slot(s)                                   \
+    for ((s) = dispatcher.workers;                                           \
+         (s) < dispatcher.workers + ARRAY_LENGTH(dispatcher.workers);        \
          (s) = (worker_t *) (s) + 1)
 
 /// Convert (const char *) to (const unsigned char *).
@@ -360,8 +361,8 @@ bool
 dispatcher_run(uint32_t num_tests)
 {
     dispatcher.num_tests = num_tests;
-    dispatcher.max_dispatched_tests = CLAMP(runner_opts.jobs,
-                                        1, ARRAY_LENGTH(dispatcher.workers));
+    dispatcher.max_dispatched_tests =
+        CLAMP(runner_opts.jobs, 1, ARRAY_LENGTH(dispatcher.workers));
 
     dispatcher_gather_vulkan_info();
     if (dispatcher.goto_next_phase)
@@ -828,7 +829,7 @@ dispatcher_collect_result(int timeout_ms)
 
 static void
 dispatcher_report_result(const test_def_t *def, uint32_t queue_num,
-                     pid_t pid, test_result_t result)
+                         pid_t pid, test_result_t result)
 {
     string_t name = STRING_INIT;
     string_printf(&name, "%s.q%d", def->name, queue_num);
@@ -1182,8 +1183,9 @@ worker_start_test(worker_t *worker, const test_def_t *def,
         worker_send_sentinel(worker);
         break;
     case RUNNER_ISOLATION_MODE_THREAD:
-        // The dispatcher may send the worker multiple tests. The dispatcher will tell
-        // the worker to expect no more tests by later sending it a NULL test.
+        // The dispatcher may send the worker multiple tests. The dispatcher
+        // will tell the worker to expect no more tests by later sending it a
+        // NULL test.
         break;
     }
 
@@ -1218,7 +1220,7 @@ worker_drain_result_pipe(worker_t *worker)
 
         worker_rm_test(worker, pk.test_def);
         dispatcher_report_result(pk.test_def, pk.queue_num, worker->pid,
-                             pk.result);
+                                 pk.result);
     }
 }
 
