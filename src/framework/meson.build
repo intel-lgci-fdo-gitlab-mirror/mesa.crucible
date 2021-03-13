@@ -19,7 +19,7 @@
 # SOFTWARE.
 
 framework_sources = files(
-  'runner/master.c',
+  'runner/dispatcher.c',
   'runner/runner.c',
   'runner/runner_vk.c',
   'runner/worker.c',

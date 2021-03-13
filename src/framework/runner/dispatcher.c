@@ -45,9 +45,9 @@
 #include "util/log.h"
 #include "util/string.h"
 
+#include "dispatcher.h"
 #include "runner.h"
 #include "runner_vk.h"
-#include "master.h"
 #include "worker.h"
 
 typedef struct worker worker_t;

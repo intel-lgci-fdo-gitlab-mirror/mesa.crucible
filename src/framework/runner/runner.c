@@ -40,7 +40,7 @@
 #include "framework/test/test.h"
 #include "framework/test/test_def.h"
 
-#include "master.h"
+#include "dispatcher.h"
 #include "runner.h"
 
 static uint32_t runner_num_tests;
