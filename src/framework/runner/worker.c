@@ -32,7 +32,7 @@ static int result_fd;
 
 /// Return NULL if the pipe is empty or has errors.
 static void
-slave_recv_test(const test_def_t **test_def, uint32_t *queue_num)
+worker_recv_test(const test_def_t **test_def, uint32_t *queue_num)
 {
     dispatch_packet_t pk;
 
@@ -49,7 +49,7 @@ slave_recv_test(const test_def_t **test_def, uint32_t *queue_num)
 }
 
 static bool
-slave_send_result(const test_def_t *def, uint32_t queue_num,
+worker_send_result(const test_def_t *def, uint32_t queue_num,
                   test_result_t result)
 {
     const result_packet_t pk = {
@@ -65,7 +65,7 @@ slave_send_result(const test_def_t *def, uint32_t queue_num,
 }
 
 static void
-slave_loop(void)
+worker_loop(void)
 {
     const test_def_t *def;
 
@@ -73,17 +73,17 @@ slave_loop(void)
         test_result_t result;
         uint32_t queue_num;
 
-        slave_recv_test(&def, &queue_num);
+        worker_recv_test(&def, &queue_num);
         if (!def)
             return;
 
         result = run_test_def(def, queue_num);
-        slave_send_result(def, queue_num, result);
+        worker_send_result(def, queue_num, result);
     }
 }
 
 void
-slave_run(int _dispatch_fd, int _result_fd)
+worker_run(int _dispatch_fd, int _result_fd)
 {
     assert(_dispatch_fd >= 0);
     assert(_result_fd >= 0);
@@ -91,5 +91,5 @@ slave_run(int _dispatch_fd, int _result_fd)
     dispatch_fd = _dispatch_fd;
     result_fd = _result_fd;
 
-    slave_loop();
+    worker_loop();
 }

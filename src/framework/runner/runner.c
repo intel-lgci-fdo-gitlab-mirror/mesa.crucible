@@ -22,8 +22,8 @@
 /// \file
 /// \brief Crucible Test Runner
 ///
-/// The runner consists of two processes: master and slave. The master forks
-/// the slave. The tests execute in the slave process. The master collects the
+/// The runner consists of two processes: master and worker. The master forks
+/// the worker. The tests execute in the worker process. The master collects the
 /// test results and prints their summary. The separation ensures that test
 /// results and summary are printed even when a test crashes its process.
 

@@ -50,10 +50,10 @@
 #include "master.h"
 #include "worker.h"
 
-typedef struct slave slave_t;
-typedef struct slave_pipe slave_pipe_t;
+typedef struct worker worker_t;
+typedef struct worker_pipe worker_pipe_t;
 
-struct slave_pipe {
+struct worker_pipe {
     union {
         int fd[2];
 
@@ -63,18 +63,18 @@ struct slave_pipe {
         };
     };
 
-    /// A reference to the pipe's containing slave. Used by epoll handlers.
-    slave_t *slave;
+    /// A reference to the pipe's containing worker. Used by epoll handlers.
+    worker_t *worker;
 };
 
-/// \brief A slave process's proxy in the master process.
+/// \brief A worker process's proxy in the master process.
 ///
-/// The struct is valid if and only if slave::pid != 0.
-struct slave {
+/// The struct is valid if and only if worker::pid != 0.
+struct worker {
     /// Cases:
     ///   * if 0: the proxy is not connected to a process,
     ///           and the struct is invalid
-    ///   * if > 0: the master forked the slave and has not yet reaped it
+    ///   * if > 0: the master forked the worker and has not yet reaped it
     pid_t pid;
 
     struct {
@@ -82,16 +82,16 @@ struct slave {
         const test_def_t *data[256];
     } tests;
 
-    slave_pipe_t dispatch_pipe;
-    slave_pipe_t result_pipe;
+    worker_pipe_t dispatch_pipe;
+    worker_pipe_t result_pipe;
 
-    /// Each slave process's stdout and stderr are connected to a pipe in the
-    /// master process. This prevents concurrently running slaves from
+    /// Each worker process's stdout and stderr are connected to a pipe in the
+    /// master process. This prevents concurrently running workers from
     /// corrupting the master's stdout and stderr with interleaved output.
-    slave_pipe_t stdout_pipe;
-    slave_pipe_t stderr_pipe;
+    worker_pipe_t stdout_pipe;
+    worker_pipe_t stderr_pipe;
 
-    /// Number of tests dispatched to the slave over its lifetime.
+    /// Number of tests dispatched to the worker over its lifetime.
     uint32_t lifetime_test_count;
 
     bool recvd_sentinel;
@@ -117,8 +117,8 @@ static struct master {
     uint32_t num_skip;
     uint32_t num_lost;
 
-    uint32_t num_slaves;
-    slave_t slaves[64];
+    uint32_t num_workers;
+    worker_t workers[64];
 
     uint32_t num_vulkan_queues;
 
@@ -146,22 +146,22 @@ static void master_dispatch_loop_with_fork(void);
 
 static void master_dispatch_test(const test_def_t *def,
                                  uint32_t queue_num);
-static slave_t * master_get_open_slave(void);
-static slave_t * master_get_new_slave(void);
-static slave_t * master_find_unborn_slave(void);
-static void master_cleanup_dead_slave(slave_t *slave);
+static worker_t * master_get_open_worker(void);
+static worker_t * master_get_new_worker(void);
+static worker_t * master_find_unborn_worker(void);
+static void master_cleanup_dead_worker(worker_t *worker);
 
 static void master_collect_result(int timeout_ms);
 
 static void master_report_result(const test_def_t *def, uint32_t queue_num,
                                  pid_t pid, test_result_t result);
-static bool master_send_packet(slave_t *slave, const dispatch_packet_t *pk);
+static bool master_send_packet(worker_t *worker, const dispatch_packet_t *pk);
 
-static void master_kill_all_slaves(void);
+static void master_kill_all_workers(void);
 
 static void master_init_epoll(void);
 static void master_finish_epoll(void);
-static bool master_epoll_add_slave_pipe(slave_pipe_t *pipe, int rw);
+static bool master_epoll_add_worker_pipe(worker_pipe_t *pipe, int rw);
 
 static void master_handle_epoll_event(const struct epoll_event *event);
 static void master_handle_pipe_event(const struct epoll_event *event);
@@ -170,28 +170,28 @@ static void master_handle_sigchld(void);
 static void master_handle_sigint(int sig);
 static void master_yield_to_sigint(void);
 
-static bool slave_is_open(const slave_t *slave);
-static int32_t slave_find_test(slave_t *slave, const test_def_t *def);
-static bool slave_insert_test(slave_t *slave, const test_def_t *def);
-static void slave_rm_test(slave_t *slave, const test_def_t *def);
+static bool worker_is_open(const worker_t *worker);
+static int32_t worker_find_test(worker_t *worker, const test_def_t *def);
+static bool worker_insert_test(worker_t *worker, const test_def_t *def);
+static void worker_rm_test(worker_t *worker, const test_def_t *def);
 
-static bool slave_start_test(slave_t *slave, const test_def_t *def,
+static bool worker_start_test(worker_t *worker, const test_def_t *def,
                              uint32_t queue_num);
-static void slave_send_sentinel(slave_t *slave);
-static void slave_drain_result_pipe(slave_t *slave);
+static void worker_send_sentinel(worker_t *worker);
+static void worker_drain_result_pipe(worker_t *worker);
 
-static bool slave_pipe_init(slave_t *slave, slave_pipe_t *pipe);
-static void slave_pipe_finish(slave_pipe_t *pipe);
-static bool slave_pipe_become_reader(slave_pipe_t *pipe);
-static bool slave_pipe_become_writer(slave_pipe_t *pipe);
-static void slave_pipe_drain_to_fd(slave_pipe_t *pipe, int fd);
+static bool worker_pipe_init(worker_t *worker, worker_pipe_t *pipe);
+static void worker_pipe_finish(worker_pipe_t *pipe);
+static bool worker_pipe_become_reader(worker_pipe_t *pipe);
+static bool worker_pipe_become_writer(worker_pipe_t *pipe);
+static void worker_pipe_drain_to_fd(worker_pipe_t *pipe, int fd);
 
-static slave_t *find_slave_by_pid(pid_t pid);
+static worker_t *find_worker_by_pid(pid_t pid);
 
-#define master_for_each_slave_slot(s)                                       \
-    for ((s) = master.slaves;                                               \
-         (s) < master.slaves + ARRAY_LENGTH(master.slaves);                 \
-         (s) = (slave_t *) (s) + 1)
+#define master_for_each_worker_slot(s)                                       \
+    for ((s) = master.workers;                                               \
+         (s) < master.workers + ARRAY_LENGTH(master.workers);                 \
+         (s) = (worker_t *) (s) + 1)
 
 /// Convert (const char *) to (const unsigned char *).
 ///
@@ -361,7 +361,7 @@ master_run(uint32_t num_tests)
 {
     master.num_tests = num_tests;
     master.max_dispatched_tests = CLAMP(runner_opts.jobs,
-                                        1, ARRAY_LENGTH(master.slaves));
+                                        1, ARRAY_LENGTH(master.workers));
 
     master_gather_vulkan_info();
     if (master.goto_next_phase)
@@ -428,8 +428,8 @@ master_gather_vulkan_info(void)
             master.goto_next_phase = true;
         return;
     }
-    slave_pipe_t pipe;
-    slave_pipe_init(NULL, &pipe);
+    worker_pipe_t pipe;
+    worker_pipe_init(NULL, &pipe);
     int pid = fork();
 
     if (pid == -1) {
@@ -445,7 +445,7 @@ master_gather_vulkan_info(void)
         dup2(devnull, 2);
 
         // Read the number of queues and send it through the pipe
-        slave_pipe_become_writer(&pipe);
+        worker_pipe_become_writer(&pipe);
         if (!runner_get_vulkan_queue_count(&num_vulkan_queues)) {
             exit(EXIT_FAILURE);
         } else {
@@ -456,7 +456,7 @@ master_gather_vulkan_info(void)
         exit(EXIT_SUCCESS);
     } else {
         // Read the number of queues from the pipe
-        slave_pipe_become_reader(&pipe);
+        worker_pipe_become_reader(&pipe);
         if (read(pipe.read_fd, &num_vulkan_queues,
                  sizeof(num_vulkan_queues)) != sizeof(num_vulkan_queues))
             goto fail;
@@ -468,12 +468,12 @@ master_gather_vulkan_info(void)
     if (result != 0)
         goto fail;
 
-    slave_pipe_finish(&pipe);
+    worker_pipe_finish(&pipe);
     master.num_vulkan_queues = num_vulkan_queues;
     return;
 
  fail:
-    slave_pipe_finish(&pipe);
+    worker_pipe_finish(&pipe);
     loge("test runner failed to gather vulkan info");
     master.goto_next_phase = true;
 }
@@ -491,22 +491,22 @@ master_enter_dispatch_phase(void)
 static void
 master_enter_cleanup_phase(void)
 {
-    slave_t *slave;
+    worker_t *worker;
 
     if (runner_opts.no_fork)
         return;
 
-    // Tell each slave that it will receive no more tests.
-    master_for_each_slave_slot(slave) {
-        if (!slave->pid)
+    // Tell each worker that it will receive no more tests.
+    master_for_each_worker_slot(worker) {
+        if (!worker->pid)
             continue;
 
-        slave_send_sentinel(slave);
+        worker_send_sentinel(worker);
         if (master.goto_next_phase)
             return;
     }
 
-    while (master.num_slaves > 0) {
+    while (master.num_workers > 0) {
         master_collect_result(-1);
         if (master.goto_next_phase)
             return;
@@ -553,7 +553,7 @@ master_dispatch_loop_no_fork(void)
     }
 }
 
-/// Dispatch tests to slave processes.
+/// Dispatch tests to worker processes.
 static void
 master_dispatch_loop_with_fork(void)
 {
@@ -598,7 +598,7 @@ master_dispatch_loop_with_fork(void)
 static void
 master_dispatch_test(const test_def_t *def, uint32_t queue_num)
 {
-    slave_t *slave = NULL;
+    worker_t *worker = NULL;
 
     assert(master.cur_dispatched_tests <= master.max_dispatched_tests);
 
@@ -612,74 +612,74 @@ master_dispatch_test(const test_def_t *def, uint32_t queue_num)
             return;
     }
 
-    while (!slave) {
+    while (!worker) {
         master_yield_to_sigint();
         if (master.goto_next_phase)
             return;
 
-        slave = master_get_open_slave();
+        worker = master_get_open_worker();
         if (master.goto_next_phase)
             return;
     }
 
-    slave_start_test(slave, def, queue_num);
+    worker_start_test(worker, def, queue_num);
 }
 
-static slave_t *
-master_get_open_slave(void)
+static worker_t *
+master_get_open_worker(void)
 {
     for (;;) {
-        slave_t *slave = NULL;
+        worker_t *worker = NULL;
 
         if (master.goto_next_phase)
             return NULL;
 
-        master_for_each_slave_slot(slave) {
-            if (slave_is_open(slave)) {
-                return slave;
+        master_for_each_worker_slot(worker) {
+            if (worker_is_open(worker)) {
+                return worker;
             }
         }
 
         switch (runner_opts.isolation_mode) {
         case RUNNER_ISOLATION_MODE_PROCESS:
-            if (master.num_slaves < master.max_dispatched_tests) {
-                return master_get_new_slave();
+            if (master.num_workers < master.max_dispatched_tests) {
+                return master_get_new_worker();
             }
             break;
         case RUNNER_ISOLATION_MODE_THREAD:
-            if (master.num_slaves == 0) {
-                return master_get_new_slave();
+            if (master.num_workers == 0) {
+                return master_get_new_worker();
             }
             break;
         }
 
-        // All slaves are busy. Wait for a test to finish, then try again.
+        // All workers are busy. Wait for a test to finish, then try again.
         master_collect_result(-1);
     }
 }
 
-static slave_t *
-master_get_new_slave(void)
+static worker_t *
+master_get_new_worker(void)
 {
-    slave_t *slave;
+    worker_t *worker;
 
     if (master.goto_next_phase)
         return NULL;
 
-    slave = master_find_unborn_slave();
-    if (!slave)
+    worker = master_find_unborn_worker();
+    if (!worker)
         return NULL;
 
-    assert(!slave->pid);
-    *slave = (slave_t) {0};
+    assert(!worker->pid);
+    *worker = (worker_t) {0};
 
-    if (!slave_pipe_init(slave, &slave->dispatch_pipe))
+    if (!worker_pipe_init(worker, &worker->dispatch_pipe))
         goto fail;
-    if (!slave_pipe_init(slave, &slave->result_pipe))
+    if (!worker_pipe_init(worker, &worker->result_pipe))
         goto fail;
-    if (!slave_pipe_init(slave, &slave->stdout_pipe))
+    if (!worker_pipe_init(worker, &worker->stdout_pipe))
         goto fail;
-    if (!slave_pipe_init(slave, &slave->stderr_pipe))
+    if (!worker_pipe_init(worker, &worker->stderr_pipe))
         goto fail;
 
     // Flush standard out and error before forking.  Otherwise, both the
@@ -688,123 +688,123 @@ master_get_new_slave(void)
     fflush(stdout);
     fflush(stderr);
 
-    slave->pid = fork();
+    worker->pid = fork();
 
-    if (slave->pid == -1) {
-        slave->pid = 0;
-        loge("test runner failed to fork slave process");
+    if (worker->pid == -1) {
+        worker->pid = 0;
+        loge("test runner failed to fork worker process");
         goto fail;
     }
 
-    if (slave->pid == 0) {
-        // Before the slave duplicates stdout and stderr, write only to the
+    if (worker->pid == 0) {
+        // Before the worker duplicates stdout and stderr, write only to the
         // debug log. This avoids corrupting the master's stdout and stderr
         // with interleaved output during concurrent test runs.
-        if (!(dup2(slave->stdout_pipe.write_fd, STDOUT_FILENO) != -1 &&
-              dup2(slave->stderr_pipe.write_fd, STDERR_FILENO) != -1)) {
-            logd("runner failed to dup slave's stdout and stderr");
+        if (!(dup2(worker->stdout_pipe.write_fd, STDOUT_FILENO) != -1 &&
+              dup2(worker->stderr_pipe.write_fd, STDERR_FILENO) != -1)) {
+            logd("runner failed to dup worker's stdout and stderr");
             exit(EXIT_FAILURE);
         }
 
-        slave_pipe_finish(&slave->stdout_pipe);
-        slave_pipe_finish(&slave->stderr_pipe);
+        worker_pipe_finish(&worker->stdout_pipe);
+        worker_pipe_finish(&worker->stderr_pipe);
 
         set_sigint_handler(SIG_DFL);
         master_finish_epoll();
 
-        if (!slave_pipe_become_reader(&slave->dispatch_pipe))
+        if (!worker_pipe_become_reader(&worker->dispatch_pipe))
             exit(EXIT_FAILURE);
-        if (!slave_pipe_become_writer(&slave->result_pipe))
+        if (!worker_pipe_become_writer(&worker->result_pipe))
             exit(EXIT_FAILURE);
 
-        slave_run(slave->dispatch_pipe.read_fd, slave->result_pipe.write_fd);
+        worker_run(worker->dispatch_pipe.read_fd, worker->result_pipe.write_fd);
 
         exit(EXIT_SUCCESS);
     }
 
-    if (!slave_pipe_become_writer(&slave->dispatch_pipe))
+    if (!worker_pipe_become_writer(&worker->dispatch_pipe))
         goto fail;
-    if (!slave_pipe_become_reader(&slave->result_pipe))
+    if (!worker_pipe_become_reader(&worker->result_pipe))
         goto fail;
-    if (!slave_pipe_become_reader(&slave->stdout_pipe))
+    if (!worker_pipe_become_reader(&worker->stdout_pipe))
         goto fail;
-    if (!slave_pipe_become_reader(&slave->stderr_pipe))
-        goto fail;
-
-    if (fcntl(slave->result_pipe.read_fd, F_SETFL, O_NONBLOCK) == -1)
-        goto fail;
-    if (fcntl(slave->stdout_pipe.read_fd, F_SETFL, O_NONBLOCK) == -1)
-        goto fail;
-    if (fcntl(slave->stderr_pipe.read_fd, F_SETFL, O_NONBLOCK) == -1)
+    if (!worker_pipe_become_reader(&worker->stderr_pipe))
         goto fail;
 
-    if (!master_epoll_add_slave_pipe(&slave->result_pipe, 0))
+    if (fcntl(worker->result_pipe.read_fd, F_SETFL, O_NONBLOCK) == -1)
         goto fail;
-    if (!master_epoll_add_slave_pipe(&slave->stdout_pipe, 0))
+    if (fcntl(worker->stdout_pipe.read_fd, F_SETFL, O_NONBLOCK) == -1)
         goto fail;
-    if (!master_epoll_add_slave_pipe(&slave->stderr_pipe, 0))
+    if (fcntl(worker->stderr_pipe.read_fd, F_SETFL, O_NONBLOCK) == -1)
         goto fail;
 
-    ++master.num_slaves;
+    if (!master_epoll_add_worker_pipe(&worker->result_pipe, 0))
+        goto fail;
+    if (!master_epoll_add_worker_pipe(&worker->stdout_pipe, 0))
+        goto fail;
+    if (!master_epoll_add_worker_pipe(&worker->stderr_pipe, 0))
+        goto fail;
 
-    return slave;
+    ++master.num_workers;
+
+    return worker;
 
 fail:
-    loge("runner failed to initialize slave process");
+    loge("runner failed to initialize worker process");
 
-    // If we can't create slaves, we should proceed to the result summary.
+    // If we can't create workers, we should proceed to the result summary.
     master.goto_next_phase = true;
 
     return NULL;
 }
 
 static void
-master_cleanup_dead_slave(slave_t *slave)
+master_cleanup_dead_worker(worker_t *worker)
 {
     int err;
 
-    assert(slave->pid);
-    assert(slave->is_dead);
+    assert(worker->pid);
+    assert(worker->is_dead);
 
-    slave_drain_result_pipe(slave);
-    slave_pipe_drain_to_fd(&slave->stdout_pipe, STDOUT_FILENO);
-    slave_pipe_drain_to_fd(&slave->stderr_pipe, STDERR_FILENO);
+    worker_drain_result_pipe(worker);
+    worker_pipe_drain_to_fd(&worker->stdout_pipe, STDOUT_FILENO);
+    worker_pipe_drain_to_fd(&worker->stderr_pipe, STDERR_FILENO);
 
-    // Any remaining tests owned by the slave are lost.
-    for (uint32_t i = 0; i < slave->tests.len; ++i) {
-        const test_def_t *def = slave->tests.data[i];
-        master_report_result(def, 0, slave->pid, TEST_RESULT_LOST);
+    // Any remaining tests owned by the worker are lost.
+    for (uint32_t i = 0; i < worker->tests.len; ++i) {
+        const test_def_t *def = worker->tests.data[i];
+        master_report_result(def, 0, worker->pid, TEST_RESULT_LOST);
     }
 
-    assert(master.cur_dispatched_tests >= slave->tests.len);
-    master.cur_dispatched_tests -= slave->tests.len;
-    slave->tests.len = 0;
+    assert(master.cur_dispatched_tests >= worker->tests.len);
+    master.cur_dispatched_tests -= worker->tests.len;
+    worker->tests.len = 0;
 
     err = epoll_ctl(master.epoll_fd, EPOLL_CTL_DEL,
-                    slave->result_pipe.read_fd, NULL);
+                    worker->result_pipe.read_fd, NULL);
     if (err == -1) {
-        loge("runner failed to remove slave process's pipe from epoll "
+        loge("runner failed to remove worker process's pipe from epoll "
              "fd; abort!");
         abort();
     }
 
-    slave_pipe_finish(&slave->dispatch_pipe);
-    slave_pipe_finish(&slave->result_pipe);
-    slave_pipe_finish(&slave->stdout_pipe);
-    slave_pipe_finish(&slave->stderr_pipe);
+    worker_pipe_finish(&worker->dispatch_pipe);
+    worker_pipe_finish(&worker->result_pipe);
+    worker_pipe_finish(&worker->stdout_pipe);
+    worker_pipe_finish(&worker->stderr_pipe);
 
-    slave->pid = 0;
-    --master.num_slaves;
+    worker->pid = 0;
+    --master.num_workers;
 }
 
-static slave_t *
-master_find_unborn_slave(void)
+static worker_t *
+master_find_unborn_worker(void)
 {
-    slave_t *slave;
+    worker_t *worker;
 
-    master_for_each_slave_slot(slave) {
-        if (!slave->pid) {
-            return slave;
+    master_for_each_worker_slot(worker) {
+        if (!worker->pid) {
+            return worker;
         }
     }
 
@@ -847,14 +847,14 @@ master_report_result(const test_def_t *def, uint32_t queue_num,
 }
 
 static bool
-master_send_packet(slave_t *slave, const dispatch_packet_t *pk)
+master_send_packet(worker_t *worker, const dispatch_packet_t *pk)
 {
     bool result = false;
     const struct sigaction ignore_sa = { .sa_handler = SIG_IGN };
     struct sigaction old_sa;
     int err;
 
-    // If the slave process died, then writing to its dispatch pipe will emit
+    // If the worker process died, then writing to its dispatch pipe will emit
     // SIGPIPE. Ignore it, because the master should never die.
     err = sigaction(SIGPIPE, &ignore_sa, &old_sa);
     if (err == -1) {
@@ -864,7 +864,7 @@ master_send_packet(slave_t *slave, const dispatch_packet_t *pk)
 
     static_assert(sizeof(*pk) <= PIPE_BUF, "dispatch packets will not be read "
                   "and written atomically");
-    if (write(slave->dispatch_pipe.write_fd, pk, sizeof(*pk)) != sizeof(*pk))
+    if (write(worker->dispatch_pipe.write_fd, pk, sizeof(*pk)) != sizeof(*pk))
         goto cleanup;
 
     result = true;
@@ -880,18 +880,18 @@ cleanup:
 }
 
 static void
-master_kill_all_slaves(void)
+master_kill_all_workers(void)
 {
     int err;
-    slave_t *slave;
+    worker_t *worker;
 
-    master_for_each_slave_slot(slave) {
-        if (!slave->pid)
+    master_for_each_worker_slot(worker) {
+        if (!worker->pid)
             continue;
 
-        err = kill(slave->pid, SIGINT);
+        err = kill(worker->pid, SIGINT);
         if (err) {
-            loge("runner failed to kill child process %d", slave->pid);
+            loge("runner failed to kill child process %d", worker->pid);
             abort();
         }
     }
@@ -955,7 +955,7 @@ master_finish_epoll(void)
 }
 
 static bool
-master_epoll_add_slave_pipe(slave_pipe_t *pipe, int rw)
+master_epoll_add_worker_pipe(worker_pipe_t *pipe, int rw)
 {
     int err;
 
@@ -967,7 +967,7 @@ master_epoll_add_slave_pipe(slave_pipe_t *pipe, int rw)
                         .data = { .ptr = pipe },
                     });
     if (err == -1) {
-        loge("runner failed to add a slave pipe to epoll fd");
+        loge("runner failed to add a worker pipe to epoll fd");
         return false;
     }
 
@@ -987,22 +987,22 @@ master_handle_epoll_event(const struct epoll_event *event)
 static void
 master_handle_pipe_event(const struct epoll_event *event)
 {
-    slave_pipe_t *pipe = event->data.ptr;
+    worker_pipe_t *pipe = event->data.ptr;
 
     assert(event->data.ptr != &master.signal_fd);
 
-    switch ((void*) pipe - (void*) pipe->slave) {
-    case offsetof(slave_t, result_pipe):
-        slave_drain_result_pipe(pipe->slave);
+    switch ((void*) pipe - (void*) pipe->worker) {
+    case offsetof(worker_t, result_pipe):
+        worker_drain_result_pipe(pipe->worker);
         break;
-    case offsetof(slave_t, stdout_pipe):
-        slave_pipe_drain_to_fd(pipe, STDOUT_FILENO);
+    case offsetof(worker_t, stdout_pipe):
+        worker_pipe_drain_to_fd(pipe, STDOUT_FILENO);
         break;
-    case offsetof(slave_t, stderr_pipe):
-        slave_pipe_drain_to_fd(pipe, STDERR_FILENO);
+    case offsetof(worker_t, stderr_pipe):
+        worker_pipe_drain_to_fd(pipe, STDERR_FILENO);
         break;
     default:
-        log_internal_error("invalid slave pipe in epoll event");
+        log_internal_error("invalid worker pipe in epoll event");
         break;
     }
 }
@@ -1035,17 +1035,17 @@ master_handle_sigchld(void)
     pid_t pid;
 
     while ((pid = waitpid(-1, /*status*/ NULL, WNOHANG)) > 0) {
-        slave_t *slave;
+        worker_t *worker;
 
-        slave = find_slave_by_pid(pid);
-        if (!slave) {
+        worker = find_worker_by_pid(pid);
+        if (!worker) {
             loge("runner caught unexpected pid");
             master.goto_next_phase = true;
             return;
         }
 
-        slave->is_dead = true;
-        master_cleanup_dead_slave(slave);
+        worker->is_dead = true;
+        master_cleanup_dead_worker(worker);
     }
 }
 
@@ -1063,7 +1063,7 @@ master_yield_to_sigint(void)
     if (!atomic_exchange(&master.sigint_flag, false))
         return;
 
-    master_kill_all_slaves();
+    master_kill_all_workers();
 
     // A second SIGINT, if received before the runner resumes dispatching
     // tests, halts the testrun. Give the user a short window in which to send
@@ -1077,32 +1077,32 @@ master_yield_to_sigint(void)
     master.goto_next_phase = true;
 }
 
-/// Is the slave accepting new tests?
+/// Is the worker accepting new tests?
 static bool
-slave_is_open(const slave_t *slave)
+worker_is_open(const worker_t *worker)
 {
-    if (!slave->pid)
+    if (!worker->pid)
         return false;
 
-    if (slave->is_dead)
+    if (worker->is_dead)
         return false;
 
     switch (runner_opts.isolation_mode) {
     case RUNNER_ISOLATION_MODE_PROCESS:
-        // The master sends each slave exactly one test.
-        return slave->lifetime_test_count == 0;
+        // The master sends each worker exactly one test.
+        return worker->lifetime_test_count == 0;
     case RUNNER_ISOLATION_MODE_THREAD:
-        return slave->tests.len < ARRAY_LENGTH(slave->tests.data);
+        return worker->tests.len < ARRAY_LENGTH(worker->tests.data);
     }
 
     return false;
 }
 
 static int32_t
-slave_find_test(slave_t *slave, const test_def_t *def)
+worker_find_test(worker_t *worker, const test_def_t *def)
 {
-    for (uint32_t i = 0; i < slave->tests.len; ++i) {
-        if (slave->tests.data[i] == def) {
+    for (uint32_t i = 0; i < worker->tests.len; ++i) {
+        if (worker->tests.data[i] == def) {
             return i;
         }
     }
@@ -1111,43 +1111,43 @@ slave_find_test(slave_t *slave, const test_def_t *def)
 }
 
 static bool
-slave_insert_test(slave_t *slave, const test_def_t *def)
+worker_insert_test(worker_t *worker, const test_def_t *def)
 {
-    if (slave->is_dead)
+    if (worker->is_dead)
         return false;
 
-    if (slave->tests.len >= ARRAY_LENGTH(slave->tests.data))
+    if (worker->tests.len >= ARRAY_LENGTH(worker->tests.data))
         return false;
 
-    slave->tests.data[slave->tests.len++] = def;
+    worker->tests.data[worker->tests.len++] = def;
     ++master.cur_dispatched_tests;
 
     return true;
 }
 
 static void
-slave_rm_test(slave_t *slave, const test_def_t *def)
+worker_rm_test(worker_t *worker, const test_def_t *def)
 {
     int32_t i;
 
-    i = slave_find_test(slave, def);
+    i = worker_find_test(worker, def);
     if (i < 0) {
-        loge("slave cannot remove test it doesn't own");
+        loge("worker cannot remove test it doesn't own");
         return;
     }
 
-    assert(slave->tests.len >= 1);
+    assert(worker->tests.len >= 1);
     assert(master.cur_dispatched_tests >= 1);
 
-    --slave->tests.len;
+    --worker->tests.len;
     --master.cur_dispatched_tests;
 
-    memmove(slave->tests.data + i, slave->tests.data + i + 1,
-            slave->tests.len);
+    memmove(worker->tests.data + i, worker->tests.data + i + 1,
+            worker->tests.len);
 }
 
 static bool
-slave_start_test(slave_t *slave, const test_def_t *def,
+worker_start_test(worker_t *worker, const test_def_t *def,
                  uint32_t queue_num)
 {
     const dispatch_packet_t pk = {
@@ -1158,32 +1158,32 @@ slave_start_test(slave_t *slave, const test_def_t *def,
     if (!def)
         return false;
 
-    if (!slave->pid)
+    if (!worker->pid)
         return false;
 
     if (master.cur_dispatched_tests >= master.max_dispatched_tests)
         return false;
 
-    if (!slave_insert_test(slave, def))
+    if (!worker_insert_test(worker, def))
         return false;
 
-    log_tag("start", slave->pid, "%s.q%d", def->name, 0);
+    log_tag("start", worker->pid, "%s.q%d", def->name, 0);
 
-    if (!master_send_packet(slave, &pk)) {
-        slave_rm_test(slave, def);
+    if (!master_send_packet(worker, &pk)) {
+        worker_rm_test(worker, def);
         return false;
     }
 
-    ++slave->lifetime_test_count;
+    ++worker->lifetime_test_count;
 
     switch (runner_opts.isolation_mode) {
     case RUNNER_ISOLATION_MODE_PROCESS:
-        // The master sends each slave exactly one test.
-        slave_send_sentinel(slave);
+        // The master sends each worker exactly one test.
+        worker_send_sentinel(worker);
         break;
     case RUNNER_ISOLATION_MODE_THREAD:
-        // The master may send the slave multiple tests. The master will tell
-        // the slave to expect no more tests by later sending it a NULL test.
+        // The master may send the worker multiple tests. The master will tell
+        // the worker to expect no more tests by later sending it a NULL test.
         break;
     }
 
@@ -1191,19 +1191,19 @@ slave_start_test(slave_t *slave, const test_def_t *def,
 }
 
 static void
-slave_send_sentinel(slave_t *slave)
+worker_send_sentinel(worker_t *worker)
 {
-    assert(slave->pid);
+    assert(worker->pid);
 
-    if (slave->recvd_sentinel || slave->is_dead)
+    if (worker->recvd_sentinel || worker->is_dead)
         return;
 
-    master_send_packet(slave, &(dispatch_packet_t) { .test_def = NULL });
-    slave->recvd_sentinel = true;
+    master_send_packet(worker, &(dispatch_packet_t) { .test_def = NULL });
+    worker->recvd_sentinel = true;
 }
 
 static void
-slave_drain_result_pipe(slave_t *slave)
+worker_drain_result_pipe(worker_t *worker)
 {
     for (;;) {
         result_packet_t pk;
@@ -1211,25 +1211,25 @@ slave_drain_result_pipe(slave_t *slave)
         static_assert(sizeof(pk) <= PIPE_BUF, "result packets will not be "
                       "read and written atomically");
 
-        // To avoid deadlock between master and slave, this read must be
+        // To avoid deadlock between master and worker, this read must be
         // non-blocking.
-        if (read(slave->result_pipe.read_fd, &pk, sizeof(pk)) != sizeof(pk))
+        if (read(worker->result_pipe.read_fd, &pk, sizeof(pk)) != sizeof(pk))
             return;
 
-        slave_rm_test(slave, pk.test_def);
-        master_report_result(pk.test_def, pk.queue_num, slave->pid,
+        worker_rm_test(worker, pk.test_def);
+        master_report_result(pk.test_def, pk.queue_num, worker->pid,
                              pk.result);
     }
 }
 
-static slave_t *
-find_slave_by_pid(pid_t pid)
+static worker_t *
+find_worker_by_pid(pid_t pid)
 {
-    slave_t *slave;
+    worker_t *worker;
 
-    master_for_each_slave_slot(slave) {
-        if (slave->pid == pid) {
-            return slave;
+    master_for_each_worker_slot(worker) {
+        if (worker->pid == pid) {
+            return worker;
         }
     }
 
@@ -1237,7 +1237,7 @@ find_slave_by_pid(pid_t pid)
 }
 
 static bool
-slave_pipe_init(slave_t *slave, slave_pipe_t *pipe)
+worker_pipe_init(worker_t *worker, worker_pipe_t *pipe)
 {
     int err;
 
@@ -1247,13 +1247,13 @@ slave_pipe_init(slave_t *slave, slave_pipe_t *pipe)
         return false;
     }
 
-    pipe->slave = slave;
+    pipe->worker = worker;
 
     return true;
 }
 
 static void
-slave_pipe_finish(slave_pipe_t *pipe)
+worker_pipe_finish(worker_pipe_t *pipe)
 {
     for (int i = 0; i < 2; ++i) {
         if (pipe->fd[i] != -1) {
@@ -1263,7 +1263,7 @@ slave_pipe_finish(slave_pipe_t *pipe)
 }
 
 static bool
-slave_pipe_become_reader(slave_pipe_t *pipe)
+worker_pipe_become_reader(worker_pipe_t *pipe)
 {
     int err;
 
@@ -1282,7 +1282,7 @@ slave_pipe_become_reader(slave_pipe_t *pipe)
 }
 
 static bool
-slave_pipe_become_writer(slave_pipe_t *pipe)
+worker_pipe_become_writer(worker_pipe_t *pipe)
 {
     int err;
 
@@ -1301,7 +1301,7 @@ slave_pipe_become_writer(slave_pipe_t *pipe)
 }
 
 static void
-slave_pipe_drain_to_fd(slave_pipe_t *pipe, int fd)
+worker_pipe_drain_to_fd(worker_pipe_t *pipe, int fd)
 {
     char buf[4096];
 
@@ -1322,8 +1322,8 @@ slave_pipe_drain_to_fd(slave_pipe_t *pipe, int fd)
 
             nwrite = write(fd, buf, nread);
             if (nwrite < 0) {
-                // Even on write errors, we must continue to drain the slave's
-                // pipe. Otherwise the slave may block on a full pipe.
+                // Even on write errors, we must continue to drain the worker's
+                // pipe. Otherwise the worker may block on a full pipe.
                 continue;
             }
 

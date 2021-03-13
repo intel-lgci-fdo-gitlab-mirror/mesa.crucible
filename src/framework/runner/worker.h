@@ -23,4 +23,4 @@
 
 #include "runner.h"
 
-void slave_run(int dispatch_fd, int result_fd);
+void worker_run(int dispatch_fd, int result_fd);
