@@ -25,7 +25,7 @@
 #include <unistd.h>
 
 #include "runner.h"
-#include "slave.h"
+#include "worker.h"
 
 static int dispatch_fd;
 static int result_fd;

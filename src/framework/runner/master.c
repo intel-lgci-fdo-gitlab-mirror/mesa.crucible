@@ -48,7 +48,7 @@
 #include "runner.h"
 #include "runner_vk.h"
 #include "master.h"
-#include "slave.h"
+#include "worker.h"
 
 typedef struct slave slave_t;
 typedef struct slave_pipe slave_pipe_t;

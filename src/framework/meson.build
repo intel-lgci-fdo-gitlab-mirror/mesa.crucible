@@ -22,7 +22,7 @@ framework_sources = files(
   'runner/master.c',
   'runner/runner.c',
   'runner/runner_vk.c',
-  'runner/slave.c',
+  'runner/worker.c',
   'test/t_cleanup.c',
   'test/t_data.c',
   'test/t_dump.c',
