@@ -24,4 +24,4 @@
 #include <stdbool.h>
 #include <stdint.h>
 
-bool master_run(uint32_t num_tests);
+bool dispatcher_run(uint32_t num_tests);

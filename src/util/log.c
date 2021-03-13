@@ -98,14 +98,14 @@ log_tag_v(const char *tag, pid_t pid, const char *format, va_list va)
     pthread_mutex_lock(&log_mutex);
 
     // Tags are aligned to 7 because that's wide enough for "warning".
-    // PID fields are aligned to 6 because that's enough for "master" and
+    // PID fields are aligned to 6 because that's enough for "dispatcher" and
     // any 16-bit unsigned value.
     if (log_should_print_pids) {
         if (pid == 0) {
             if (log_has_aligned_tags) {
-                printf("crucible [master]: %-7s: ", tag);
+                printf("crucible [dispatcher]: %-7s: ", tag);
             } else {
-                printf("crucible [master]: %s: ", tag);
+                printf("crucible [dispatcher]: %s: ", tag);
             }
         } else {
             int ipid = pid; // printf likes standard data types better

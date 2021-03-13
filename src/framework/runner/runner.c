@@ -22,8 +22,8 @@
 /// \file
 /// \brief Crucible Test Runner
 ///
-/// The runner consists of two processes: master and worker. The master forks
-/// the worker. The tests execute in the worker process. The master collects the
+/// The runner consists of two processes: dispatcher and worker. The dispatcher forks
+/// the worker. The tests execute in the worker process. The dispatcher collects the
 /// test results and prints their summary. The separation ensures that test
 /// results and summary are printed even when a test crashes its process.
 
@@ -121,7 +121,7 @@ runner_run_tests(void)
 {
     ASSERT_RUNNER_IS_INIT;
 
-    return master_run(runner_num_tests);
+    return dispatcher_run(runner_num_tests);
 }
 
 static bool

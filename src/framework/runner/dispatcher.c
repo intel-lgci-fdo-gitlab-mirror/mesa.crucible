@@ -20,7 +20,7 @@
 // IN THE SOFTWARE.
 
 /// \file
-/// \brief The runner's master process
+/// \brief The runner's dispatcher process
 
 #include <limits.h>
 #include <signal.h>
@@ -67,14 +67,14 @@ struct worker_pipe {
     worker_t *worker;
 };
 
-/// \brief A worker process's proxy in the master process.
+/// \brief A worker process's proxy in the dispatcher process.
 ///
 /// The struct is valid if and only if worker::pid != 0.
 struct worker {
     /// Cases:
     ///   * if 0: the proxy is not connected to a process,
     ///           and the struct is invalid
-    ///   * if > 0: the master forked the worker and has not yet reaped it
+    ///   * if > 0: the dispatcher forked the worker and has not yet reaped it
     pid_t pid;
 
     struct {
@@ -86,8 +86,8 @@ struct worker {
     worker_pipe_t result_pipe;
 
     /// Each worker process's stdout and stderr are connected to a pipe in the
-    /// master process. This prevents concurrently running workers from
-    /// corrupting the master's stdout and stderr with interleaved output.
+    /// dispatcher process. This prevents concurrently running workers from
+    /// corrupting the dispatcher's stdout and stderr with interleaved output.
     worker_pipe_t stdout_pipe;
     worker_pipe_t stderr_pipe;
 
@@ -98,7 +98,7 @@ struct worker {
     bool is_dead;
 };
 
-static struct master {
+static struct dispatcher {
     atomic_bool sigint_flag;
     atomic_bool goto_next_phase;
 
@@ -129,46 +129,46 @@ static struct master {
         xmlNodePtr testsuite_node;
     } junit;
 
-} master = {
+} dispatcher = {
     .epoll_fd = -1,
     .signal_fd = -1,
 };
 
-static uint32_t master_get_num_ran_tests(void);
-static void master_print_header(void);
-static void master_gather_vulkan_info(void);
-static void master_enter_dispatch_phase(void);
-static void master_enter_cleanup_phase(void);
-static void master_print_summary(void);
+static uint32_t dispatcher_get_num_ran_tests(void);
+static void dispatcher_print_header(void);
+static void dispatcher_gather_vulkan_info(void);
+static void dispatcher_enter_dispatch_phase(void);
+static void dispatcher_enter_cleanup_phase(void);
+static void dispatcher_print_summary(void);
 
-static void master_dispatch_loop_no_fork(void);
-static void master_dispatch_loop_with_fork(void);
+static void dispatcher_dispatch_loop_no_fork(void);
+static void dispatcher_dispatch_loop_with_fork(void);
 
-static void master_dispatch_test(const test_def_t *def,
+static void dispatcher_dispatch_test(const test_def_t *def,
                                  uint32_t queue_num);
-static worker_t * master_get_open_worker(void);
-static worker_t * master_get_new_worker(void);
-static worker_t * master_find_unborn_worker(void);
-static void master_cleanup_dead_worker(worker_t *worker);
+static worker_t * dispatcher_get_open_worker(void);
+static worker_t * dispatcher_get_new_worker(void);
+static worker_t * dispatcher_find_unborn_worker(void);
+static void dispatcher_cleanup_dead_worker(worker_t *worker);
 
-static void master_collect_result(int timeout_ms);
+static void dispatcher_collect_result(int timeout_ms);
 
-static void master_report_result(const test_def_t *def, uint32_t queue_num,
+static void dispatcher_report_result(const test_def_t *def, uint32_t queue_num,
                                  pid_t pid, test_result_t result);
-static bool master_send_packet(worker_t *worker, const dispatch_packet_t *pk);
+static bool dispatcher_send_packet(worker_t *worker, const dispatch_packet_t *pk);
 
-static void master_kill_all_workers(void);
+static void dispatcher_kill_all_workers(void);
 
-static void master_init_epoll(void);
-static void master_finish_epoll(void);
-static bool master_epoll_add_worker_pipe(worker_pipe_t *pipe, int rw);
+static void dispatcher_init_epoll(void);
+static void dispatcher_finish_epoll(void);
+static bool dispatcher_epoll_add_worker_pipe(worker_pipe_t *pipe, int rw);
 
-static void master_handle_epoll_event(const struct epoll_event *event);
-static void master_handle_pipe_event(const struct epoll_event *event);
-static void master_handle_signal_event(const struct epoll_event *event);
-static void master_handle_sigchld(void);
-static void master_handle_sigint(int sig);
-static void master_yield_to_sigint(void);
+static void dispatcher_handle_epoll_event(const struct epoll_event *event);
+static void dispatcher_handle_pipe_event(const struct epoll_event *event);
+static void dispatcher_handle_signal_event(const struct epoll_event *event);
+static void dispatcher_handle_sigchld(void);
+static void dispatcher_handle_sigint(int sig);
+static void dispatcher_yield_to_sigint(void);
 
 static bool worker_is_open(const worker_t *worker);
 static int32_t worker_find_test(worker_t *worker, const test_def_t *def);
@@ -188,9 +188,9 @@ static void worker_pipe_drain_to_fd(worker_pipe_t *pipe, int fd);
 
 static worker_t *find_worker_by_pid(pid_t pid);
 
-#define master_for_each_worker_slot(s)                                       \
-    for ((s) = master.workers;                                               \
-         (s) < master.workers + ARRAY_LENGTH(master.workers);                 \
+#define dispatcher_for_each_worker_slot(s)                                       \
+    for ((s) = dispatcher.workers;                                               \
+         (s) < dispatcher.workers + ARRAY_LENGTH(dispatcher.workers);                 \
          (s) = (worker_t *) (s) + 1)
 
 /// Convert (const char *) to (const unsigned char *).
@@ -234,11 +234,11 @@ junit_init(void)
 
     xmlSetGenericErrorFunc(/*ctx*/ NULL, junit_xml_error_handler);
 
-    master.junit.filepath = xstrdup(runner_opts.junit_xml_filepath);
-    master.junit.file = fopen(master.junit.filepath, "w");
-    if (!master.junit.file) {
-        loge("failed to open junit xml file: %s", master.junit.filepath);
-        free(master.junit.filepath);
+    dispatcher.junit.filepath = xstrdup(runner_opts.junit_xml_filepath);
+    dispatcher.junit.file = fopen(dispatcher.junit.filepath, "w");
+    if (!dispatcher.junit.file) {
+        loge("failed to open junit xml file: %s", dispatcher.junit.filepath);
+        free(dispatcher.junit.filepath);
         return false;
     }
 
@@ -253,8 +253,8 @@ junit_init(void)
                                             /*context*/ NULL);
     xmlNewProp(testsuite_node, u("name"), u("crucible"));
 
-    master.junit.doc = doc;
-    master.junit.testsuite_node = testsuite_node;
+    dispatcher.junit.doc = doc;
+    dispatcher.junit.testsuite_node = testsuite_node;
 
     return true;
 }
@@ -262,7 +262,7 @@ junit_init(void)
 static void
 junit_add_result(const char *name, test_result_t result)
 {
-    if (!master.junit.doc)
+    if (!dispatcher.junit.doc)
         return;
 
     xmlNodePtr testcase_node = xmlNewNode(NULL, u("testcase"));
@@ -306,7 +306,7 @@ junit_add_result(const char *name, test_result_t result)
     }
     }
 
-    xmlAddChild(master.junit.testsuite_node, testcase_node);
+    xmlAddChild(dispatcher.junit.testsuite_node, testcase_node);
 }
 
 static bool
@@ -314,118 +314,118 @@ junit_finish(void)
 {
     bool rc = true;
 
-    xmlDocPtr doc = master.junit.doc;
+    xmlDocPtr doc = dispatcher.junit.doc;
     if (!doc)
         return rc;
 
     string_t buf = STRING_INIT;
     xmlNodePtr root_node = xmlDocGetRootElement(doc);
-    xmlNodePtr testsuite_node = master.junit.testsuite_node;
+    xmlNodePtr testsuite_node = dispatcher.junit.testsuite_node;
 
-    string_printf(&buf, "%u", master_get_num_ran_tests());
+    string_printf(&buf, "%u", dispatcher_get_num_ran_tests());
     xmlNewProp(root_node, u("tests"), u(string_data(&buf)));
     xmlNewProp(testsuite_node, u("tests"), u(string_data(&buf)));
 
-    string_printf(&buf, "%u", master.num_fail);
+    string_printf(&buf, "%u", dispatcher.num_fail);
     xmlNewProp(root_node, u("failures"), u(string_data(&buf)));
     xmlNewProp(testsuite_node, u("failures"), u(string_data(&buf)));
 
-    string_printf(&buf, "%u", master.num_lost);
+    string_printf(&buf, "%u", dispatcher.num_lost);
     xmlNewProp(root_node, u("errors"), u(string_data(&buf)));
     xmlNewProp(testsuite_node, u("errors"), u(string_data(&buf)));
 
-    string_printf(&buf, "%u", master.num_skip);
+    string_printf(&buf, "%u", dispatcher.num_skip);
     xmlNewProp(root_node, u("disabled"), u(string_data(&buf)));
     xmlNewProp(testsuite_node, u("disabled"), u(string_data(&buf)));
 
-    if (xmlDocFormatDump(master.junit.file, doc,
+    if (xmlDocFormatDump(dispatcher.junit.file, doc,
                          /*format*/ 1) == -1) {
-        loge("failed to write junit xml file: %s", master.junit.filepath);
+        loge("failed to write junit xml file: %s", dispatcher.junit.filepath);
         rc = false;
     }
 
-    if (fclose(master.junit.file) == -1) {
-        loge("failed to close junit xml file: %s", master.junit.filepath);
+    if (fclose(dispatcher.junit.file) == -1) {
+        loge("failed to close junit xml file: %s", dispatcher.junit.filepath);
         rc = false;
     }
 
-    free(master.junit.filepath);
-    xmlFreeDoc(master.junit.doc);
-    memset(&master.junit, 0, sizeof(master.junit));
+    free(dispatcher.junit.filepath);
+    xmlFreeDoc(dispatcher.junit.doc);
+    memset(&dispatcher.junit, 0, sizeof(dispatcher.junit));
 
     return rc;
 }
 
 bool
-master_run(uint32_t num_tests)
+dispatcher_run(uint32_t num_tests)
 {
-    master.num_tests = num_tests;
-    master.max_dispatched_tests = CLAMP(runner_opts.jobs,
-                                        1, ARRAY_LENGTH(master.workers));
+    dispatcher.num_tests = num_tests;
+    dispatcher.max_dispatched_tests = CLAMP(runner_opts.jobs,
+                                        1, ARRAY_LENGTH(dispatcher.workers));
 
-    master_gather_vulkan_info();
-    if (master.goto_next_phase)
+    dispatcher_gather_vulkan_info();
+    if (dispatcher.goto_next_phase)
         return false;
 
     if (!junit_init())
         return false;
 
-    master_init_epoll();
-    set_sigint_handler(master_handle_sigint);
+    dispatcher_init_epoll();
+    set_sigint_handler(dispatcher_handle_sigint);
 
-    master_print_header();
-    master_enter_dispatch_phase();
-    master_enter_cleanup_phase();
-    master_print_summary();
+    dispatcher_print_header();
+    dispatcher_enter_dispatch_phase();
+    dispatcher_enter_cleanup_phase();
+    dispatcher_print_summary();
 
     set_sigint_handler(SIG_DFL);
-    master_finish_epoll();
+    dispatcher_finish_epoll();
 
     if (!junit_finish())
         return false;
 
-    return master.num_pass + master.num_skip == master.num_tests;
+    return dispatcher.num_pass + dispatcher.num_skip == dispatcher.num_tests;
 }
 
 static uint32_t
-master_get_num_ran_tests(void)
+dispatcher_get_num_ran_tests(void)
 {
-    return master.num_pass + master.num_fail + master.num_skip +
-           master.num_lost;
+    return dispatcher.num_pass + dispatcher.num_fail + dispatcher.num_skip +
+           dispatcher.num_lost;
 }
 
 static void
-master_print_header(void)
+dispatcher_print_header(void)
 {
     log_align_tags(true);
-    logi("running %u tests", master.num_tests);
+    logi("running %u tests", dispatcher.num_tests);
     logi("================================");
 
 }
 
 static void
-master_print_summary(void)
+dispatcher_print_summary(void)
 {
     // A big, and perhaps unneeded, hammer.
     fflush(stdout);
     fflush(stderr);
 
     logi("================================");
-    logi("ran %u tests", master_get_num_ran_tests());
-    logi("pass %u", master.num_pass);
-    logi("fail %u", master.num_fail);
-    logi("skip %u", master.num_skip);
-    logi("lost %u", master.num_lost);
+    logi("ran %u tests", dispatcher_get_num_ran_tests());
+    logi("pass %u", dispatcher.num_pass);
+    logi("fail %u", dispatcher.num_fail);
+    logi("skip %u", dispatcher.num_skip);
+    logi("lost %u", dispatcher.num_lost);
 }
 
 static void
-master_gather_vulkan_info(void)
+dispatcher_gather_vulkan_info(void)
 {
     uint32_t num_vulkan_queues;
 
     if (runner_opts.no_fork) {
-        if (!runner_get_vulkan_queue_count(&master.num_vulkan_queues))
-            master.goto_next_phase = true;
+        if (!runner_get_vulkan_queue_count(&dispatcher.num_vulkan_queues))
+            dispatcher.goto_next_phase = true;
         return;
     }
     worker_pipe_t pipe;
@@ -469,27 +469,27 @@ master_gather_vulkan_info(void)
         goto fail;
 
     worker_pipe_finish(&pipe);
-    master.num_vulkan_queues = num_vulkan_queues;
+    dispatcher.num_vulkan_queues = num_vulkan_queues;
     return;
 
  fail:
     worker_pipe_finish(&pipe);
     loge("test runner failed to gather vulkan info");
-    master.goto_next_phase = true;
+    dispatcher.goto_next_phase = true;
 }
 
 static void
-master_enter_dispatch_phase(void)
+dispatcher_enter_dispatch_phase(void)
 {
     if (runner_opts.no_fork) {
-        master_dispatch_loop_no_fork();
+        dispatcher_dispatch_loop_no_fork();
     } else {
-        master_dispatch_loop_with_fork();
+        dispatcher_dispatch_loop_with_fork();
     }
 }
 
 static void
-master_enter_cleanup_phase(void)
+dispatcher_enter_cleanup_phase(void)
 {
     worker_t *worker;
 
@@ -497,25 +497,25 @@ master_enter_cleanup_phase(void)
         return;
 
     // Tell each worker that it will receive no more tests.
-    master_for_each_worker_slot(worker) {
+    dispatcher_for_each_worker_slot(worker) {
         if (!worker->pid)
             continue;
 
         worker_send_sentinel(worker);
-        if (master.goto_next_phase)
+        if (dispatcher.goto_next_phase)
             return;
     }
 
-    while (master.num_workers > 0) {
-        master_collect_result(-1);
-        if (master.goto_next_phase)
+    while (dispatcher.num_workers > 0) {
+        dispatcher_collect_result(-1);
+        if (dispatcher.goto_next_phase)
             return;
     }
 }
 
-/// Run all tests in the master process.
+/// Run all tests in the dispatcher process.
 static void
-master_dispatch_loop_no_fork(void)
+dispatcher_dispatch_loop_no_fork(void)
 {
     const test_def_t *def;
 
@@ -523,7 +523,7 @@ master_dispatch_loop_no_fork(void)
         uint32_t queue_start, queue_end;
         if (def->priv.queue_num == NO_QUEUE_NUM_PREF) {
             queue_start = 0;
-            queue_end = master.num_vulkan_queues;
+            queue_end = dispatcher.num_vulkan_queues;
         } else {
             queue_start = def->priv.queue_num;
             queue_end = def->priv.queue_num + 1;
@@ -535,27 +535,27 @@ master_dispatch_loop_no_fork(void)
             if (!def->priv.enable)
                 continue;
 
-            if (qi >= master.num_vulkan_queues) {
+            if (qi >= dispatcher.num_vulkan_queues) {
                 logi("queue-family-index %d does not exist", qi);
-                master_report_result(def, qi, 0, TEST_RESULT_SKIP);
+                dispatcher_report_result(def, qi, 0, TEST_RESULT_SKIP);
                 continue;
             }
 
             if (def->skip) {
-                master_report_result(def, qi, 0, TEST_RESULT_SKIP);
+                dispatcher_report_result(def, qi, 0, TEST_RESULT_SKIP);
                 continue;
             }
 
             log_tag("start", 0, "%s.q%d", def->name, qi);
             result = run_test_def(def, qi);
-            master_report_result(def, qi, 0, result);
+            dispatcher_report_result(def, qi, 0, result);
         }
     }
 }
 
 /// Dispatch tests to worker processes.
 static void
-master_dispatch_loop_with_fork(void)
+dispatcher_dispatch_loop_with_fork(void)
 {
     const test_def_t *def;
 
@@ -563,7 +563,7 @@ master_dispatch_loop_with_fork(void)
         uint32_t queue_start, queue_end;
         if (def->priv.queue_num == NO_QUEUE_NUM_PREF) {
             queue_start = 0;
-            queue_end = master.num_vulkan_queues;
+            queue_end = dispatcher.num_vulkan_queues;
         } else {
             queue_start = def->priv.queue_num;
             queue_end = def->priv.queue_num + 1;
@@ -573,52 +573,52 @@ master_dispatch_loop_with_fork(void)
             if (!def->priv.enable)
                 continue;
 
-            if (qi >= master.num_vulkan_queues) {
+            if (qi >= dispatcher.num_vulkan_queues) {
                 logi("queue-family-index %d does not exist", qi);
-                master_report_result(def, qi, 0, TEST_RESULT_SKIP);
+                dispatcher_report_result(def, qi, 0, TEST_RESULT_SKIP);
                 continue;
             }
 
             if (def->skip) {
-                master_report_result(def, qi, 0, TEST_RESULT_SKIP);
+                dispatcher_report_result(def, qi, 0, TEST_RESULT_SKIP);
                 continue;
             }
 
-            master_dispatch_test(def, qi);
-            if (master.goto_next_phase)
+            dispatcher_dispatch_test(def, qi);
+            if (dispatcher.goto_next_phase)
                 return;
 
-            master_collect_result(0);
-            if (master.goto_next_phase)
+            dispatcher_collect_result(0);
+            if (dispatcher.goto_next_phase)
                 return;
         }
     }
 }
 
 static void
-master_dispatch_test(const test_def_t *def, uint32_t queue_num)
+dispatcher_dispatch_test(const test_def_t *def, uint32_t queue_num)
 {
     worker_t *worker = NULL;
 
-    assert(master.cur_dispatched_tests <= master.max_dispatched_tests);
+    assert(dispatcher.cur_dispatched_tests <= dispatcher.max_dispatched_tests);
 
-    master_yield_to_sigint();
-    if (master.goto_next_phase)
+    dispatcher_yield_to_sigint();
+    if (dispatcher.goto_next_phase)
         return;
 
-    while (master.cur_dispatched_tests == master.max_dispatched_tests) {
-        master_collect_result(0);
-        if (master.goto_next_phase)
+    while (dispatcher.cur_dispatched_tests == dispatcher.max_dispatched_tests) {
+        dispatcher_collect_result(0);
+        if (dispatcher.goto_next_phase)
             return;
     }
 
     while (!worker) {
-        master_yield_to_sigint();
-        if (master.goto_next_phase)
+        dispatcher_yield_to_sigint();
+        if (dispatcher.goto_next_phase)
             return;
 
-        worker = master_get_open_worker();
-        if (master.goto_next_phase)
+        worker = dispatcher_get_open_worker();
+        if (dispatcher.goto_next_phase)
             return;
     }
 
@@ -626,15 +626,15 @@ master_dispatch_test(const test_def_t *def, uint32_t queue_num)
 }
 
 static worker_t *
-master_get_open_worker(void)
+dispatcher_get_open_worker(void)
 {
     for (;;) {
         worker_t *worker = NULL;
 
-        if (master.goto_next_phase)
+        if (dispatcher.goto_next_phase)
             return NULL;
 
-        master_for_each_worker_slot(worker) {
+        dispatcher_for_each_worker_slot(worker) {
             if (worker_is_open(worker)) {
                 return worker;
             }
@@ -642,31 +642,31 @@ master_get_open_worker(void)
 
         switch (runner_opts.isolation_mode) {
         case RUNNER_ISOLATION_MODE_PROCESS:
-            if (master.num_workers < master.max_dispatched_tests) {
-                return master_get_new_worker();
+            if (dispatcher.num_workers < dispatcher.max_dispatched_tests) {
+                return dispatcher_get_new_worker();
             }
             break;
         case RUNNER_ISOLATION_MODE_THREAD:
-            if (master.num_workers == 0) {
-                return master_get_new_worker();
+            if (dispatcher.num_workers == 0) {
+                return dispatcher_get_new_worker();
             }
             break;
         }
 
         // All workers are busy. Wait for a test to finish, then try again.
-        master_collect_result(-1);
+        dispatcher_collect_result(-1);
     }
 }
 
 static worker_t *
-master_get_new_worker(void)
+dispatcher_get_new_worker(void)
 {
     worker_t *worker;
 
-    if (master.goto_next_phase)
+    if (dispatcher.goto_next_phase)
         return NULL;
 
-    worker = master_find_unborn_worker();
+    worker = dispatcher_find_unborn_worker();
     if (!worker)
         return NULL;
 
@@ -698,7 +698,7 @@ master_get_new_worker(void)
 
     if (worker->pid == 0) {
         // Before the worker duplicates stdout and stderr, write only to the
-        // debug log. This avoids corrupting the master's stdout and stderr
+        // debug log. This avoids corrupting the dispatcher's stdout and stderr
         // with interleaved output during concurrent test runs.
         if (!(dup2(worker->stdout_pipe.write_fd, STDOUT_FILENO) != -1 &&
               dup2(worker->stderr_pipe.write_fd, STDERR_FILENO) != -1)) {
@@ -710,7 +710,7 @@ master_get_new_worker(void)
         worker_pipe_finish(&worker->stderr_pipe);
 
         set_sigint_handler(SIG_DFL);
-        master_finish_epoll();
+        dispatcher_finish_epoll();
 
         if (!worker_pipe_become_reader(&worker->dispatch_pipe))
             exit(EXIT_FAILURE);
@@ -738,14 +738,14 @@ master_get_new_worker(void)
     if (fcntl(worker->stderr_pipe.read_fd, F_SETFL, O_NONBLOCK) == -1)
         goto fail;
 
-    if (!master_epoll_add_worker_pipe(&worker->result_pipe, 0))
+    if (!dispatcher_epoll_add_worker_pipe(&worker->result_pipe, 0))
         goto fail;
-    if (!master_epoll_add_worker_pipe(&worker->stdout_pipe, 0))
+    if (!dispatcher_epoll_add_worker_pipe(&worker->stdout_pipe, 0))
         goto fail;
-    if (!master_epoll_add_worker_pipe(&worker->stderr_pipe, 0))
+    if (!dispatcher_epoll_add_worker_pipe(&worker->stderr_pipe, 0))
         goto fail;
 
-    ++master.num_workers;
+    ++dispatcher.num_workers;
 
     return worker;
 
@@ -753,13 +753,13 @@ fail:
     loge("runner failed to initialize worker process");
 
     // If we can't create workers, we should proceed to the result summary.
-    master.goto_next_phase = true;
+    dispatcher.goto_next_phase = true;
 
     return NULL;
 }
 
 static void
-master_cleanup_dead_worker(worker_t *worker)
+dispatcher_cleanup_dead_worker(worker_t *worker)
 {
     int err;
 
@@ -773,14 +773,14 @@ master_cleanup_dead_worker(worker_t *worker)
     // Any remaining tests owned by the worker are lost.
     for (uint32_t i = 0; i < worker->tests.len; ++i) {
         const test_def_t *def = worker->tests.data[i];
-        master_report_result(def, 0, worker->pid, TEST_RESULT_LOST);
+        dispatcher_report_result(def, 0, worker->pid, TEST_RESULT_LOST);
     }
 
-    assert(master.cur_dispatched_tests >= worker->tests.len);
-    master.cur_dispatched_tests -= worker->tests.len;
+    assert(dispatcher.cur_dispatched_tests >= worker->tests.len);
+    dispatcher.cur_dispatched_tests -= worker->tests.len;
     worker->tests.len = 0;
 
-    err = epoll_ctl(master.epoll_fd, EPOLL_CTL_DEL,
+    err = epoll_ctl(dispatcher.epoll_fd, EPOLL_CTL_DEL,
                     worker->result_pipe.read_fd, NULL);
     if (err == -1) {
         loge("runner failed to remove worker process's pipe from epoll "
@@ -794,15 +794,15 @@ master_cleanup_dead_worker(worker_t *worker)
     worker_pipe_finish(&worker->stderr_pipe);
 
     worker->pid = 0;
-    --master.num_workers;
+    --dispatcher.num_workers;
 }
 
 static worker_t *
-master_find_unborn_worker(void)
+dispatcher_find_unborn_worker(void)
 {
     worker_t *worker;
 
-    master_for_each_worker_slot(worker) {
+    dispatcher_for_each_worker_slot(worker) {
         if (!worker->pid) {
             return worker;
         }
@@ -812,22 +812,22 @@ master_find_unborn_worker(void)
 }
 
 static void
-master_collect_result(int timeout_ms)
+dispatcher_collect_result(int timeout_ms)
 {
     struct epoll_event event;
 
-    master_yield_to_sigint();
-    if (master.goto_next_phase)
+    dispatcher_yield_to_sigint();
+    if (dispatcher.goto_next_phase)
         return;
 
-    if (epoll_wait(master.epoll_fd, &event, 1, timeout_ms) <= 0)
+    if (epoll_wait(dispatcher.epoll_fd, &event, 1, timeout_ms) <= 0)
         return;
 
-    master_handle_epoll_event(&event);
+    dispatcher_handle_epoll_event(&event);
 }
 
 static void
-master_report_result(const test_def_t *def, uint32_t queue_num,
+dispatcher_report_result(const test_def_t *def, uint32_t queue_num,
                      pid_t pid, test_result_t result)
 {
     string_t name = STRING_INIT;
@@ -836,10 +836,10 @@ master_report_result(const test_def_t *def, uint32_t queue_num,
     fflush(stdout);
 
     switch (result) {
-    case TEST_RESULT_PASS: master.num_pass++; break;
-    case TEST_RESULT_FAIL: master.num_fail++; break;
-    case TEST_RESULT_SKIP: master.num_skip++; break;
-    case TEST_RESULT_LOST: master.num_lost++; break;
+    case TEST_RESULT_PASS: dispatcher.num_pass++; break;
+    case TEST_RESULT_FAIL: dispatcher.num_fail++; break;
+    case TEST_RESULT_SKIP: dispatcher.num_skip++; break;
+    case TEST_RESULT_LOST: dispatcher.num_lost++; break;
     }
 
     junit_add_result(string_data(&name), result);
@@ -847,7 +847,7 @@ master_report_result(const test_def_t *def, uint32_t queue_num,
 }
 
 static bool
-master_send_packet(worker_t *worker, const dispatch_packet_t *pk)
+dispatcher_send_packet(worker_t *worker, const dispatch_packet_t *pk)
 {
     bool result = false;
     const struct sigaction ignore_sa = { .sa_handler = SIG_IGN };
@@ -855,7 +855,7 @@ master_send_packet(worker_t *worker, const dispatch_packet_t *pk)
     int err;
 
     // If the worker process died, then writing to its dispatch pipe will emit
-    // SIGPIPE. Ignore it, because the master should never die.
+    // SIGPIPE. Ignore it, because the dispatcher should never die.
     err = sigaction(SIGPIPE, &ignore_sa, &old_sa);
     if (err == -1) {
         loge("test runner failed to disable SIGPIPE");
@@ -880,12 +880,12 @@ cleanup:
 }
 
 static void
-master_kill_all_workers(void)
+dispatcher_kill_all_workers(void)
 {
     int err;
     worker_t *worker;
 
-    master_for_each_worker_slot(worker) {
+    dispatcher_for_each_worker_slot(worker) {
         if (!worker->pid)
             continue;
 
@@ -898,34 +898,34 @@ master_kill_all_workers(void)
 }
 
 static void
-master_init_epoll(void)
+dispatcher_init_epoll(void)
 {
     sigset_t sigset;
     int err;
 
-    assert(master.signal_fd == -1);
-    assert(master.epoll_fd == -1);
+    assert(dispatcher.signal_fd == -1);
+    assert(dispatcher.epoll_fd == -1);
 
     sigemptyset(&sigset);
     sigaddset(&sigset, SIGCHLD);
 
-    master.signal_fd = signalfd(-1, &sigset, SFD_CLOEXEC);
-    if (master.signal_fd == -1)
+    dispatcher.signal_fd = signalfd(-1, &sigset, SFD_CLOEXEC);
+    if (dispatcher.signal_fd == -1)
         goto fail;
 
     err = sigprocmask(SIG_BLOCK, &sigset, NULL);
     if (err == -1)
         goto fail;
 
-    master.epoll_fd = epoll_create1(EPOLL_CLOEXEC);
-    if (master.epoll_fd == -1)
+    dispatcher.epoll_fd = epoll_create1(EPOLL_CLOEXEC);
+    if (dispatcher.epoll_fd == -1)
         goto fail;
 
-    err = epoll_ctl(master.epoll_fd, EPOLL_CTL_ADD, master.signal_fd,
+    err = epoll_ctl(dispatcher.epoll_fd, EPOLL_CTL_ADD, dispatcher.signal_fd,
                     &(struct epoll_event) {
                         .events = EPOLLIN,
                         .data = {
-                            .ptr = &master.signal_fd,
+                            .ptr = &dispatcher.signal_fd,
                         },
                     });
     if (err == -1)
@@ -935,19 +935,19 @@ master_init_epoll(void)
 
 fail:
     loge("runner failed to setup epoll fd");
-    master.goto_next_phase = true;
+    dispatcher.goto_next_phase = true;
 }
 
 static void
-master_finish_epoll(void)
+dispatcher_finish_epoll(void)
 {
     sigset_t sigset;
 
-    assert(master.signal_fd >= 0);
-    assert(master.epoll_fd >= 0);
+    assert(dispatcher.signal_fd >= 0);
+    assert(dispatcher.epoll_fd >= 0);
 
-    close(master.signal_fd);
-    close(master.epoll_fd);
+    close(dispatcher.signal_fd);
+    close(dispatcher.epoll_fd);
 
     sigemptyset(&sigset);
     sigaddset(&sigset, SIGCHLD);
@@ -955,13 +955,13 @@ master_finish_epoll(void)
 }
 
 static bool
-master_epoll_add_worker_pipe(worker_pipe_t *pipe, int rw)
+dispatcher_epoll_add_worker_pipe(worker_pipe_t *pipe, int rw)
 {
     int err;
 
     assert(rw == 0 || rw == 1);
 
-    err = epoll_ctl(master.epoll_fd, EPOLL_CTL_ADD, pipe->fd[rw],
+    err = epoll_ctl(dispatcher.epoll_fd, EPOLL_CTL_ADD, pipe->fd[rw],
                     &(struct epoll_event) {
                         .events = EPOLLIN,
                         .data = { .ptr = pipe },
@@ -975,21 +975,21 @@ master_epoll_add_worker_pipe(worker_pipe_t *pipe, int rw)
 }
 
 static void
-master_handle_epoll_event(const struct epoll_event *event)
+dispatcher_handle_epoll_event(const struct epoll_event *event)
 {
-    if (event->data.ptr == &master.signal_fd) {
-        master_handle_signal_event(event);
+    if (event->data.ptr == &dispatcher.signal_fd) {
+        dispatcher_handle_signal_event(event);
     } else {
-        master_handle_pipe_event(event);
+        dispatcher_handle_pipe_event(event);
     }
 }
 
 static void
-master_handle_pipe_event(const struct epoll_event *event)
+dispatcher_handle_pipe_event(const struct epoll_event *event)
 {
     worker_pipe_t *pipe = event->data.ptr;
 
-    assert(event->data.ptr != &master.signal_fd);
+    assert(event->data.ptr != &dispatcher.signal_fd);
 
     switch ((void*) pipe - (void*) pipe->worker) {
     case offsetof(worker_t, result_pipe):
@@ -1008,20 +1008,20 @@ master_handle_pipe_event(const struct epoll_event *event)
 }
 
 static void
-master_handle_signal_event(const struct epoll_event *event)
+dispatcher_handle_signal_event(const struct epoll_event *event)
 {
     struct signalfd_siginfo siginfo;
     int n;
 
-    assert(event->data.ptr == &master.signal_fd);
+    assert(event->data.ptr == &dispatcher.signal_fd);
 
-    n = read(master.signal_fd, &siginfo, sizeof(siginfo));
+    n = read(dispatcher.signal_fd, &siginfo, sizeof(siginfo));
     if (n != sizeof(siginfo))
         log_abort("runner failed to read from signal fd");
 
     switch (siginfo.ssi_signo) {
     case SIGCHLD:
-        master_handle_sigchld();
+        dispatcher_handle_sigchld();
         break;
     default:
         log_abort("runner caught unexpected signal %d", siginfo.ssi_signo);
@@ -1030,7 +1030,7 @@ master_handle_signal_event(const struct epoll_event *event)
 }
 
 static void
-master_handle_sigchld(void)
+dispatcher_handle_sigchld(void)
 {
     pid_t pid;
 
@@ -1040,41 +1040,41 @@ master_handle_sigchld(void)
         worker = find_worker_by_pid(pid);
         if (!worker) {
             loge("runner caught unexpected pid");
-            master.goto_next_phase = true;
+            dispatcher.goto_next_phase = true;
             return;
         }
 
         worker->is_dead = true;
-        master_cleanup_dead_worker(worker);
+        dispatcher_cleanup_dead_worker(worker);
     }
 }
 
 static void
-master_handle_sigint(int sig)
+dispatcher_handle_sigint(int sig)
 {
     assert(sig == SIGINT);
-    atomic_store(&master.sigint_flag, true);
+    atomic_store(&dispatcher.sigint_flag, true);
 }
 
 /// Take actions triggered by any previously received SIGINT.
 static void
-master_yield_to_sigint(void)
+dispatcher_yield_to_sigint(void)
 {
-    if (!atomic_exchange(&master.sigint_flag, false))
+    if (!atomic_exchange(&dispatcher.sigint_flag, false))
         return;
 
-    master_kill_all_workers();
+    dispatcher_kill_all_workers();
 
     // A second SIGINT, if received before the runner resumes dispatching
     // tests, halts the testrun. Give the user a short window in which to send
     // the second SIGINT.
     nanosleep(&(struct timespec) { .tv_nsec = 500000000 }, NULL);
 
-    if (!atomic_exchange(&master.sigint_flag, false))
+    if (!atomic_exchange(&dispatcher.sigint_flag, false))
         return;
 
     // The runner received the second SIGINT. Halt the testrun.
-    master.goto_next_phase = true;
+    dispatcher.goto_next_phase = true;
 }
 
 /// Is the worker accepting new tests?
@@ -1089,7 +1089,7 @@ worker_is_open(const worker_t *worker)
 
     switch (runner_opts.isolation_mode) {
     case RUNNER_ISOLATION_MODE_PROCESS:
-        // The master sends each worker exactly one test.
+        // The dispatcher sends each worker exactly one test.
         return worker->lifetime_test_count == 0;
     case RUNNER_ISOLATION_MODE_THREAD:
         return worker->tests.len < ARRAY_LENGTH(worker->tests.data);
@@ -1120,7 +1120,7 @@ worker_insert_test(worker_t *worker, const test_def_t *def)
         return false;
 
     worker->tests.data[worker->tests.len++] = def;
-    ++master.cur_dispatched_tests;
+    ++dispatcher.cur_dispatched_tests;
 
     return true;
 }
@@ -1137,10 +1137,10 @@ worker_rm_test(worker_t *worker, const test_def_t *def)
     }
 
     assert(worker->tests.len >= 1);
-    assert(master.cur_dispatched_tests >= 1);
+    assert(dispatcher.cur_dispatched_tests >= 1);
 
     --worker->tests.len;
-    --master.cur_dispatched_tests;
+    --dispatcher.cur_dispatched_tests;
 
     memmove(worker->tests.data + i, worker->tests.data + i + 1,
             worker->tests.len);
@@ -1161,7 +1161,7 @@ worker_start_test(worker_t *worker, const test_def_t *def,
     if (!worker->pid)
         return false;
 
-    if (master.cur_dispatched_tests >= master.max_dispatched_tests)
+    if (dispatcher.cur_dispatched_tests >= dispatcher.max_dispatched_tests)
         return false;
 
     if (!worker_insert_test(worker, def))
@@ -1169,7 +1169,7 @@ worker_start_test(worker_t *worker, const test_def_t *def,
 
     log_tag("start", worker->pid, "%s.q%d", def->name, 0);
 
-    if (!master_send_packet(worker, &pk)) {
+    if (!dispatcher_send_packet(worker, &pk)) {
         worker_rm_test(worker, def);
         return false;
     }
@@ -1178,11 +1178,11 @@ worker_start_test(worker_t *worker, const test_def_t *def,
 
     switch (runner_opts.isolation_mode) {
     case RUNNER_ISOLATION_MODE_PROCESS:
-        // The master sends each worker exactly one test.
+        // The dispatcher sends each worker exactly one test.
         worker_send_sentinel(worker);
         break;
     case RUNNER_ISOLATION_MODE_THREAD:
-        // The master may send the worker multiple tests. The master will tell
+        // The dispatcher may send the worker multiple tests. The dispatcher will tell
         // the worker to expect no more tests by later sending it a NULL test.
         break;
     }
@@ -1198,7 +1198,7 @@ worker_send_sentinel(worker_t *worker)
     if (worker->recvd_sentinel || worker->is_dead)
         return;
 
-    master_send_packet(worker, &(dispatch_packet_t) { .test_def = NULL });
+    dispatcher_send_packet(worker, &(dispatch_packet_t) { .test_def = NULL });
     worker->recvd_sentinel = true;
 }
 
@@ -1211,13 +1211,13 @@ worker_drain_result_pipe(worker_t *worker)
         static_assert(sizeof(pk) <= PIPE_BUF, "result packets will not be "
                       "read and written atomically");
 
-        // To avoid deadlock between master and worker, this read must be
+        // To avoid deadlock between dispatcher and worker, this read must be
         // non-blocking.
         if (read(worker->result_pipe.read_fd, &pk, sizeof(pk)) != sizeof(pk))
             return;
 
         worker_rm_test(worker, pk.test_def);
-        master_report_result(pk.test_def, pk.queue_num, worker->pid,
+        dispatcher_report_result(pk.test_def, pk.queue_num, worker->pid,
                              pk.result);
     }
 }
@@ -1227,7 +1227,7 @@ find_worker_by_pid(pid_t pid)
 {
     worker_t *worker;
 
-    master_for_each_worker_slot(worker) {
+    dispatcher_for_each_worker_slot(worker) {
         if (worker->pid == pid) {
             return worker;
         }
@@ -1309,7 +1309,7 @@ worker_pipe_drain_to_fd(worker_pipe_t *pipe, int fd)
         ssize_t nread = 0;
         ssize_t nwrite = 0;
 
-        if (master.goto_next_phase)
+        if (dispatcher.goto_next_phase)
             return;
 
         nread = read(pipe->read_fd, buf, sizeof(buf));
@@ -1317,7 +1317,7 @@ worker_pipe_drain_to_fd(worker_pipe_t *pipe, int fd)
             return;
 
         while (nread > 0) {
-            if (master.goto_next_phase)
+            if (dispatcher.goto_next_phase)
                 return;
 
             nwrite = write(fd, buf, nread);

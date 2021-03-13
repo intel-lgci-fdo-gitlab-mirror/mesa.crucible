@@ -49,8 +49,8 @@ with "self.".  As a corollary, special tests do not match the pattern "*".
 OPTIONS
 -------
 --fork, --no-fork [default: enabled]::
-    Run tests outside or inside the test runner's master process. With forking
-    enabled, the test runner's master process is protected from test crashes.
+    Run tests outside or inside the test runner's dispatcher process. With forking
+    enabled, the test runner's dispatcher process is protected from test crashes.
     However, forking also makes debugging tests more difficult.
 
 --no-cleanup::
