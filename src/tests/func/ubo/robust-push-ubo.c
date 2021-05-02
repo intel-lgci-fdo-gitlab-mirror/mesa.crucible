@@ -28,32 +28,78 @@
 #define UBO_BIND_SIZE (UBO_PAD_SIZE + 4 * 4)
 
 static VkPipeline
-create_pipeline(VkDevice device, VkPipelineLayout pipeline_layout)
+create_pipeline(VkDevice device,
+                VkShaderStageFlagBits ubo_stage,
+                VkPipelineLayout pipeline_layout)
 {
-    VkShaderModule vs = qoCreateShaderModuleGLSL(t_device, VERTEX,
-        void main()
-        {
-            vec2 pos = vec2(float(gl_VertexIndex & 1),
-                            float(gl_VertexIndex >> 1));
-            gl_Position = vec4(vec2(-1) + 2 * pos, 0.0f, 1.0f);
-        }
-    );
+    VkShaderModule vs, fs;
+    switch (ubo_stage) {
+    case VK_SHADER_STAGE_VERTEX_BIT:
+        vs = qoCreateShaderModuleGLSL(t_device, VERTEX,
+            layout(location = 0) out vec4 v_color;
 
-    VkShaderModule fs = qoCreateShaderModuleGLSL(t_device, FRAGMENT,
-        layout(location = 0) out vec4 f_color;
+            layout(set = 0, binding = 0) uniform block1 {
+                // Ensure that the two colors are in different 32B blocks
+                vec4 pad[15];
+                vec4 color1;
+                vec4 color2;
+            } u;
 
-        layout(set = 0, binding = 0) uniform block1 {
-            // Ensure that the two colors are in different 32B blocks
-            vec4 pad[15];
-            vec4 color1;
-            vec4 color2;
-        } u;
+            void main()
+            {
+                v_color = u.color1 + u.color2;
 
-        void main()
-        {
-            f_color = u.color1 + u.color2;
-        }
-    );
+                vec2 pos = vec2(float(gl_VertexIndex & 1),
+                                float(gl_VertexIndex >> 1));
+                gl_Position = vec4(vec2(-1) + 2 * pos, 0.0f, 1.0f);
+            }
+        );
+        break;
+
+    case VK_SHADER_STAGE_FRAGMENT_BIT:
+        fs = qoCreateShaderModuleGLSL(t_device, FRAGMENT,
+            layout(location = 0) out vec4 f_color;
+
+            layout(set = 0, binding = 0) uniform block1 {
+                // Ensure that the two colors are in different 32B blocks
+                vec4 pad[15];
+                vec4 color1;
+                vec4 color2;
+            } u;
+
+            void main()
+            {
+                f_color = u.color1 + u.color2;
+            }
+        );
+        break;
+
+    default:
+        cru_unreachable;
+    }
+
+    if (ubo_stage != VK_SHADER_STAGE_VERTEX_BIT) {
+        vs = qoCreateShaderModuleGLSL(t_device, VERTEX,
+            void main()
+            {
+                vec2 pos = vec2(float(gl_VertexIndex & 1),
+                                float(gl_VertexIndex >> 1));
+                gl_Position = vec4(vec2(-1) + 2 * pos, 0.0f, 1.0f);
+            }
+        );
+    }
+
+    if (ubo_stage != VK_SHADER_STAGE_FRAGMENT_BIT) {
+        fs = qoCreateShaderModuleGLSL(t_device, FRAGMENT,
+            layout(location = 0) in vec4 v_color;
+            layout(location = 0) out vec4 f_color;
+
+            void main()
+            {
+                f_color = v_color;
+            }
+        );
+    }
 
     VkPipelineVertexInputStateCreateInfo vi_create_info = {
         .sType = VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO,
@@ -120,7 +166,7 @@ create_buffer(uint32_t bind_offset)
 }
 
 static void
-test(void)
+test(VkShaderStageFlagBits ubo_stage)
 {
     const uint32_t bind_offset = 512;
 
@@ -131,7 +177,7 @@ test(void)
                     .binding = 0,
                     .descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
                     .descriptorCount = 1,
-                    .stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT,
+                    .stageFlags = ubo_stage,
                     .pImmutableSamplers = NULL,
                 },
             });
@@ -140,7 +186,7 @@ test(void)
         .setLayoutCount = 1,
         .pSetLayouts = &set_layout);
 
-    VkPipeline pipeline = create_pipeline(t_device, pipeline_layout);
+    VkPipeline pipeline = create_pipeline(t_device, ubo_stage, pipeline_layout);
 
     VkBuffer buffer = create_buffer(bind_offset);
 
@@ -190,15 +236,34 @@ test(void)
     qoQueueSubmit(t_queue, 1, &t_cmd_buffer, VK_NULL_HANDLE);
 }
 
+static void
+test_vs(void)
+{
+    test(VK_SHADER_STAGE_VERTEX_BIT);
+}
+
 test_define {
-    .name = "func.ubo.robust-push-ubo",
-    .start = test,
+    .name = "func.ubo.robust-push-ubo.vs",
+    .start = test_vs,
     .image_filename = "32x32-green.ref.png",
     .robust_buffer_access = true,
 };
 
 static void
-test_dynamic(void)
+test_fs(void)
+{
+    test(VK_SHADER_STAGE_FRAGMENT_BIT);
+}
+
+test_define {
+    .name = "func.ubo.robust-push-ubo.fs",
+    .start = test_fs,
+    .image_filename = "32x32-green.ref.png",
+    .robust_buffer_access = true,
+};
+
+static void
+test_dynamic(VkShaderStageFlagBits ubo_stage)
 {
     const uint32_t bind_offset = 512;
 
@@ -218,7 +283,7 @@ test_dynamic(void)
         .setLayoutCount = 1,
         .pSetLayouts = &set_layout);
 
-    VkPipeline pipeline = create_pipeline(t_device, pipeline_layout);
+    VkPipeline pipeline = create_pipeline(t_device, ubo_stage, pipeline_layout);
 
     VkBuffer buffer = create_buffer(bind_offset);
 
@@ -268,9 +333,28 @@ test_dynamic(void)
     qoQueueSubmit(t_queue, 1, &t_cmd_buffer, VK_NULL_HANDLE);
 }
 
+static void
+test_dynamic_vs(void)
+{
+    test_dynamic(VK_SHADER_STAGE_VERTEX_BIT);
+}
+
 test_define {
-    .name = "func.ubo.robust-push-ubo-dynamic",
-    .start = test_dynamic,
+    .name = "func.ubo.robust-push-ubo-dynamic.vs",
+    .start = test_dynamic_vs,
+    .image_filename = "32x32-green.ref.png",
+    .robust_buffer_access = true,
+};
+
+static void
+test_dynamic_fs(void)
+{
+    test_dynamic(VK_SHADER_STAGE_FRAGMENT_BIT);
+}
+
+test_define {
+    .name = "func.ubo.robust-push-ubo-dynamic.fs",
+    .start = test_dynamic_fs,
     .image_filename = "32x32-green.ref.png",
     .robust_buffer_access = true,
 };
