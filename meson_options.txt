@@ -18,42 +18,10 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-man_sources = [
-  'crucible-bootstrap.1.txt',
-  'crucible-dump-image.1.txt',
-  'crucible-help.1.txt',
-  'crucible-tutorial.7.txt',
-  'crucible-ls-tests.1.txt',
-  'crucible-run.1.txt',
-  'crucible-version.1.txt',
-]
-
-_man_pages = get_option('man_pages')
-
-if _man_pages == 'disabled'
-  with_man_pages = false
-else
-  a2x = find_program('a2x', required : _man_pages == 'enabled')
-  with_man_pages = a2x.found()
-endif
-
-man_pages = []
-
-foreach a : man_sources
-  man_pages += custom_target(
-    a,
-    input : a,
-    output : a,
-    command : ['cp', '@INPUT@', '@OUTPUT@'],
-  )
-
-  if with_man_pages
-    dst = a.substring(0, -4)
-    man_pages += custom_target(
-      dst,
-      input : a,
-      output : dst,
-      command : [a2x, '--format', 'manpage', '-D', '@OUTDIR@', '@INPUT@'],
-    )
-  endif
-endforeach
+option(
+  'man_pages',
+  type : 'combo',
+  value : 'auto',
+  choices : ['auto', 'disabled', 'enabled'],
+  description : 'enable support for man pages'
+)
