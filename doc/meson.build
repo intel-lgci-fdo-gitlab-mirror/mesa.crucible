@@ -30,12 +30,6 @@ man_sources = [
 
 a2x = find_program('a2x')
 
-txt_to_man = generator(
-  a2x,
-  output : '@BASENAME@',
-  arguments : ['--format', 'manpage', '-D', '@BUILD_DIR@', '@INPUT@'],
-)
-
 man_pages = []
 
 foreach a : man_sources
