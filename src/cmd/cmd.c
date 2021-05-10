@@ -91,14 +91,33 @@ cru_open_crucible_manpage(int volume, const char *suffix)
     path_append_cstr(&path, "doc");
     path_appendf(&path, "crucible-%s.%d", suffix, volume);
 
-    char *man_args[] = {"man", "--local-file", string_data(&path), NULL};
+    if (access(string_data(&path), R_OK) == F_OK) {
+        char *man_args[] = {"man", "--local-file", string_data(&path), NULL};
 
-    err = execvp(man_args[0], man_args);
-    if (err) {
-        loge("exec failed: %s %s %s",
+        err = execvp(man_args[0], man_args);
+        if (err) {
+            loge("exec failed: %s %s %s",
                  man_args[0], man_args[1], man_args[2]);
-        exit(1);
+            exit(1);
+        }
     }
+
+    // Add .txt to display plain text file with less
+    string_append_cstr(&path, ".txt");
+
+    if (access(string_data(&path), R_OK) == F_OK) {
+        char *less_args[] = {"less", "-FSi", string_data(&path), NULL};
+
+        err = execvp(less_args[0], less_args);
+        if (err) {
+            loge("exec failed: %s %s %s",
+                 less_args[0], less_args[1], less_args[2]);
+            exit(1);
+        }
+    }
+
+    loge("man page data not found for: %s", suffix);
+    exit(1);
 
     cru_unreachable;
 }
