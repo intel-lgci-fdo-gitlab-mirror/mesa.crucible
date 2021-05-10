@@ -33,6 +33,13 @@ a2x = find_program('a2x')
 man_pages = []
 
 foreach a : man_sources
+  man_pages += custom_target(
+    a,
+    input : a,
+    output : a,
+    command : ['cp', '@INPUT@', '@OUTPUT@'],
+  )
+
   dst = a.substring(0, -4)
   man_page = custom_target(
     dst,
