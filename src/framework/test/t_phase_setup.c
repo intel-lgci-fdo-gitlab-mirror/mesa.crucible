@@ -531,12 +531,21 @@ t_setup_vulkan(void)
     VkDeviceQueueCreateInfo *qci = calloc(t->vk.queue_count, sizeof(*qci));
     t_assert(qci);
 
-    const float priority = 1.0f;
+    uint32_t maxQueueCount = 0;
+    for (uint32_t i = 0; i < t->vk.queue_family_count; i++)
+        maxQueueCount = MAX(maxQueueCount, t->vk.queue_family_props[i].queueCount);
+
+    float *priorities = malloc(maxQueueCount * sizeof(priorities[0]));
+    t_assert(priorities);
+
+    for (uint32_t i = 0; i < maxQueueCount; ++i)
+        priorities[i] = 1.0f;
+
     for (uint32_t i = 0; i < t->vk.queue_family_count; i++) {
         qci[i].sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
         qci[i].queueFamilyIndex = i;
         qci[i].queueCount = t->vk.queue_family_props[i].queueCount;
-        qci[i].pQueuePriorities = &priority;
+        qci[i].pQueuePriorities = priorities;
     }
 
     VkPhysicalDeviceFeatures pdf;
@@ -554,6 +563,7 @@ t_setup_vulkan(void)
         }, NULL, &t->vk.device);
     free(qci);
     free(ext_names);
+    free(priorities);
     t_assert(res == VK_SUCCESS);
     t_cleanup_push_vk_device(t->vk.device, NULL);
 
