@@ -51,8 +51,7 @@ run_simple_pipeline(VkShaderModule fs, void *push_constants,
                         .layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
                     },
                 },
-                .preserveAttachmentCount = 1,
-                .pPreserveAttachments = (uint32_t[]) { 0 },
+                .preserveAttachmentCount = 0,
             }
         });
 
