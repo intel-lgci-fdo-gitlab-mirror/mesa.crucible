@@ -761,6 +761,7 @@ test_opaque_fd_no_sync(void)
     logi("All compute batches queued\n");
 
     check_memory_contents(&ctx1, cpu_data, mem1, true, true);
+    vkQueueWaitIdle(ctx2.queue);
 }
 
 test_define {
@@ -914,6 +915,7 @@ test_sync_fd(void)
     logi("All compute batches queued\n");
 
     check_memory_contents(&ctx1, cpu_data, mem1, true, false);
+    vkQueueWaitIdle(ctx2.queue);
 }
 
 test_define {
