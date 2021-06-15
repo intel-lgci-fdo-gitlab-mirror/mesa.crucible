@@ -160,6 +160,9 @@ struct test {
         uint32_t queue_count;
         VkQueue *queue;
 
+        /// The queue family for each of element of the queue array.
+        uint32_t *queue_family;
+
         /// First queue with both graphics and compute support. -1 if
         /// none exist.
         int graphics_and_compute_queue;

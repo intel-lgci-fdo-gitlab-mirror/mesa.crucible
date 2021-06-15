@@ -85,6 +85,15 @@ __t_queue(void)
     return &t->vk.queue[t_queue_num];
 }
 
+const uint32_t *
+__t_queue_family(void)
+{
+    ASSERT_TEST_IN_MAJOR_PHASE;
+    GET_CURRENT_TEST(t);
+
+    return &t->vk.queue_family[t_queue_num];
+}
+
 const VkQueue *
 __t_queue_idx(int q)
 {
@@ -92,6 +101,15 @@ __t_queue_idx(int q)
     GET_CURRENT_TEST(t);
 
     return &t->vk.queue[q];
+}
+
+const uint32_t *
+__t_queue_family_idx(int q)
+{
+    ASSERT_TEST_IN_MAJOR_PHASE;
+    GET_CURRENT_TEST(t);
+
+    return &t->vk.queue_family[q];
 }
 
 const VkDescriptorPool *

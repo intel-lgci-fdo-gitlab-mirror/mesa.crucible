@@ -574,11 +574,15 @@ t_setup_vulkan(void)
     t->vk.queue = calloc(t->vk.queue_count, sizeof(*t->vk.queue));
     t_assert(t->vk.queue);
     t_cleanup_push_free(t->vk.queue);
+    t->vk.queue_family = calloc(t->vk.queue_count, sizeof(*t->vk.queue_family));
+    t_assert(t->vk.queue_family);
+    t_cleanup_push_free(t->vk.queue_family);
 
     for (uint32_t qfam = 0, q = 0; qfam < t->vk.queue_family_count; qfam++) {
         uint32_t queues_in_fam = t->vk.queue_family_props[qfam].queueCount;
         for (uint32_t j = 0; j < queues_in_fam; j++) {
             vkGetDeviceQueue(t->vk.device, qfam, j, &t->vk.queue[q + j]);
+            t->vk.queue_family[q + j] = qfam;
         }
         q += queues_in_fam;
     }

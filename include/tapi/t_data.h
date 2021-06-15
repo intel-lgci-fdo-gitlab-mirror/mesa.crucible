@@ -41,7 +41,9 @@ typedef struct cru_image cru_image_t;
 #define t_physical_dev_mem_props  (__t_physical_dev_mem_props())
 #define t_device (*__t_device())
 #define t_queue (*__t_queue())
+#define t_queue_family (*__t_queue_family())
 #define t_queue_idx(q) (*__t_queue_idx(q))
+#define t_queue_family_idx(q) (*__t_queue_family_idx(q))
 #define t_descriptor_pool (*__t_descriptor_pool())
 #define t_cmd_pool (*__t_cmd_pool())
 #define t_cmd_pool_idx(q) (*__t_cmd_pool_idx(q))
@@ -70,7 +72,9 @@ const VkPhysicalDeviceFeatures *__t_physical_dev_features(void);
 const VkPhysicalDeviceProperties *__t_physical_dev_props(void);
 const VkPhysicalDeviceMemoryProperties *__t_physical_dev_mem_props(void);
 const VkQueue *__t_queue(void);
+const uint32_t *__t_queue_family(void);
 const VkQueue *__t_queue_idx(int q);
+const uint32_t *__t_queue_family_idx(int q);
 const VkDescriptorPool *__t_descriptor_pool(void);
 const VkCommandPool *__t_cmd_pool(void);
 const VkCommandPool *__t_cmd_pool_idx(int q);
