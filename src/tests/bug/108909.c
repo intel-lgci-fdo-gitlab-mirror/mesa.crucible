@@ -63,6 +63,12 @@ test(void)
                                                .queryType = VK_QUERY_TYPE_TIMESTAMP,
                                                .queryCount = ARRAY_LENGTH(initialData));
 
+#define GET_FUNCTION_PTR(name, device)                                  \
+    PFN_vk##name name = (PFN_vk##name)vkGetDeviceProcAddr(device, "vk"#name)
+    GET_FUNCTION_PTR(ResetQueryPool, t_device);
+#undef GET_FUNCTION_PTR
+
+    ResetQueryPool(t_device, pool, 0, ARRAY_LENGTH(initialData));
 
     /* vkCmdCopyQueryPoolResults should be ordered with regard to vkCmdCopyBuffer. */
     vkCmdWriteTimestamp(t_cmd_buffer, VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT, pool, 0);
@@ -102,4 +108,5 @@ test_define {
     .name = "bug.108909",
     .start = test,
     .no_image = true,
+    .api_version = VK_MAKE_VERSION(1, 2, 0), // For vkResetQueuePool
 };
