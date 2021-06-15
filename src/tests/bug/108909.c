@@ -78,6 +78,23 @@ test(void)
     vkCmdWriteTimestamp(t_cmd_buffer, VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT, pool, 2);
     vkCmdWriteTimestamp(t_cmd_buffer, VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT, pool, 3);
 
+    vkCmdPipelineBarrier(t_cmd_buffer,
+                         VK_PIPELINE_STAGE_TRANSFER_BIT,
+                         VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT,
+                         0,
+                         0, NULL,
+                         1, &(VkBufferMemoryBarrier) {
+                             .sType = VK_STRUCTURE_TYPE_BUFFER_MEMORY_BARRIER,
+                             .srcAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT,
+                             .dstAccessMask = VK_ACCESS_MEMORY_WRITE_BIT,
+                             .srcQueueFamilyIndex = t_queue_family,
+                             .dstQueueFamilyIndex = t_queue_family,
+                             .buffer = resultBuffer,
+                             .offset = 0,
+                             .size = sizeof(initialData),
+                         },
+                         0, NULL);
+
     vkCmdCopyQueryPoolResults(t_cmd_buffer, pool, /*firstQuery*/ 0, /*queryCount*/ 4,
                               resultBuffer, /*dstBufferOffset*/ 0, sizeof(uint64_t),
                               VK_QUERY_RESULT_64_BIT | VK_QUERY_RESULT_WAIT_BIT);
@@ -92,6 +109,8 @@ test(void)
     for (unsigned i = 0; i < ARRAY_LENGTH(initialData); i++) {
         printf("timestamp%i = 0x%016" PRIx64 "\n",
                i, copiedResults[i]);
+    }
+    for (unsigned i = 0; i < ARRAY_LENGTH(initialData); i++) {
         if (copiedResults[i] == initialData[i]) {
             printf("Got unexpected timestamp (index=%i) 0x%016" PRIx64 "\n",
                    i, copiedResults[i]);
