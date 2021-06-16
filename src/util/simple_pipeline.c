@@ -128,7 +128,8 @@ run_simple_pipeline(VkShaderModule fs, void *push_constants,
                                  .usage = VK_BUFFER_USAGE_VERTEX_BUFFER_BIT);
 
     VkDeviceMemory vb_mem = qoAllocBufferMemory(t_device, vb,
-        .properties = VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
+        .properties = VK_MEMORY_PROPERTY_HOST_COHERENT_BIT |
+                      VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT);
     qoBindBufferMemory(t_device, vb, vb_mem, 0);
 
     void *vb_map = qoMapMemory(t_device, vb_mem, 0, sizeof(vertices), 0);
@@ -222,7 +223,8 @@ void run_simple_compute_pipeline(VkShaderModule cs,
             .usage = VK_BUFFER_USAGE_STORAGE_BUFFER_BIT);
 
         storage_mem = qoAllocBufferMemory(t_device, storage_buf,
-            .properties = VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
+            .properties = VK_MEMORY_PROPERTY_HOST_COHERENT_BIT |
+                          VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT);
         qoBindBufferMemory(t_device, storage_buf, storage_mem, 0);
 
         // Copy storage to buffer.
