@@ -132,7 +132,7 @@ qoCreateGraphicsPipeline(VkDevice device,
         pipeline_info.pColorBlendState = &cb_info;
     }
 
-    if (pipeline_info.pDynamicState == NULL) {
+    if (pipeline_info.pDynamicState == NULL && extra->dynamicStates) {
         int count = 0;
         for (int s = 0; s < 32; s++) {
             if (extra->dynamicStates & (1u << s))
