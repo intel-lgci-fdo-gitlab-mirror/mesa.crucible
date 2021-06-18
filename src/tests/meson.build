@@ -43,6 +43,7 @@ test_sources_without_spirv = [
   'stress/buffer_limit.c',
   'self/concurrent-output.c',
   'func/calibrated-timestamps.c',
+  'func/sync/semaphore.c',
 ]
 
 test_sources_with_spirv = [
