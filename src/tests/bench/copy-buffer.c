@@ -180,7 +180,7 @@ test_large_copy(void)
                 .size = buffer_size,
             }, 0, NULL);
 
-        vkCmdWriteTimestamp(cmd_buffer, VK_PIPELINE_STAGE_ALL_GRAPHICS_BIT,
+        vkCmdWriteTimestamp(cmd_buffer, VK_PIPELINE_STAGE_TRANSFER_BIT,
                             query, 1);
 
         qoEndCommandBuffer(cmd_buffer);
@@ -219,4 +219,5 @@ test_define {
     .name = "bench.copy-buffer",
     .start = test_large_copy,
     .no_image = true,
+    .queue_setup = QUEUE_SETUP_TRANSFER,
 };
