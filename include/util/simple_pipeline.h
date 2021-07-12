@@ -53,6 +53,12 @@ struct simple_mesh_pipeline_options {
     void *storage;
     size_t storage_size;
 
+    void *uniform_data;
+    size_t uniform_data_size;
+
+    void *push_constants;
+    size_t push_constants_size;
+
     // Defaults to passthrough location 0 to color if not specified.
     VkShaderModule fs;
 

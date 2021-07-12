@@ -66,6 +66,8 @@ test_sources_with_spirv = [
   'func/compute-shared-memory.c',
   'func/compute-subgroup-quad.c',
   'func/mesh/basic.c',
+  'func/mesh/buffers.c',
+  'func/mesh/push-constants.c',
   'func/mesh/workgroup-id.c',
   'func/miptree/miptree.c',
   'func/multiview.c',

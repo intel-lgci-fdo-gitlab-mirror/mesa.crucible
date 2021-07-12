@@ -345,47 +345,40 @@ run_simple_mesh_pipeline(VkShaderModule mesh,
         });
 
     bool has_storage = opts.storage_size > 0;
+    bool has_uniform = opts.uniform_data_size > 0;
+    bool has_push_constants = opts.push_constants_size > 0;
 
-    VkDescriptorSetLayout set_layout = qoCreateDescriptorSetLayout(t_device,
-        .bindingCount = 1,
-        .pBindings = (VkDescriptorSetLayoutBinding[]) {
-            {
-                .binding = 0,
+    VkDescriptorSetLayoutBinding vkDescriptorSetLayoutBinding[2];
+    VkDescriptorSetLayout set_layouts[2];
+    VkDescriptorSet sets[2];
+    VkDeviceMemory storage_mem;
+
+    VkWriteDescriptorSet vkWriteDescriptorSet[2];
+    VkDescriptorBufferInfo vkDescriptorBufferInfo[2];
+
+    uint32_t descSetCount = 0;
+    if (has_storage) {
+        vkDescriptorSetLayoutBinding[descSetCount] =
+        (VkDescriptorSetLayoutBinding) {
+                .binding = descSetCount,
                 .descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER,
                 .descriptorCount = 1,
                 .stageFlags = VK_SHADER_STAGE_TASK_BIT_NV |
                               VK_SHADER_STAGE_MESH_BIT_NV |
                               VK_SHADER_STAGE_FRAGMENT_BIT,
                 .pImmutableSamplers = NULL,
-            },
-        });
+        };
 
-    VkPipelineLayout pipeline_layout = qoCreatePipelineLayout(t_device,
-        .setLayoutCount = has_storage ? 1 : 0,
-        .pSetLayouts = has_storage ? &set_layout : NULL);
+        set_layouts[descSetCount] = qoCreateDescriptorSetLayout(t_device,
+            .bindingCount = 1,
+            .pBindings = &vkDescriptorSetLayoutBinding[descSetCount]
+        );
 
-    VkPipeline pipeline = qoCreateGraphicsPipeline(t_device, t_pipeline_cache,
-        &(QoExtraGraphicsPipelineCreateInfo) {
-            QO_EXTRA_GRAPHICS_PIPELINE_CREATE_INFO_DEFAULTS,
-            .taskShader = opts.task,
-            .meshShader = mesh,
-            .fragmentShader = opts.fs,
-            .pNext =
-        &(VkGraphicsPipelineCreateInfo) {
-            .sType = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO,
-            .renderPass = pass,
-            .layout = pipeline_layout,
-            .subpass = 0,
-        }});
+        sets[descSetCount] = qoAllocateDescriptorSet(t_device,
+            .descriptorPool = t_descriptor_pool,
+            .pSetLayouts = &set_layouts[descSetCount]);
 
-    VkDescriptorSet set = qoAllocateDescriptorSet(t_device,
-        .descriptorPool = t_descriptor_pool,
-        .pSetLayouts = &set_layout);
-
-    VkBuffer storage_buf;
-    VkDeviceMemory storage_mem;
-    if (has_storage) {
-        storage_buf = qoCreateBuffer(t_device,
+        VkBuffer storage_buf = qoCreateBuffer(t_device,
             .size = opts.storage_size,
             .usage = VK_BUFFER_USAGE_STORAGE_BUFFER_BIT);
 
@@ -402,24 +395,112 @@ run_simple_mesh_pipeline(VkShaderModule mesh,
         memcpy(storage_ptr, opts.storage, opts.storage_size);
         vkUnmapMemory(t_device, storage_mem);
 
-        vkUpdateDescriptorSets(t_device,
-            /*writeCount*/ 1,
-            (VkWriteDescriptorSet[]) {
-                {
-                    .sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET,
-                    .dstSet = set,
-                    .dstBinding = 0,
-                    .dstArrayElement = 0,
-                    .descriptorCount = 1,
-                    .descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER,
-                    .pBufferInfo = &(VkDescriptorBufferInfo) {
-                        .buffer = storage_buf,
-                        .offset = 0,
-                        .range = opts.storage_size,
-                    },
-                },
-            }, 0, NULL);
+        vkDescriptorBufferInfo[descSetCount] = (VkDescriptorBufferInfo) {
+            .buffer = storage_buf,
+            .offset = 0,
+            .range = opts.storage_size,
+        };
+
+        vkWriteDescriptorSet[descSetCount] = (VkWriteDescriptorSet) {
+                .sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET,
+                .dstSet = sets[descSetCount],
+                .dstBinding = descSetCount,
+                .dstArrayElement = 0,
+                .descriptorCount = 1,
+                .descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER,
+                .pBufferInfo = &vkDescriptorBufferInfo[descSetCount],
+            };
+
+        descSetCount++;
     }
+
+    if (has_uniform) {
+        vkDescriptorSetLayoutBinding[descSetCount] =
+        (VkDescriptorSetLayoutBinding) {
+                .binding = descSetCount,
+                .descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
+                .descriptorCount = 1,
+                .stageFlags = VK_SHADER_STAGE_TASK_BIT_NV |
+                              VK_SHADER_STAGE_MESH_BIT_NV |
+                              VK_SHADER_STAGE_FRAGMENT_BIT,
+                .pImmutableSamplers = NULL,
+        };
+
+        set_layouts[descSetCount] = qoCreateDescriptorSetLayout(t_device,
+            .bindingCount = 1,
+            .pBindings = &vkDescriptorSetLayoutBinding[descSetCount]
+        );
+
+        sets[descSetCount] = qoAllocateDescriptorSet(t_device,
+            .descriptorPool = t_descriptor_pool,
+            .pSetLayouts = &set_layouts[descSetCount]);
+
+        VkBuffer uniform_buf = qoCreateBuffer(t_device,
+            .size = opts.uniform_data_size,
+            .usage = VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT);
+
+        VkDeviceMemory uniform_mem = qoAllocBufferMemory(t_device, uniform_buf,
+            .properties = VK_MEMORY_PROPERTY_HOST_COHERENT_BIT |
+                          VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT);
+        qoBindBufferMemory(t_device, uniform_buf, uniform_mem, 0);
+
+        // Copy uniform to buffer.
+        void *uniform_ptr = NULL;
+        VkResult result = vkMapMemory(t_device, uniform_mem, 0,
+                                      opts.uniform_data_size, 0, &uniform_ptr);
+        t_assert(result == VK_SUCCESS);
+        memcpy(uniform_ptr, opts.uniform_data, opts.uniform_data_size);
+        vkUnmapMemory(t_device, uniform_mem);
+
+        vkDescriptorBufferInfo[descSetCount] = (VkDescriptorBufferInfo) {
+            .buffer = uniform_buf,
+            .offset = 0,
+            .range = opts.uniform_data_size,
+        };
+
+        vkWriteDescriptorSet[descSetCount] = (VkWriteDescriptorSet) {
+                .sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET,
+                .dstSet = sets[descSetCount],
+                .dstBinding = descSetCount,
+                .dstArrayElement = 0,
+                .descriptorCount = 1,
+                .descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
+                .pBufferInfo = &vkDescriptorBufferInfo[descSetCount],
+            };
+
+        descSetCount++;
+    }
+
+    VkPushConstantRange push_range;
+    if (has_push_constants) {
+        push_range.stageFlags = VK_SHADER_STAGE_MESH_BIT_NV;
+        push_range.offset = 0;
+        push_range.size = opts.push_constants_size;
+    }
+
+    VkPipelineLayout pipeline_layout = qoCreatePipelineLayout(t_device,
+        .setLayoutCount = descSetCount,
+        .pSetLayouts = descSetCount ? set_layouts : NULL,
+        .pushConstantRangeCount = has_push_constants ? 1 : 0,
+        .pPushConstantRanges = has_push_constants ? &push_range : NULL
+    );
+
+    VkPipeline pipeline = qoCreateGraphicsPipeline(t_device, t_pipeline_cache,
+        &(QoExtraGraphicsPipelineCreateInfo) {
+            QO_EXTRA_GRAPHICS_PIPELINE_CREATE_INFO_DEFAULTS,
+            .taskShader = opts.task,
+            .meshShader = mesh,
+            .fragmentShader = opts.fs,
+            .pNext =
+        &(VkGraphicsPipelineCreateInfo) {
+            .sType = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO,
+            .renderPass = pass,
+            .layout = pipeline_layout,
+            .subpass = 0,
+        }});
+
+    if (descSetCount)
+        vkUpdateDescriptorSets(t_device, descSetCount, vkWriteDescriptorSet, 0, NULL);
 
     vkCmdBeginRenderPass(t_cmd_buffer,
         &(VkRenderPassBeginInfo) {
@@ -435,11 +516,15 @@ run_simple_mesh_pipeline(VkShaderModule mesh,
 
     vkCmdBindPipeline(t_cmd_buffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipeline);
 
-    if (has_storage) {
-        vkCmdBindDescriptorSets(t_cmd_buffer,
-            VK_PIPELINE_BIND_POINT_GRAPHICS,
-            pipeline_layout, 0, 1,
-            &set, 0, NULL);
+    if (descSetCount) {
+        vkCmdBindDescriptorSets(t_cmd_buffer, VK_PIPELINE_BIND_POINT_GRAPHICS,
+            pipeline_layout, 0, descSetCount, sets, 0, NULL);
+    }
+
+    if (has_push_constants) {
+        vkCmdPushConstants(t_cmd_buffer, pipeline_layout,
+                VK_SHADER_STAGE_MESH_BIT_NV, 0, opts.push_constants_size,
+                opts.push_constants);
     }
 
     vkCmdDrawMeshTasksNV(t_cmd_buffer, opts.task_count, 0);
