@@ -653,6 +653,7 @@ miptree_create(void)
 
             uint32_t src_usage, dest_usage;
             VkFormat dest_format;
+            VkImageAspectFlagBits dest_aspect;
             VkImage src_vk_image = VK_NULL_HANDLE;
             VkImage dest_vk_image = VK_NULL_HANDLE;
             uint32_t src_pitch = 0, dest_pitch = 0;
@@ -716,11 +717,13 @@ miptree_create(void)
                 case MIPTREE_DOWNLOAD_METHOD_COPY_TO_LINEAR_IMAGE:
                     dest_usage = VK_IMAGE_USAGE_TRANSFER_DST_BIT;
                     dest_format = format;
+                    dest_aspect = params->aspect;
                     use_img_size = true;
                     break;
                 case MIPTREE_DOWNLOAD_METHOD_COPY_WITH_DRAW:
                     dest_usage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT;
                     dest_format = get_color_format(format);
+                    dest_aspect = VK_IMAGE_ASPECT_COLOR_BIT;
                     break;
                 default:
                     assert(!"Unreachable");
@@ -749,7 +752,7 @@ miptree_create(void)
                 VkSubresourceLayout img_layout;
                 vkGetImageSubresourceLayout(t_device, dest_vk_image,
                     &(VkImageSubresource) {
-                        .aspectMask = params->aspect
+                        .aspectMask = dest_aspect
                     },
                     &img_layout);
                 dest_pitch = img_layout.rowPitch;
