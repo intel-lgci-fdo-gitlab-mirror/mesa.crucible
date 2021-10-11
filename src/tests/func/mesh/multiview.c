@@ -246,3 +246,87 @@ run_multiview_mesh_pipeline(VkShaderModule mesh,
     return result;
 }
 
+static void
+multiview(void)
+{
+    t_require_ext("VK_NV_mesh_shader");
+    t_require_ext("VK_NVX_multiview_per_view_attributes");
+
+    VkShaderModule mesh = qoCreateShaderModuleGLSL(t_device, MESH,
+        QO_EXTENSION GL_NV_mesh_shader : require
+        QO_EXTENSION GL_OVR_multiview : require
+        layout(local_size_x = 1) in;
+        layout(max_vertices = 6) out;
+        layout(max_primitives = 3) out;
+        layout(triangles) out;
+
+        layout(location = 0) out vec4 color[];
+
+        void main()
+        {
+            gl_PrimitiveCountNV = 2;
+
+            gl_PrimitiveIndicesNV[0] = 0;
+            gl_PrimitiveIndicesNV[1] = 1;
+            gl_PrimitiveIndicesNV[2] = 2;
+            gl_PrimitiveIndicesNV[3] = 3;
+            gl_PrimitiveIndicesNV[4] = 4;
+            gl_PrimitiveIndicesNV[5] = 5;
+
+            for (int view_slot = 0; view_slot < gl_MeshViewCountNV; ++view_slot) {
+                uint view_number = gl_MeshViewIndicesNV[view_slot];
+                vec4 off = vec4(0.2 * view_number, 0.1 * view_number, 0, 0);
+
+                gl_MeshVerticesNV[0].gl_PositionPerViewNV[view_slot] = vec4( 0.1f,  0.2f, 0.0f, 1.0f) + off;
+                gl_MeshVerticesNV[1].gl_PositionPerViewNV[view_slot] = vec4(-0.4f,  0.2f, 0.0f, 1.0f) + off;
+                gl_MeshVerticesNV[2].gl_PositionPerViewNV[view_slot] = vec4(-0.4f, -0.3f, 0.0f, 1.0f) + off;
+
+                gl_MeshVerticesNV[3].gl_PositionPerViewNV[view_slot] = vec4( 0.1f, -0.3f, 0.0f, 1.0f) + off;
+                gl_MeshVerticesNV[4].gl_PositionPerViewNV[view_slot] = vec4( 0.1f,  0.2f, 0.0f, 1.0f) + off;
+                gl_MeshVerticesNV[5].gl_PositionPerViewNV[view_slot] = vec4(-0.4f, -0.3f, 0.0f, 1.0f) + off;
+            }
+
+            color[0] = vec4(0, 1, 0, 1);
+            color[1] = vec4(0, 1, 0, 1);
+            color[2] = vec4(0, 1, 0, 1);
+            color[3] = vec4(0, 0, 1, 1);
+            color[4] = vec4(0, 0, 1, 1);
+            color[5] = vec4(0, 0, 1, 1);
+        }
+    );
+
+    test_result_t result = run_multiview_mesh_pipeline(mesh, NULL);
+
+    if (result != TEST_RESULT_PASS)
+        t_end(result);
+}
+
+test_define {
+    .name = "func.mesh.multiview.3.111",
+    .start = multiview,
+    .no_image = true,
+};
+
+test_define {
+    .name = "func.mesh.multiview.3.110",
+    .start = multiview,
+    .no_image = true,
+};
+
+test_define {
+    .name = "func.mesh.multiview.2.10",
+    .start = multiview,
+    .no_image = true,
+};
+
+test_define {
+    .name = "func.mesh.multiview.2.11",
+    .start = multiview,
+    .no_image = true,
+};
+
+test_define {
+    .name = "func.mesh.multiview.1.1",
+    .start = multiview,
+    .no_image = true,
+};
