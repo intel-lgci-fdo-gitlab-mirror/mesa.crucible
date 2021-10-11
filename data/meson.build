@@ -141,6 +141,7 @@ data_ref_files = [
   'func.gs.basic.ref.png',
   'func.interleaved-cmd-buffers.ref.png',
   'func.mesh.basic.ref.png',
+  'func.mesh.multiview.ref.empty.png',
   'func.multiview.ref.0.png',
   'func.multiview.ref.1.png',
   'func.multiview.ref.2.png',
