@@ -668,6 +668,7 @@ require_handle_type(VkExternalSemaphoreHandleTypeFlagBitsKHR handle_type)
     };
     GetPhysicalDeviceExternalSemaphorePropertiesKHR(t_physical_dev,
         &(VkPhysicalDeviceExternalSemaphoreInfoKHR) {
+            .sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_EXTERNAL_SEMAPHORE_INFO_KHR,
             .handleType = handle_type,
         }, &props);
 
