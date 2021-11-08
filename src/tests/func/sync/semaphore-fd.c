@@ -100,7 +100,6 @@ init_context(struct test_context *ctx, float priority,
             .offset = 0,
             .size = 4,
         });
-    vkUnmapMemory(ctx->device, atomic_mem);
     qoBindBufferMemory(ctx->device, ctx->atomic, atomic_mem, 0);
 }
 
@@ -563,7 +562,6 @@ init_memory_contents(struct test_context *ctx,
             .offset = 0,
             .size = sizeof(struct buffer_layout),
         });
-    vkUnmapMemory(ctx->device, tmp_mem);
 
     copy_memory(ctx,
                 memory, VK_ACCESS_SHADER_READ_BIT | VK_ACCESS_SHADER_WRITE_BIT,
@@ -606,7 +604,6 @@ check_memory_contents(struct test_context *ctx,
     /* If expecting a failure, do a simple memcmp. */
     if (expect_failure) {
         t_assert(memcmp(data, map->data, sizeof(map->data)) != 0);
-        vkUnmapMemory(ctx->device, tmp_mem);
         return;
     }
 
@@ -620,8 +617,6 @@ check_memory_contents(struct test_context *ctx,
         }
     }
     t_assert(memcmp(data, map->data, sizeof(map->data)) == 0);
-
-    vkUnmapMemory(ctx->device, tmp_mem);
 }
 
 /* A simplified form to test the test and make sure everything works as
