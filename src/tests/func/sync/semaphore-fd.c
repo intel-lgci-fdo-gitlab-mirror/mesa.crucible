@@ -438,8 +438,10 @@ create_command_buffer(struct test_context *ctx, int parity)
 static void
 copy_memory(struct test_context *ctx,
             VkDeviceMemory dst, VkAccessFlags dst_access,
+            VkPipelineStageFlagBits dst_stage,
             VkExternalMemoryHandleTypeFlags dst_handle_type,
             VkDeviceMemory src, VkAccessFlags src_access,
+            VkPipelineStageFlagBits src_stage,
             VkExternalMemoryHandleTypeFlags src_handle_type,
             VkDeviceSize size)
 {
@@ -474,11 +476,11 @@ copy_memory(struct test_context *ctx,
     qoBeginCommandBuffer(cmd_buffer);
 
     vkCmdPipelineBarrier(cmd_buffer,
-                         0,
-                         VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT,
+                         src_stage,
+                         VK_PIPELINE_STAGE_TRANSFER_BIT,
                          VK_DEPENDENCY_BY_REGION_BIT,
                          0, NULL,
-                         2, (VkBufferMemoryBarrier[]) {
+                         1, (VkBufferMemoryBarrier[]) {
                             {
                                 .sType = VK_STRUCTURE_TYPE_BUFFER_MEMORY_BARRIER,
                                 .srcAccessMask = src_access,
@@ -510,21 +512,11 @@ copy_memory(struct test_context *ctx,
         });
 
     vkCmdPipelineBarrier(cmd_buffer,
-                         0,
-                         VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT,
+                         VK_PIPELINE_STAGE_TRANSFER_BIT,
+                         dst_stage,
                          VK_DEPENDENCY_BY_REGION_BIT,
                          0, NULL,
-                         2, (VkBufferMemoryBarrier[]) {
-                            {
-                                .sType = VK_STRUCTURE_TYPE_BUFFER_MEMORY_BARRIER,
-                                .srcAccessMask = VK_ACCESS_TRANSFER_READ_BIT,
-                                .dstAccessMask = 0,
-                                .srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED,
-                                .dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED,
-                                .buffer = src_buf,
-                                .offset = 0,
-                                .size = VK_WHOLE_SIZE,
-                            },
+                         1, (VkBufferMemoryBarrier[]) {
                             {
                                 .sType = VK_STRUCTURE_TYPE_BUFFER_MEMORY_BARRIER,
                                 .srcAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT,
@@ -574,8 +566,9 @@ init_memory_contents(struct test_context *ctx,
     vkUnmapMemory(ctx->device, tmp_mem);
 
     copy_memory(ctx,
-                memory, VK_ACCESS_SHADER_READ_BIT | VK_ACCESS_SHADER_WRITE_BIT, handle_type,
-                tmp_mem, VK_ACCESS_HOST_WRITE_BIT, 0,
+                memory, VK_ACCESS_SHADER_READ_BIT | VK_ACCESS_SHADER_WRITE_BIT,
+                VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT, handle_type,
+                tmp_mem, VK_ACCESS_HOST_WRITE_BIT, VK_PIPELINE_STAGE_HOST_BIT, 0,
                 sizeof(struct buffer_layout));
 }
 
@@ -594,8 +587,9 @@ check_memory_contents(struct test_context *ctx,
                       .memoryTypeIndex = 0 /* TODO */);
 
     copy_memory(ctx,
-                tmp_mem, VK_ACCESS_HOST_READ_BIT, 0,
-                memory, VK_ACCESS_SHADER_READ_BIT | VK_ACCESS_SHADER_WRITE_BIT, handle_type,
+                tmp_mem, VK_ACCESS_HOST_READ_BIT, VK_PIPELINE_STAGE_HOST_BIT, 0,
+                memory, VK_ACCESS_SHADER_READ_BIT | VK_ACCESS_SHADER_WRITE_BIT,
+                VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT, handle_type,
                 sizeof(struct buffer_layout));
     vkQueueWaitIdle(ctx->queue);
 
