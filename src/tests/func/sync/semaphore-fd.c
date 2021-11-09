@@ -802,9 +802,12 @@ test_opaque_fd(void)
      * bit easier.
      */
     for (unsigned i = 0; i < NUM_HASH_ITERATIONS; i++) {
+        VkPipelineStageFlags dst_stage_masks =
+            VK_PIPELINE_STAGE_ALL_COMMANDS_BIT;
         VkSubmitInfo submit = {
             .sType = VK_STRUCTURE_TYPE_SUBMIT_INFO,
             .commandBufferCount = 1,
+            .pWaitDstStageMask = &dst_stage_masks,
         };
 
         if ((i & 1) == 0) {
@@ -913,9 +916,12 @@ test_opaque_fd_no_sync(void)
      * bit easier.
      */
     for (unsigned i = 0; i < NUM_HASH_ITERATIONS; i++) {
+        VkPipelineStageFlags dst_stage_masks =
+            VK_PIPELINE_STAGE_ALL_COMMANDS_BIT;
         VkSubmitInfo submit = {
             .sType = VK_STRUCTURE_TYPE_SUBMIT_INFO,
             .commandBufferCount = 1,
+            .pWaitDstStageMask = &dst_stage_masks,
         };
 
         if ((i & 1) == 0) {
