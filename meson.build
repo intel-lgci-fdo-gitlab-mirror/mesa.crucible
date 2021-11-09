@@ -52,6 +52,8 @@ gen_py_to_gen_h = generator(
 
 test_sources = []
 
+prog_cp = find_program('cp')
+
 # Generator to create *-spirv.h.
 
 prog_glslang = find_program('glslangValidator')

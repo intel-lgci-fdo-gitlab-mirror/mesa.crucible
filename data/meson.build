@@ -843,6 +843,6 @@ foreach a : data_ref_files
     a,
     input : a,
     output : a,
-    command : ['cp', '@INPUT@', '@OUTPUT@'],
+    command : [prog_cp, '@INPUT@', '@OUTPUT@'],
   )
 endforeach

@@ -44,7 +44,7 @@ foreach a : man_sources
     a,
     input : a,
     output : a,
-    command : ['cp', '@INPUT@', '@OUTPUT@'],
+    command : [prog_cp, '@INPUT@', '@OUTPUT@'],
   )
 
   if with_man_pages
