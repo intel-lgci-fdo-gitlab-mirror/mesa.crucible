@@ -98,13 +98,20 @@ qoQueueSubmit(VkQueue queue, uint32_t cmdBufferCount,
               const VkCommandBuffer *commandBuffers, VkFence fence)
 {
     VkResult result;
+    VkPipelineStageFlags *wait_dst_stage_masks = calloc(cmdBufferCount, sizeof(*wait_dst_stage_masks));
+    assert(wait_dst_stage_masks);
+
+    for (uint32_t i = 0; i < cmdBufferCount; i++)
+        wait_dst_stage_masks[i] = VK_PIPELINE_STAGE_ALL_COMMANDS_BIT;
 
     result = vkQueueSubmit(queue, 1,
         &(VkSubmitInfo) {
             .sType = VK_STRUCTURE_TYPE_SUBMIT_INFO,
             .commandBufferCount = cmdBufferCount,
             .pCommandBuffers = commandBuffers,
+            .pWaitDstStageMask = wait_dst_stage_masks,
         }, fence);
+    free(wait_dst_stage_masks);
     t_assert(result == VK_SUCCESS);
 
     return result;
