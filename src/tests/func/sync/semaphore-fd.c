@@ -436,10 +436,24 @@ create_command_buffer(struct test_context *ctx, int parity)
 static void
 copy_memory(struct test_context *ctx,
             VkDeviceMemory dst, VkAccessFlags dst_access,
-            VkDeviceMemory src, VkAccessFlags src_access, VkDeviceSize size)
+            VkExternalMemoryHandleTypeFlags dst_handle_type,
+            VkDeviceMemory src, VkAccessFlags src_access,
+            VkExternalMemoryHandleTypeFlags src_handle_type,
+            VkDeviceSize size)
 {
-    VkBuffer src_buf = qoCreateBuffer(ctx->device, .size = size);
-    VkBuffer dst_buf = qoCreateBuffer(ctx->device, .size = size);
+    VkBuffer src_buf =
+        qoCreateBuffer(ctx->device, .size = size,
+                       .pNext = &(VkExternalMemoryBufferCreateInfoKHR) {
+                           .sType = VK_STRUCTURE_TYPE_EXTERNAL_MEMORY_BUFFER_CREATE_INFO_KHR,
+                           .handleTypes = src_handle_type,
+                       });
+
+    VkBuffer dst_buf =
+        qoCreateBuffer(ctx->device, .size = size,
+                       .pNext = &(VkExternalMemoryBufferCreateInfoKHR) {
+                           .sType = VK_STRUCTURE_TYPE_EXTERNAL_MEMORY_BUFFER_CREATE_INFO_KHR,
+                           .handleTypes = dst_handle_type,
+                       });
 
     qoBindBufferMemory(ctx->device, src_buf, src, 0);
     qoBindBufferMemory(ctx->device, dst_buf, dst, 0);
@@ -529,7 +543,8 @@ copy_memory(struct test_context *ctx,
 
 static void
 init_memory_contents(struct test_context *ctx,
-                     uint32_t *data, VkDeviceMemory memory)
+                     uint32_t *data, VkDeviceMemory memory,
+                     VkExternalMemoryHandleTypeFlags handle_type)
 {
     /* First, set up the CPU pointer */
     for (unsigned i = 0; i < LOCAL_WORKGROUP_SIZE; i++) {
@@ -557,14 +572,15 @@ init_memory_contents(struct test_context *ctx,
     vkUnmapMemory(ctx->device, tmp_mem);
 
     copy_memory(ctx,
-                memory, VK_ACCESS_SHADER_READ_BIT | VK_ACCESS_SHADER_WRITE_BIT,
-                tmp_mem, VK_ACCESS_HOST_WRITE_BIT,
+                memory, VK_ACCESS_SHADER_READ_BIT | VK_ACCESS_SHADER_WRITE_BIT, handle_type,
+                tmp_mem, VK_ACCESS_HOST_WRITE_BIT, 0,
                 sizeof(struct buffer_layout));
 }
 
 static void
 check_memory_contents(struct test_context *ctx,
                       uint32_t *data, VkDeviceMemory memory,
+                      VkExternalMemoryHandleTypeFlags handle_type,
                       bool multi_ctx, bool expect_failure)
 {
     /* First, do the computation on the CPU */
@@ -576,8 +592,8 @@ check_memory_contents(struct test_context *ctx,
                       .memoryTypeIndex = 0 /* TODO */);
 
     copy_memory(ctx,
-                tmp_mem, VK_ACCESS_HOST_READ_BIT,
-                memory, VK_ACCESS_SHADER_READ_BIT | VK_ACCESS_SHADER_WRITE_BIT,
+                tmp_mem, VK_ACCESS_HOST_READ_BIT, 0,
+                memory, VK_ACCESS_SHADER_READ_BIT | VK_ACCESS_SHADER_WRITE_BIT, handle_type,
                 sizeof(struct buffer_layout));
     vkQueueWaitIdle(ctx->queue);
 
@@ -631,7 +647,7 @@ test_sanity(void)
     qoBindBufferMemory(ctx.device, ctx.buffer, mem, 0);
 
     uint32_t cpu_data[LOCAL_WORKGROUP_SIZE * 2];
-    init_memory_contents(&ctx, cpu_data, mem);
+    init_memory_contents(&ctx, cpu_data, mem, 0);
 
     VkCommandBuffer cmd_buffer1 = create_command_buffer(&ctx, 0);
     VkCommandBuffer cmd_buffer2 = create_command_buffer(&ctx, 1);
@@ -644,7 +660,7 @@ test_sanity(void)
         }
     }
 
-    check_memory_contents(&ctx, cpu_data, mem, false, false);
+    check_memory_contents(&ctx, cpu_data, mem, 0, false, false);
 }
 
 test_define {
@@ -705,6 +721,9 @@ test_opaque_fd(void)
 
 #undef GET_FUNCTION_PTR
 
+    VkExternalMemoryHandleTypeFlags handle_type =
+        VK_EXTERNAL_MEMORY_HANDLE_TYPE_OPAQUE_FD_BIT_KHR;
+
     VkMemoryRequirements buffer_reqs =
         qoGetBufferMemoryRequirements(ctx1.device, ctx1.buffer);
 
@@ -713,7 +732,7 @@ test_opaque_fd(void)
             .properties = VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
             .pNext = &(VkExportMemoryAllocateInfoKHR) {
                 .sType = VK_STRUCTURE_TYPE_EXPORT_MEMORY_ALLOCATE_INFO_KHR,
-                .handleTypes = VK_EXTERNAL_MEMORY_HANDLE_TYPE_OPAQUE_FD_BIT_KHR,
+                .handleTypes = handle_type,
             });
 
     int fd;
@@ -721,7 +740,7 @@ test_opaque_fd(void)
         &(VkMemoryGetFdInfoKHR) {
             .sType = VK_STRUCTURE_TYPE_MEMORY_GET_FD_INFO_KHR,
             .memory = mem1,
-            .handleType = VK_EXTERNAL_MEMORY_HANDLE_TYPE_OPAQUE_FD_BIT_KHR,
+            .handleType = handle_type,
         }, &fd);
     t_assert(result == VK_SUCCESS);
     t_assert(fd >= 0);
@@ -731,7 +750,7 @@ test_opaque_fd(void)
             .properties = VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
             .pNext = &(VkImportMemoryFdInfoKHR) {
                 .sType = VK_STRUCTURE_TYPE_IMPORT_MEMORY_FD_INFO_KHR,
-                .handleType = VK_EXTERNAL_MEMORY_HANDLE_TYPE_OPAQUE_FD_BIT_KHR,
+                .handleType = handle_type,
                 .fd = fd,
             });
 
@@ -739,7 +758,7 @@ test_opaque_fd(void)
     qoBindBufferMemory(ctx2.device, ctx2.buffer, mem2, 0);
 
     uint32_t cpu_data[LOCAL_WORKGROUP_SIZE * 2];
-    init_memory_contents(&ctx1, cpu_data, mem1);
+    init_memory_contents(&ctx1, cpu_data, mem1, handle_type);
 
     VkCommandBuffer cmd_buffer1 = create_command_buffer(&ctx1, 0);
     VkCommandBuffer cmd_buffer2 = create_command_buffer(&ctx2, 1);
@@ -823,7 +842,7 @@ test_opaque_fd(void)
 
     logi("All compute batches queued\n");
 
-    check_memory_contents(&ctx1, cpu_data, mem1, true, false);
+    check_memory_contents(&ctx1, cpu_data, mem1, handle_type, true, false);
 }
 
 test_define {
@@ -849,6 +868,9 @@ test_opaque_fd_no_sync(void)
     GET_FUNCTION_PTR(GetMemoryFdKHR, ctx1.device);
 #undef GET_FUNCTION_PTR
 
+    VkExternalMemoryHandleTypeFlags handle_type =
+        VK_EXTERNAL_MEMORY_HANDLE_TYPE_OPAQUE_FD_BIT_KHR;
+
     VkMemoryRequirements buffer_reqs =
         qoGetBufferMemoryRequirements(ctx1.device, ctx1.buffer);
 
@@ -857,7 +879,7 @@ test_opaque_fd_no_sync(void)
             .properties = VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
             .pNext = &(VkExportMemoryAllocateInfoKHR) {
                 .sType = VK_STRUCTURE_TYPE_EXPORT_MEMORY_ALLOCATE_INFO_KHR,
-                .handleTypes = VK_EXTERNAL_MEMORY_HANDLE_TYPE_OPAQUE_FD_BIT_KHR,
+                .handleTypes = handle_type,
             });
 
     int fd;
@@ -875,7 +897,7 @@ test_opaque_fd_no_sync(void)
             .properties = VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
             .pNext = &(VkImportMemoryFdInfoKHR) {
                 .sType = VK_STRUCTURE_TYPE_IMPORT_MEMORY_FD_INFO_KHR,
-                .handleType = VK_EXTERNAL_MEMORY_HANDLE_TYPE_OPAQUE_FD_BIT_KHR,
+                .handleType = handle_type,
                 .fd = fd,
             });
 
@@ -883,7 +905,7 @@ test_opaque_fd_no_sync(void)
     qoBindBufferMemory(ctx2.device, ctx2.buffer, mem2, 0);
 
     uint32_t cpu_data[LOCAL_WORKGROUP_SIZE * 2];
-    init_memory_contents(&ctx1, cpu_data, mem1);
+    init_memory_contents(&ctx1, cpu_data, mem1, handle_type);
 
     VkCommandBuffer cmd_buffer1 = create_command_buffer(&ctx1, 0);
     VkCommandBuffer cmd_buffer2 = create_command_buffer(&ctx2, 1);
@@ -913,7 +935,7 @@ test_opaque_fd_no_sync(void)
 
     logi("All compute batches queued\n");
 
-    check_memory_contents(&ctx1, cpu_data, mem1, true, true);
+    check_memory_contents(&ctx1, cpu_data, mem1, handle_type, true, true);
     vkQueueWaitIdle(ctx2.queue);
 }
 
@@ -948,6 +970,9 @@ test_sync_fd(void)
 
 #undef GET_FUNCTION_PTR
 
+    VkExternalMemoryHandleTypeFlags handle_type =
+        VK_EXTERNAL_MEMORY_HANDLE_TYPE_OPAQUE_FD_BIT_KHR;
+
     VkMemoryRequirements buffer_reqs =
         qoGetBufferMemoryRequirements(ctx1.device, ctx1.buffer);
 
@@ -956,7 +981,7 @@ test_sync_fd(void)
             .properties = VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
             .pNext = &(VkExportMemoryAllocateInfoKHR) {
                 .sType = VK_STRUCTURE_TYPE_EXPORT_MEMORY_ALLOCATE_INFO_KHR,
-                .handleTypes = VK_EXTERNAL_MEMORY_HANDLE_TYPE_OPAQUE_FD_BIT_KHR,
+                .handleTypes = handle_type,
             });
 
     int fd;
@@ -964,7 +989,7 @@ test_sync_fd(void)
         &(VkMemoryGetFdInfoKHR) {
             .sType = VK_STRUCTURE_TYPE_MEMORY_GET_FD_INFO_KHR,
             .memory = mem1,
-            .handleType = VK_EXTERNAL_MEMORY_HANDLE_TYPE_OPAQUE_FD_BIT_KHR,
+            .handleType = handle_type,
         }, &fd);
     t_assert(result == VK_SUCCESS);
     t_assert(fd >= 0);
@@ -974,7 +999,7 @@ test_sync_fd(void)
             .properties = VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
             .pNext = &(VkImportMemoryFdInfoKHR) {
                 .sType = VK_STRUCTURE_TYPE_IMPORT_MEMORY_FD_INFO_KHR,
-                .handleType = VK_EXTERNAL_MEMORY_HANDLE_TYPE_OPAQUE_FD_BIT_KHR,
+                .handleType = handle_type,
                 .fd = fd,
             });
 
@@ -982,7 +1007,7 @@ test_sync_fd(void)
     qoBindBufferMemory(ctx2.device, ctx2.buffer, mem2, 0);
 
     uint32_t cpu_data[LOCAL_WORKGROUP_SIZE * 2];
-    init_memory_contents(&ctx1, cpu_data, mem1);
+    init_memory_contents(&ctx1, cpu_data, mem1, handle_type);
 
     VkCommandBuffer cmd_buffer1 = create_command_buffer(&ctx1, 0);
     VkCommandBuffer cmd_buffer2 = create_command_buffer(&ctx2, 1);
@@ -1067,7 +1092,7 @@ test_sync_fd(void)
 
     logi("All compute batches queued\n");
 
-    check_memory_contents(&ctx1, cpu_data, mem1, true, false);
+    check_memory_contents(&ctx1, cpu_data, mem1, handle_type, true, false);
     vkQueueWaitIdle(ctx2.queue);
 }
 
