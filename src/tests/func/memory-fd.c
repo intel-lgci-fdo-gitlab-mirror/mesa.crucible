@@ -192,3 +192,100 @@ test_define {
     .start = test_write_dma_buf,
     .no_image = true,
 };
+
+static void
+test_multi_map(VkExternalMemoryHandleTypeFlagBits handle_type)
+{
+    t_require_ext("VK_KHR_external_memory_fd");
+
+    GET_DEVICE_FUNCTION_PTR(GetMemoryFdKHR);
+
+    t_assert(GetMemoryFdKHR != NULL);
+
+    size_t size = 1024;
+
+    uint32_t mem_type_idx = qoFindMemoryTypeWithProperties(~0u,
+        VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
+    t_assert(mem_type_idx != QO_MEMORY_TYPE_INDEX_INVALID);
+
+    VkDeviceMemory mem1 = qoAllocMemory(t_device,
+        .allocationSize = size,
+        .memoryTypeIndex = mem_type_idx,
+        .pNext = &(VkExportMemoryAllocateInfo) {
+            .sType = VK_STRUCTURE_TYPE_EXPORT_MEMORY_ALLOCATE_INFO,
+            .handleTypes = handle_type,
+        });
+
+    void *maps[3];
+
+    maps[0] = qoMapMemory(t_device, mem1, 0, size, 0);
+
+    int fd;
+    VkResult result = GetMemoryFdKHR(t_device, &(VkMemoryGetFdInfoKHR) {
+            .sType = VK_STRUCTURE_TYPE_MEMORY_GET_FD_INFO_KHR,
+            .memory = mem1,
+            .handleType = handle_type,
+        }, &fd);
+    t_assert(result == VK_SUCCESS);
+
+    int fd2 = dup(fd);
+    t_assert(fd2 >= 0);
+
+    VkDeviceMemory mem2 = qoAllocMemory(t_device,
+        .allocationSize = size,
+        .memoryTypeIndex = mem_type_idx,
+        .pNext = &(VkImportMemoryFdInfoKHR) {
+            .sType = VK_STRUCTURE_TYPE_IMPORT_MEMORY_FD_INFO_KHR,
+            .handleType = handle_type,
+            .fd = fd,
+        });
+
+    maps[1] = qoMapMemory(t_device, mem2, 0, size, 0);
+
+    VkDeviceMemory mem3 = qoAllocMemory(t_device,
+        .allocationSize = size,
+        .memoryTypeIndex = mem_type_idx,
+        .pNext = &(VkImportMemoryFdInfoKHR) {
+            .sType = VK_STRUCTURE_TYPE_IMPORT_MEMORY_FD_INFO_KHR,
+            .handleType = handle_type,
+            .fd = fd2,
+        });
+
+    maps[2] = qoMapMemory(t_device, mem3, 0, size, 0);
+
+    for (unsigned i = 0; i < size / sizeof(uint32_t); i++) {
+        uint32_t *map_u32 = maps[i % 3];
+        map_u32[i] = i;
+    }
+
+    for (unsigned i = 0; i < size / sizeof(uint32_t); i++) {
+        /* Read through different maps */
+        uint32_t *map_u32 = maps[(i * 7) % 3];
+        t_assert(map_u32[i] == i);
+    }
+}
+
+static void
+test_multi_map_opaque_fd(void)
+{
+    test_multi_map(VK_EXTERNAL_MEMORY_HANDLE_TYPE_OPAQUE_FD_BIT);
+}
+
+test_define {
+    .name = "func.memory-fd.opaque.multi-map",
+    .start = test_multi_map_opaque_fd,
+    .no_image = true,
+};
+
+static void
+test_multi_map_dma_buf(void)
+{
+    t_require_ext("VK_EXT_external_memory_dma_buf");
+    test_multi_map(VK_EXTERNAL_MEMORY_HANDLE_TYPE_DMA_BUF_BIT_EXT);
+}
+
+test_define {
+    .name = "func.memory-fd.dma-buf.multi-map",
+    .start = test_multi_map_dma_buf,
+    .no_image = true,
+};
