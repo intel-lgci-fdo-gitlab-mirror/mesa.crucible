@@ -145,6 +145,23 @@ __qoAllocMemory(VkDevice dev, const VkMemoryAllocateInfo *info)
     return memory;
 }
 
+uint32_t
+qoFindMemoryTypeWithProperties(uint32_t memoryTypeBits,
+                               VkMemoryPropertyFlags properties)
+{
+    const VkPhysicalDeviceMemoryProperties *props = t_physical_dev_mem_props;
+    for (uint32_t i = 0; i < props->memoryTypeCount; i++) {
+        if (!(memoryTypeBits & (1 << i)))
+            continue;
+
+        const VkMemoryType *type = &props->memoryTypes[i];
+        if ((type->propertyFlags & properties) == properties)
+            return i;
+    }
+
+    return QO_MEMORY_TYPE_INDEX_INVALID;
+}
+
 VkDeviceMemory
 __qoAllocMemoryFromRequirements(VkDevice dev,
                                 const VkMemoryRequirements *mem_reqs,
@@ -163,15 +180,9 @@ __qoAllocMemoryFromRequirements(VkDevice dev,
     t_assert(alloc_info.allocationSize >= mem_reqs->size);
 
     if (alloc_info.memoryTypeIndex == QO_MEMORY_TYPE_INDEX_INVALID) {
-        const VkPhysicalDeviceMemoryProperties *props = t_physical_dev_mem_props;
-        for (uint32_t i = 0; i < props->memoryTypeCount; i++) {
-            const VkMemoryType *type = &props->memoryTypes[i];
-            if ((mem_reqs->memoryTypeBits & (1 << i)) &&
-                (type->propertyFlags & info->properties) == info->properties) {
-                alloc_info.memoryTypeIndex = i;
-                break;
-            }
-        }
+        alloc_info.memoryTypeIndex =
+            qoFindMemoryTypeWithProperties(mem_reqs->memoryTypeBits,
+                                           info->properties);
     }
 
     t_assert(alloc_info.memoryTypeIndex != QO_MEMORY_TYPE_INDEX_INVALID);

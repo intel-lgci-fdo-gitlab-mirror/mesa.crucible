@@ -275,6 +275,10 @@ VkResult qoBindBufferMemory(VkDevice device, VkBuffer buffer,
 VkResult qoBindImageMemory(VkDevice device, VkImage img,
                            VkDeviceMemory mem, VkDeviceSize offset);
 
+uint32_t
+qoFindMemoryTypeWithProperties(uint32_t memoryTypeBits,
+                               VkMemoryPropertyFlags properties);
+
 #ifdef DOXYGEN
 VkDeviceMemory qoAllocMemory(VkDevice dev, ...);
 #else
