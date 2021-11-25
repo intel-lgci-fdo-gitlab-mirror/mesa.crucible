@@ -537,6 +537,7 @@ run_simple_mesh_pipeline(VkShaderModule mesh,
                 QO_PIPELINE_RASTERIZATION_STATE_CREATE_INFO_DEFAULTS,
                 .rasterizerDiscardEnable = no_image,
             },
+            .pViewportState = opts.viewport_state,
         }});
 
     if (descSetCount)

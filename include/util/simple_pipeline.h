@@ -68,6 +68,8 @@ struct simple_mesh_pipeline_options {
     // If non-zero, will be used when creating the shader modules.
     // See VK_EXT_subgroup_size_control.
     uint32_t required_subgroup_size;
+
+    VkPipelineViewportStateCreateInfo *viewport_state;
 };
 
 void run_simple_mesh_pipeline(VkShaderModule mesh,

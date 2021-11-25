@@ -80,6 +80,7 @@ test_sources_with_spirv = [
   'func/mesh/task-memory.c',
   'func/mesh/workgroup-id.c',
   'func/mesh/workgroup-memory.c',
+  'func/mesh/viewportindex.c',
   'func/miptree/miptree.c',
   'func/multiview.c',
   'func/push-constants/basic.c',

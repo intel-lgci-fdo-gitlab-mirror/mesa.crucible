@@ -158,6 +158,7 @@ data_ref_files = [
   'func.mesh.multiview.perview.block.2.11.ref.1.png',
   'func.mesh.multiview.perview.nonblock.2.11.ref.0.png',
   'func.mesh.multiview.perview.nonblock.2.11.ref.1.png',
+  'func.mesh.viewport_index.ref.png',
   'func.multiview.ref.0.png',
   'func.multiview.ref.1.png',
   'func.multiview.ref.2.png',
