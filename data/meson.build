@@ -143,6 +143,7 @@ data_ref_files = [
   'func.mesh.basic.ref.png',
   'func.mesh.clipdistance.ref.png',
   'func.mesh.clipdistance_culldistance.ref.png',
+  'func.mesh.clipdistance.fs.ref.png',
   'func.mesh.culldistance.ref.png',
   'func.mesh.multiview.1.1.ref.0.png',
   'func.mesh.multiview.2.10.ref.1.png',

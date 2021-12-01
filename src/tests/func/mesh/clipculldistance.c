@@ -412,3 +412,37 @@ test_define {
     .start = clipdistance_1_culldistance_1,
     .image_filename = "func.mesh.clipdistance_culldistance.ref.png",
 };
+
+static void
+clipdistance_1_fs(void)
+{
+    t_require_ext("VK_NV_mesh_shader");
+
+    VkShaderModule mesh = get_clipdistance_1_shader();
+
+    VkShaderModule fs = qoCreateShaderModuleGLSL(t_device, FRAGMENT,
+        layout(location = 0) out vec4 f_color;
+        layout(location = 0) in vec4 v_color;
+
+        void main()
+        {
+            if (gl_ClipDistance[0] > 0.5)
+                f_color = v_color;
+            else
+                f_color = vec4(0.6, 0.6, 0.6, 1);
+        }
+    );
+
+
+    simple_mesh_pipeline_options_t opts = {
+            .fs = fs,
+    };
+
+    run_simple_mesh_pipeline(mesh, &opts);
+}
+
+test_define {
+    .name = "func.mesh.clipdistance.1.fs",
+    .start = clipdistance_1_fs,
+    .image_filename = "func.mesh.clipdistance.fs.ref.png",
+};
