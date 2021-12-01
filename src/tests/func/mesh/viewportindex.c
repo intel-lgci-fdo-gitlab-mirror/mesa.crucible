@@ -133,3 +133,76 @@ test_define {
     .start = viewport_index,
     .image_filename = "func.mesh.viewport_index.ref.png",
 };
+
+static void
+viewport_index_fs(void)
+{
+    t_require_ext("VK_NV_mesh_shader");
+
+    VkShaderModule mesh = get_mesh_shader();
+
+    VkViewport vps[2] = {
+            {
+                    .x = 0,
+                    .y = 0,
+                    .width = t_width / 2,
+                    .height = t_height,
+                    .minDepth = 0.0,
+                    .maxDepth = 1.0
+            },
+            {
+                    .x = t_width / 2,
+                    .y = 0,
+                    .width = t_width / 2,
+                    .height = t_height,
+                    .minDepth = 0.0,
+                    .maxDepth = 1.0
+            },
+    };
+
+    VkRect2D scissors[2] =  {
+            {
+                    { 0, 0 },
+                    { t_width / 2, t_height }
+            },
+            {
+                    { t_width / 2, 0 },
+                    { t_width / 2, t_height }
+            },
+    };
+
+    VkPipelineViewportStateCreateInfo viewport_state;
+    viewport_state.sType = VK_STRUCTURE_TYPE_PIPELINE_VIEWPORT_STATE_CREATE_INFO;
+    viewport_state.pNext = NULL;
+    viewport_state.flags = 0;
+    viewport_state.viewportCount = 2;
+    viewport_state.pViewports = vps;
+    viewport_state.scissorCount = 2;
+    viewport_state.pScissors = scissors;
+
+    VkShaderModule fs = qoCreateShaderModuleGLSL(t_device, FRAGMENT,
+        layout(location = 0) out vec4 f_color;
+        layout(location = 0) in vec4 v_color;
+
+        void main()
+        {
+            if (gl_ViewportIndex == 1)
+                f_color = v_color;
+            else
+                f_color = vec4(0.6, 0.6, 0.6, 1);
+        }
+    );
+
+    simple_mesh_pipeline_options_t opts = {
+            .viewport_state = &viewport_state,
+            .fs = fs,
+    };
+
+    run_simple_mesh_pipeline(mesh, &opts);
+}
+
+test_define {
+    .name = "func.mesh.viewport_index.fs",
+    .start = viewport_index_fs,
+    .image_filename = "func.mesh.viewport_index.fs.ref.png",
+};
