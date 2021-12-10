@@ -487,3 +487,237 @@ test_define {
     .start = multiview_perview_block,
     .no_image = true,
 };
+
+static void
+multiview_clipdistance(void)
+{
+    t_require_ext("VK_NV_mesh_shader");
+    t_require_ext("VK_NVX_multiview_per_view_attributes");
+
+    VkShaderModule mesh = qoCreateShaderModuleGLSL(t_device, MESH,
+        QO_EXTENSION GL_NV_mesh_shader : require
+        layout(local_size_x = 1) in;
+        layout(max_vertices = 12) out;
+        layout(max_primitives = 4) out;
+        layout(triangles) out;
+
+        layout(location = 0) out vec4 color[];
+
+        void main()
+        {
+            gl_PrimitiveCountNV = 4;
+
+            for (int i = 0; i < 12; ++i)
+                gl_PrimitiveIndicesNV[i] = i;
+
+            for (int prim = 0; prim < 4; ++prim) {
+                for (int view_slot = 0; view_slot < gl_MeshViewCountNV; ++view_slot) {
+                    uint view_number = gl_MeshViewIndicesNV[view_slot];
+                    vec4 off = vec4(0.2 * view_number, 0.1 * view_number, 0, 0);
+
+                    gl_MeshVerticesNV[prim * 3 + 0].gl_PositionPerViewNV[view_slot] = vec4(-0.5f,   0.25f, 0.0f, 1.0f) + prim * vec4(0.5, 0, 0, 0) + off;
+                    gl_MeshVerticesNV[prim * 3 + 1].gl_PositionPerViewNV[view_slot] = vec4(-1.0f,   0.25f, 0.0f, 1.0f) + prim * vec4(0.5, 0, 0, 0) + off;
+                    gl_MeshVerticesNV[prim * 3 + 2].gl_PositionPerViewNV[view_slot] = vec4(-0.75f, -0.25f, 0.0f, 1.0f) + prim * vec4(0.5, 0, 0, 0) + off;
+                }
+            }
+
+            for (int view_slot = 0; view_slot < gl_MeshViewCountNV; ++view_slot) {
+                uint view_number = gl_MeshViewIndicesNV[view_slot];
+
+                if (view_number == 0) {
+                    gl_MeshVerticesNV[0].gl_ClipDistancePerViewNV[view_slot][0] = 1;
+                    gl_MeshVerticesNV[1].gl_ClipDistancePerViewNV[view_slot][0] = 1;
+                    gl_MeshVerticesNV[2].gl_ClipDistancePerViewNV[view_slot][0] = 1;
+
+                    gl_MeshVerticesNV[3].gl_ClipDistancePerViewNV[view_slot][0] = -1;
+                    gl_MeshVerticesNV[4].gl_ClipDistancePerViewNV[view_slot][0] =  1;
+                    gl_MeshVerticesNV[5].gl_ClipDistancePerViewNV[view_slot][0] =  1;
+
+                    gl_MeshVerticesNV[6].gl_ClipDistancePerViewNV[view_slot][0] = -1;
+                    gl_MeshVerticesNV[7].gl_ClipDistancePerViewNV[view_slot][0] = -1;
+                    gl_MeshVerticesNV[8].gl_ClipDistancePerViewNV[view_slot][0] =  1;
+
+                    gl_MeshVerticesNV[9].gl_ClipDistancePerViewNV[view_slot][0]  = -1;
+                    gl_MeshVerticesNV[10].gl_ClipDistancePerViewNV[view_slot][0] = -1;
+                    gl_MeshVerticesNV[11].gl_ClipDistancePerViewNV[view_slot][0] = -1;
+                } else if (view_number == 1) {
+                    gl_MeshVerticesNV[0].gl_ClipDistancePerViewNV[view_slot][0] = -1;
+                    gl_MeshVerticesNV[1].gl_ClipDistancePerViewNV[view_slot][0] = -1;
+                    gl_MeshVerticesNV[2].gl_ClipDistancePerViewNV[view_slot][0] = -1;
+
+                    gl_MeshVerticesNV[3].gl_ClipDistancePerViewNV[view_slot][0] =  1;
+                    gl_MeshVerticesNV[4].gl_ClipDistancePerViewNV[view_slot][0] =  1;
+                    gl_MeshVerticesNV[5].gl_ClipDistancePerViewNV[view_slot][0] =  1;
+
+                    gl_MeshVerticesNV[6].gl_ClipDistancePerViewNV[view_slot][0] = -1;
+                    gl_MeshVerticesNV[7].gl_ClipDistancePerViewNV[view_slot][0] =  1;
+                    gl_MeshVerticesNV[8].gl_ClipDistancePerViewNV[view_slot][0] =  1;
+
+                    gl_MeshVerticesNV[9].gl_ClipDistancePerViewNV[view_slot][0]  = -1;
+                    gl_MeshVerticesNV[10].gl_ClipDistancePerViewNV[view_slot][0] = -1;
+                    gl_MeshVerticesNV[11].gl_ClipDistancePerViewNV[view_slot][0] =  1;
+                } else { // should be impossible
+                    gl_MeshVerticesNV[0].gl_ClipDistancePerViewNV[view_slot][0] = -1;
+                    gl_MeshVerticesNV[1].gl_ClipDistancePerViewNV[view_slot][0] = -1;
+                    gl_MeshVerticesNV[2].gl_ClipDistancePerViewNV[view_slot][0] = -1;
+
+                    gl_MeshVerticesNV[3].gl_ClipDistancePerViewNV[view_slot][0] = -1;
+                    gl_MeshVerticesNV[4].gl_ClipDistancePerViewNV[view_slot][0] = -1;
+                    gl_MeshVerticesNV[5].gl_ClipDistancePerViewNV[view_slot][0] = -1;
+
+                    gl_MeshVerticesNV[6].gl_ClipDistancePerViewNV[view_slot][0] = -1;
+                    gl_MeshVerticesNV[7].gl_ClipDistancePerViewNV[view_slot][0] = -1;
+                    gl_MeshVerticesNV[8].gl_ClipDistancePerViewNV[view_slot][0] = -1;
+
+                    gl_MeshVerticesNV[9].gl_ClipDistancePerViewNV[view_slot][0]  = -1;
+                    gl_MeshVerticesNV[10].gl_ClipDistancePerViewNV[view_slot][0] = -1;
+                    gl_MeshVerticesNV[11].gl_ClipDistancePerViewNV[view_slot][0] = -1;
+                }
+            }
+
+            color[0] = vec4(1, 1, 1, 1);
+            color[1] = vec4(1, 1, 1, 1);
+            color[2] = vec4(1, 1, 1, 1);
+
+            color[3] = vec4(1, 0, 0, 1);
+            color[4] = vec4(1, 0, 0, 1);
+            color[5] = vec4(1, 0, 0, 1);
+
+            color[6] = vec4(0, 1, 0, 1);
+            color[7] = vec4(0, 1, 0, 1);
+            color[8] = vec4(0, 1, 0, 1);
+
+            color[9]  = vec4(0, 0, 1, 1);
+            color[10] = vec4(0, 0, 1, 1);
+            color[11] = vec4(0, 0, 1, 1);
+        }
+    );
+
+    test_result_t result = run_multiview_mesh_pipeline(mesh, NULL);
+
+    if (result != TEST_RESULT_PASS)
+        t_end(result);
+}
+
+test_define {
+    .name = "func.mesh.multiview.clipdistance.2.11",
+    .start = multiview_clipdistance,
+    .no_image = true,
+};
+
+static void
+multiview_culldistance(void)
+{
+    t_require_ext("VK_NV_mesh_shader");
+    t_require_ext("VK_NVX_multiview_per_view_attributes");
+
+    VkShaderModule mesh = qoCreateShaderModuleGLSL(t_device, MESH,
+        QO_EXTENSION GL_NV_mesh_shader : require
+        layout(local_size_x = 1) in;
+        layout(max_vertices = 12) out;
+        layout(max_primitives = 4) out;
+        layout(triangles) out;
+
+        layout(location = 0) out vec4 color[];
+
+        void main()
+        {
+            gl_PrimitiveCountNV = 4;
+
+            for (int i = 0; i < 12; ++i)
+                gl_PrimitiveIndicesNV[i] = i;
+
+            for (int prim = 0; prim < 4; ++prim) {
+                for (int view = 0; view < gl_MeshViewCountNV; ++view) {
+                    uint view_number = gl_MeshViewIndicesNV[view];
+                    vec4 off = vec4(0.2 * view_number, 0.1 * view_number, 0, 0);
+
+                    gl_MeshVerticesNV[prim * 3 + 0].gl_PositionPerViewNV[view] = vec4(-0.5f,   0.25f, 0.0f, 1.0f) + prim * vec4(0.5, 0, 0, 0) + off;
+                    gl_MeshVerticesNV[prim * 3 + 1].gl_PositionPerViewNV[view] = vec4(-1.0f,   0.25f, 0.0f, 1.0f) + prim * vec4(0.5, 0, 0, 0) + off;
+                    gl_MeshVerticesNV[prim * 3 + 2].gl_PositionPerViewNV[view] = vec4(-0.75f, -0.25f, 0.0f, 1.0f) + prim * vec4(0.5, 0, 0, 0) + off;
+                }
+            }
+
+            for (int view_slot = 0; view_slot < gl_MeshViewCountNV; ++view_slot) {
+                uint view_number = gl_MeshViewIndicesNV[view_slot];
+
+                if (view_number == 0) {
+                    gl_MeshVerticesNV[0].gl_CullDistancePerViewNV[view_slot][0] = 1;
+                    gl_MeshVerticesNV[1].gl_CullDistancePerViewNV[view_slot][0] = 1;
+                    gl_MeshVerticesNV[2].gl_CullDistancePerViewNV[view_slot][0] = 1;
+
+                    gl_MeshVerticesNV[3].gl_CullDistancePerViewNV[view_slot][0] = -1;
+                    gl_MeshVerticesNV[4].gl_CullDistancePerViewNV[view_slot][0] =  1;
+                    gl_MeshVerticesNV[5].gl_CullDistancePerViewNV[view_slot][0] =  1;
+
+                    gl_MeshVerticesNV[6].gl_CullDistancePerViewNV[view_slot][0] = -1;
+                    gl_MeshVerticesNV[7].gl_CullDistancePerViewNV[view_slot][0] = -1;
+                    gl_MeshVerticesNV[8].gl_CullDistancePerViewNV[view_slot][0] =  1;
+
+                    gl_MeshVerticesNV[9].gl_CullDistancePerViewNV[view_slot][0]  = -1;
+                    gl_MeshVerticesNV[10].gl_CullDistancePerViewNV[view_slot][0] = -1;
+                    gl_MeshVerticesNV[11].gl_CullDistancePerViewNV[view_slot][0] = -1;
+                } else if (view_number == 1) {
+                    gl_MeshVerticesNV[0].gl_CullDistancePerViewNV[view_slot][0] = -1;
+                    gl_MeshVerticesNV[1].gl_CullDistancePerViewNV[view_slot][0] = -1;
+                    gl_MeshVerticesNV[2].gl_CullDistancePerViewNV[view_slot][0] = -1;
+
+                    gl_MeshVerticesNV[3].gl_CullDistancePerViewNV[view_slot][0] =  1;
+                    gl_MeshVerticesNV[4].gl_CullDistancePerViewNV[view_slot][0] =  1;
+                    gl_MeshVerticesNV[5].gl_CullDistancePerViewNV[view_slot][0] =  1;
+
+                    gl_MeshVerticesNV[6].gl_CullDistancePerViewNV[view_slot][0] = -1;
+                    gl_MeshVerticesNV[7].gl_CullDistancePerViewNV[view_slot][0] =  1;
+                    gl_MeshVerticesNV[8].gl_CullDistancePerViewNV[view_slot][0] =  1;
+
+                    gl_MeshVerticesNV[9].gl_CullDistancePerViewNV[view_slot][0]  = -1;
+                    gl_MeshVerticesNV[10].gl_CullDistancePerViewNV[view_slot][0] = -1;
+                    gl_MeshVerticesNV[11].gl_CullDistancePerViewNV[view_slot][0] =  1;
+                } else { // should be impossible
+                    gl_MeshVerticesNV[0].gl_CullDistancePerViewNV[view_slot][0] = -1;
+                    gl_MeshVerticesNV[1].gl_CullDistancePerViewNV[view_slot][0] = -1;
+                    gl_MeshVerticesNV[2].gl_CullDistancePerViewNV[view_slot][0] = -1;
+
+                    gl_MeshVerticesNV[3].gl_CullDistancePerViewNV[view_slot][0] = -1;
+                    gl_MeshVerticesNV[4].gl_CullDistancePerViewNV[view_slot][0] = -1;
+                    gl_MeshVerticesNV[5].gl_CullDistancePerViewNV[view_slot][0] = -1;
+
+                    gl_MeshVerticesNV[6].gl_CullDistancePerViewNV[view_slot][0] = -1;
+                    gl_MeshVerticesNV[7].gl_CullDistancePerViewNV[view_slot][0] = -1;
+                    gl_MeshVerticesNV[8].gl_CullDistancePerViewNV[view_slot][0] = -1;
+
+                    gl_MeshVerticesNV[9].gl_CullDistancePerViewNV[view_slot][0]  = -1;
+                    gl_MeshVerticesNV[10].gl_CullDistancePerViewNV[view_slot][0] = -1;
+                    gl_MeshVerticesNV[11].gl_CullDistancePerViewNV[view_slot][0] = -1;
+                }
+            }
+
+            color[0] = vec4(1, 1, 1, 1);
+            color[1] = vec4(1, 1, 1, 1);
+            color[2] = vec4(1, 1, 1, 1);
+
+            color[3] = vec4(1, 0, 0, 1);
+            color[4] = vec4(1, 0, 0, 1);
+            color[5] = vec4(1, 0, 0, 1);
+
+            color[6] = vec4(0, 1, 0, 1);
+            color[7] = vec4(0, 1, 0, 1);
+            color[8] = vec4(0, 1, 0, 1);
+
+            color[9]  = vec4(0, 0, 1, 1);
+            color[10] = vec4(0, 0, 1, 1);
+            color[11] = vec4(0, 0, 1, 1);
+        }
+    );
+
+    test_result_t result = run_multiview_mesh_pipeline(mesh, NULL);
+
+    if (result != TEST_RESULT_PASS)
+        t_end(result);
+}
+
+test_define {
+    .name = "func.mesh.multiview.culldistance.2.11",
+    .start = multiview_culldistance,
+    .no_image = true,
+};
