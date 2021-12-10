@@ -33,6 +33,8 @@ typedef struct multiview_mesh_pipeline_options multiview_mesh_pipeline_options_t
 
 struct multiview_mesh_pipeline_options {
     VkShaderModule task;
+
+    VkPipelineViewportStateCreateInfo *viewport_state;
 };
 
 static test_result_t
@@ -150,7 +152,8 @@ run_multiview_mesh_pipeline(VkShaderModule mesh,
             .renderPass = pass,
             .layout = pipeline_layout,
             .subpass = 0,
-            .pViewportState = &(VkPipelineViewportStateCreateInfo) {
+            .pViewportState = opts.viewport_state ? opts.viewport_state :
+             &(VkPipelineViewportStateCreateInfo) {
                 .sType = VK_STRUCTURE_TYPE_PIPELINE_VIEWPORT_STATE_CREATE_INFO,
                 .viewportCount = 1,
                 .pViewports = &(VkViewport) { 0, 0, width, height, 0, 1 },
@@ -719,5 +722,147 @@ multiview_culldistance(void)
 test_define {
     .name = "func.mesh.multiview.culldistance.2.11",
     .start = multiview_culldistance,
+    .no_image = true,
+};
+
+static void
+multiview_viewportmask_perview(void)
+{
+    t_require_ext("VK_NV_mesh_shader");
+    t_require_ext("VK_NV_viewport_array2");
+    t_require_ext("VK_NVX_multiview_per_view_attributes");
+
+    VkShaderModule mesh = qoCreateShaderModuleGLSL(t_device, MESH,
+        QO_EXTENSION GL_NV_mesh_shader : require
+        layout(local_size_x = 1) in;
+        layout(max_vertices = 12) out;
+        layout(max_primitives = 4) out;
+        layout(triangles) out;
+
+        layout(location = 0) out vec4 color[];
+
+        void main()
+        {
+            gl_PrimitiveCountNV = 4;
+
+            for (int i = 0; i < 12; ++i)
+                gl_PrimitiveIndicesNV[i] = i;
+
+            for (int prim = 0; prim < 4; ++prim) {
+                for (int view_slot = 0; view_slot < gl_MeshViewCountNV; ++view_slot) {
+                    uint view_number = gl_MeshViewIndicesNV[view_slot];
+                    vec4 off = vec4(0.2 * view_number, 0.1 * view_number, 0, 0);
+
+                    gl_MeshVerticesNV[prim * 3 + 0].gl_PositionPerViewNV[view_slot] = vec4(-0.5f,   0.25f, 0.0f, 1.0f) + prim * vec4(0.5, 0, 0, 0) + off;
+                    gl_MeshVerticesNV[prim * 3 + 1].gl_PositionPerViewNV[view_slot] = vec4(-1.0f,   0.25f, 0.0f, 1.0f) + prim * vec4(0.5, 0, 0, 0) + off;
+                    gl_MeshVerticesNV[prim * 3 + 2].gl_PositionPerViewNV[view_slot] = vec4(-0.75f, -0.25f, 0.0f, 1.0f) + prim * vec4(0.5, 0, 0, 0) + off;
+
+                    if (view_number == 0)
+                        gl_MeshPrimitivesNV[prim].gl_ViewportMaskPerViewNV[view_slot][0] = 1 << prim;
+                    else if (view_number == 1)
+                        gl_MeshPrimitivesNV[prim].gl_ViewportMaskPerViewNV[view_slot][0] = 1 << (3 - prim);
+                    else // impossible
+                        gl_MeshPrimitivesNV[prim].gl_ViewportMaskPerViewNV[view_slot][0] = 1 << 3;
+                }
+            }
+
+            color[0] = vec4(1, 1, 1, 1);
+            color[1] = vec4(1, 1, 1, 1);
+            color[2] = vec4(1, 1, 1, 1);
+
+            color[3] = vec4(1, 0, 0, 1);
+            color[4] = vec4(1, 0, 0, 1);
+            color[5] = vec4(1, 0, 0, 1);
+
+            color[6] = vec4(0, 1, 0, 1);
+            color[7] = vec4(0, 1, 0, 1);
+            color[8] = vec4(0, 1, 0, 1);
+
+            color[9]  = vec4(0, 0, 1, 1);
+            color[10] = vec4(0, 0, 1, 1);
+            color[11] = vec4(0, 0, 1, 1);
+        }
+    );
+#undef t_width
+#undef t_height
+#define t_width 128
+#define t_height 128
+
+    VkViewport vps[4] = {
+            {
+                    .x = 0,
+                    .y = 0,
+                    .width = t_width / 2,
+                    .height = t_height / 2,
+                    .minDepth = 0.0,
+                    .maxDepth = 1.0
+            },
+            {
+                    .x = t_width / 2,
+                    .y = 0,
+                    .width = t_width / 2,
+                    .height = t_height / 2,
+                    .minDepth = 0.0,
+                    .maxDepth = 1.0
+            },
+            {
+                    .x = 0,
+                    .y = t_height / 2,
+                    .width = t_width / 2,
+                    .height = t_height / 2,
+                    .minDepth = 0.0,
+                    .maxDepth = 1.0
+            },
+            {
+                    .x = t_width / 2,
+                    .y = t_height / 2,
+                    .width = t_width / 2,
+                    .height = t_height / 2,
+                    .minDepth = 0.0,
+                    .maxDepth = 1.0
+            },
+    };
+
+    VkRect2D scissors[4] =  {
+            {
+                    { 0, 0 },
+                    { t_width / 2, t_height / 2 }
+            },
+            {
+                    { t_width / 2, 0 },
+                    { t_width / 2, t_height / 2 }
+            },
+            {
+                    { 0, t_height / 2 },
+                    { t_width / 2, t_height / 2 }
+            },
+            {
+                    { t_width / 2, t_height / 2 },
+                    { t_width / 2, t_height / 2 }
+            },
+    };
+
+    VkPipelineViewportStateCreateInfo viewport_state;
+    viewport_state.sType = VK_STRUCTURE_TYPE_PIPELINE_VIEWPORT_STATE_CREATE_INFO;
+    viewport_state.pNext = NULL;
+    viewport_state.flags = 0;
+    viewport_state.viewportCount = 4;
+    viewport_state.pViewports = vps;
+    viewport_state.scissorCount = 4;
+    viewport_state.pScissors = scissors;
+
+    multiview_mesh_pipeline_options_t opts = {
+        .viewport_state = &viewport_state,
+    };
+
+    test_result_t result = run_multiview_mesh_pipeline(mesh, &opts);
+
+    if (result != TEST_RESULT_PASS)
+        t_end(result);
+}
+
+test_define {
+    .name = "func.mesh.multiview.viewportmask_perview.2.11",
+    .start = multiview_viewportmask_perview,
     .no_image = true,
 };
