@@ -75,6 +75,7 @@ test_sources_with_spirv = [
   'func/mesh/buffers.c',
   'func/mesh/clipculldistance.c',
   'func/mesh/multiview.c',
+  'func/mesh/primitiveid.c',
   'func/mesh/push-constants.c',
   'func/mesh/outputs.c',
   'func/mesh/task-memory.c',
