@@ -172,6 +172,7 @@ data_ref_files = [
   'func.mesh.primitive_id.fs.ref.png',
   'func.mesh.viewport_index.ref.png',
   'func.mesh.viewport_index.fs.ref.png',
+  'func.mesh.viewport_index.wg.ref.png',
   'func.mesh.viewport_mask.simple.ref.png',
   'func.mesh.viewport_mask.mixed.ref.png',
   'func.multiview.ref.0.png',

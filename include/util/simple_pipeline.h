@@ -70,6 +70,8 @@ struct simple_mesh_pipeline_options {
     uint32_t required_subgroup_size;
 
     VkPipelineViewportStateCreateInfo *viewport_state;
+
+    VkPipelineShaderStageCreateInfo *mesh_create_info;
 };
 
 void run_simple_mesh_pipeline(VkShaderModule mesh,

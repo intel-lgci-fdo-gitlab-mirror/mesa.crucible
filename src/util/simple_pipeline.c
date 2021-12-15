@@ -538,6 +538,8 @@ run_simple_mesh_pipeline(VkShaderModule mesh,
                 .rasterizerDiscardEnable = no_image,
             },
             .pViewportState = opts.viewport_state,
+            .stageCount = opts.mesh_create_info ? 1 : 0,
+            .pStages = opts.mesh_create_info ? opts.mesh_create_info : NULL,
         }});
 
     if (descSetCount)
