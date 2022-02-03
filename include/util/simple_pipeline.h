@@ -43,3 +43,22 @@ struct simple_compute_pipeline_options {
 
 void run_simple_compute_pipeline(VkShaderModule cs,
                                  const struct simple_compute_pipeline_options *opts);
+
+typedef struct simple_mesh_pipeline_options simple_mesh_pipeline_options_t;
+
+struct simple_mesh_pipeline_options {
+    VkShaderModule task;
+
+    // Bound to set 0, descriptor 0.
+    void *storage;
+    size_t storage_size;
+
+    // Defaults to passthrough location 0 to color if not specified.
+    VkShaderModule fs;
+
+    // Defaults to 1 if not specified.
+    uint32_t task_count;
+};
+
+void run_simple_mesh_pipeline(VkShaderModule mesh,
+                              const struct simple_mesh_pipeline_options *opts);
