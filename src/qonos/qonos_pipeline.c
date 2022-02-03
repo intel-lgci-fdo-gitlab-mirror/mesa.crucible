@@ -149,6 +149,8 @@ qoCreateGraphicsPipeline(VkDevice device,
         }
     }
 
+    bool is_mesh_pipeline = extra->meshShader != VK_NULL_HANDLE;
+
     // Look for vertex or fragment shaders in the chain
     bool has_fs = false, has_vs = false;
     for (unsigned i = 0; i < pipeline_info.stageCount; i++) {
@@ -158,6 +160,9 @@ qoCreateGraphicsPipeline(VkDevice device,
             break;
         case VK_SHADER_STAGE_FRAGMENT_BIT:
             has_fs = true;
+            break;
+        case VK_SHADER_STAGE_MESH_BIT_NV:
+            is_mesh_pipeline = true;
             break;
         default:
             break;
@@ -196,13 +201,15 @@ qoCreateGraphicsPipeline(VkDevice device,
         }
     };
 
-    if (pipeline_info.pVertexInputState == NULL) {
+    if (pipeline_info.pVertexInputState == NULL && !is_mesh_pipeline) {
         /* They should be using one of our shaders if they use this */
         assert(!has_vs || !has_fs);
         pipeline_info.pVertexInputState = &vi_info;
     }
 
-    if (!has_vs || !has_fs || extra->geometryShader != VK_NULL_HANDLE) {
+    if (!has_vs || !has_fs || extra->geometryShader != VK_NULL_HANDLE ||
+        extra->meshShader != VK_NULL_HANDLE ||
+        extra->taskShader != VK_NULL_HANDLE) {
         /* Make a copy of the shader stages so that we can modify it */
         assert(pipeline_info.stageCount < NUM_SHADER_STAGES);
         memcpy(stage_info, pipeline_info.pStages,
@@ -210,7 +217,7 @@ qoCreateGraphicsPipeline(VkDevice device,
         pipeline_info.pStages = stage_info;
     }
 
-    if (!has_vs) {
+    if (!has_vs && !is_mesh_pipeline) {
         VkShaderModule vs = extra->vertexShader;
 
         if (!vs != VK_NULL_HANDLE) {
@@ -244,6 +251,32 @@ qoCreateGraphicsPipeline(VkDevice device,
                 .sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO,
                 .stage = VK_SHADER_STAGE_GEOMETRY_BIT,
                 .module = extra->geometryShader,
+                .pName = "main",
+                .pSpecializationInfo = NULL,
+            };
+    }
+
+    if (extra->taskShader != VK_NULL_HANDLE) {
+        // We're assuming here that they didn't try to set the mesh
+        // shader both ways (through extra and normally).
+        stage_info[pipeline_info.stageCount++] =
+            (VkPipelineShaderStageCreateInfo) {
+                .sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO,
+                .stage = VK_SHADER_STAGE_TASK_BIT_NV,
+                .module = extra->taskShader,
+                .pName = "main",
+                .pSpecializationInfo = NULL,
+            };
+    }
+    
+    if (extra->meshShader != VK_NULL_HANDLE) {
+        // We're assuming here that they didn't try to set the mesh
+        // shader both ways (through extra and normally).
+        stage_info[pipeline_info.stageCount++] =
+            (VkPipelineShaderStageCreateInfo) {
+                .sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO,
+                .stage = VK_SHADER_STAGE_MESH_BIT_NV,
+                .module = extra->meshShader,
                 .pName = "main",
                 .pSpecializationInfo = NULL,
             };
