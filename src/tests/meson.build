@@ -68,6 +68,7 @@ test_sources_with_spirv = [
   'func/mesh/basic.c',
   'func/mesh/buffers.c',
   'func/mesh/push-constants.c',
+  'func/mesh/outputs.c',
   'func/mesh/task-memory.c',
   'func/mesh/workgroup-id.c',
   'func/mesh/workgroup-memory.c',
