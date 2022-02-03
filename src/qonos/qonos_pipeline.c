@@ -46,6 +46,8 @@ qoCreateGraphicsPipeline(VkDevice device,
     VkPipelineColorBlendAttachmentState cb_att;
     VkPipelineColorBlendStateCreateInfo cb_info;
     VkPipelineShaderStageCreateInfo stage_info[NUM_SHADER_STAGES];
+    VkPipelineShaderStageRequiredSubgroupSizeCreateInfoEXT rss_info[NUM_SHADER_STAGES];
+
     // Enough dynamic states to cover the 32 bits available in
     // QoExtraGraphicsPipelineCreateInfo.
     VkDynamicState dynamic_states[32];
@@ -304,6 +306,24 @@ qoCreateGraphicsPipeline(VkDevice device,
                 .pName = "main",
                 .pSpecializationInfo = NULL,
             };
+    }
+
+    for (int i = 0; i < pipeline_info.stageCount; i++) {
+        if (stage_info[i].stage == VK_SHADER_STAGE_TASK_BIT_NV &&
+            extra->taskRequiredSubgroupSize) {
+            rss_info[i] = (VkPipelineShaderStageRequiredSubgroupSizeCreateInfoEXT) {
+                .sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_REQUIRED_SUBGROUP_SIZE_CREATE_INFO_EXT,
+                .requiredSubgroupSize = extra->taskRequiredSubgroupSize,
+            };
+            stage_info[i].pNext = &rss_info[i];
+        } else if (stage_info[i].stage == VK_SHADER_STAGE_MESH_BIT_NV &&
+            extra->meshRequiredSubgroupSize) {
+            rss_info[i] = (VkPipelineShaderStageRequiredSubgroupSizeCreateInfoEXT) {
+                .sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_REQUIRED_SUBGROUP_SIZE_CREATE_INFO_EXT,
+                .requiredSubgroupSize = extra->meshRequiredSubgroupSize,
+            };
+            stage_info[i].pNext = &rss_info[i];
+        }
     }
 
     result = vkCreateGraphicsPipelines(device, pipeline_cache,

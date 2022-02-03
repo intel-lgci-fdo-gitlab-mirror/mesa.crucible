@@ -298,14 +298,18 @@ run_simple_mesh_pipeline(VkShaderModule mesh,
 {
     t_require_ext("VK_NV_mesh_shader");
 
-    VkPhysicalDeviceMeshShaderFeaturesNV features = {
+    VkPhysicalDeviceMeshShaderFeaturesNV mesh_features = {
         .sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_MESH_SHADER_FEATURES_NV,
     };
-    VkPhysicalDeviceFeatures2 pfeatures = {
-        .sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_FEATURES_2,
-        .pNext = &features,
+    VkPhysicalDeviceSubgroupSizeControlFeaturesEXT ssc_features = {
+        .sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SUBGROUP_SIZE_CONTROL_FEATURES_EXT,
+        .pNext = &mesh_features,
     };
-    vkGetPhysicalDeviceFeatures2(t_physical_dev, &pfeatures);
+    VkPhysicalDeviceFeatures2 features = {
+        .sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_FEATURES_2,
+        .pNext = &ssc_features,
+    };
+    vkGetPhysicalDeviceFeatures2(t_physical_dev, &features);
 
     struct simple_mesh_pipeline_options opts = {};
     if (_opts)
@@ -313,10 +317,38 @@ run_simple_mesh_pipeline(VkShaderModule mesh,
     if (opts.task_count == 0)
         opts.task_count = 1;
 
-    if (!features.meshShader)
+    if (!mesh_features.meshShader)
         t_skipf("meshShader not supported");
-    if (opts.task != VK_NULL_HANDLE && !features.taskShader)
+    if (opts.task != VK_NULL_HANDLE && !mesh_features.taskShader)
         t_skipf("taskShader not supported");
+    if (opts.required_subgroup_size) {
+        if (!ssc_features.subgroupSizeControl)
+            t_skipf("subgroupSizeControl not supported, needed to require a subgroup size");
+
+        VkPhysicalDeviceSubgroupSizeControlPropertiesEXT ssc_props = {
+            .sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SUBGROUP_SIZE_CONTROL_PROPERTIES_EXT,
+        };
+        VkPhysicalDeviceProperties2 props = {
+            .sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_PROPERTIES_2,
+            .pNext = &ssc_props,
+        };
+        vkGetPhysicalDeviceProperties2(t_physical_dev, &props);
+
+        if ((ssc_props.requiredSubgroupSizeStages & VK_SHADER_STAGE_MESH_BIT_NV) == 0)
+            t_skipf("subgroupSizeControl not supported for Mesh shader stage");
+        if (opts.task != VK_NULL_HANDLE &&
+            (ssc_props.requiredSubgroupSizeStages & VK_SHADER_STAGE_TASK_BIT_NV) == 0)
+            t_skipf("subgroupSizeControl not supported for Task shader stage");
+
+        if (opts.required_subgroup_size < ssc_props.minSubgroupSize) {
+            t_skipf("requiredSubgroupSize (%u) smaller than minSubgroupSize (%u) supported",
+                opts.required_subgroup_size, ssc_props.minSubgroupSize);
+        }
+        if (opts.required_subgroup_size > ssc_props.maxSubgroupSize) {
+            t_skipf("requiredSubgroupSize (%u) larger than maxSubgroupSize (%u) supported",
+                opts.required_subgroup_size, ssc_props.maxSubgroupSize);
+        }
+    }
 
     GET_DEVICE_FUNCTION_PTR(vkCmdDrawMeshTasksNV);
 
@@ -491,6 +523,8 @@ run_simple_mesh_pipeline(VkShaderModule mesh,
             .taskShader = opts.task,
             .meshShader = mesh,
             .fragmentShader = opts.fs,
+            .meshRequiredSubgroupSize = opts.required_subgroup_size,
+            .taskRequiredSubgroupSize = opts.required_subgroup_size,
             .pNext =
         &(VkGraphicsPipelineCreateInfo) {
             .sType = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO,

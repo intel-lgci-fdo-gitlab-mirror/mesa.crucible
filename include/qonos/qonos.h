@@ -109,6 +109,10 @@ typedef struct QoExtraGraphicsPipelineCreateInfo_ {
     VkShaderModule fragmentShader;
     VkShaderModule taskShader;
     VkShaderModule meshShader;
+
+    uint32_t taskRequiredSubgroupSize;
+    uint32_t meshRequiredSubgroupSize;
+
     uint32_t dynamicStates; // Bitfield
 } QoExtraGraphicsPipelineCreateInfo;
 

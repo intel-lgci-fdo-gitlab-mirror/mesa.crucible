@@ -64,6 +64,10 @@ struct simple_mesh_pipeline_options {
 
     // Defaults to 1 if not specified.
     uint32_t task_count;
+
+    // If non-zero, will be used when creating the shader modules.
+    // See VK_EXT_subgroup_size_control.
+    uint32_t required_subgroup_size;
 };
 
 void run_simple_mesh_pipeline(VkShaderModule mesh,
