@@ -352,8 +352,10 @@ run_simple_mesh_pipeline(VkShaderModule mesh,
 
     GET_DEVICE_FUNCTION_PTR(vkCmdDrawMeshTasksNV);
 
+    const bool no_image = t_no_image;
+
     VkRenderPass pass = qoCreateRenderPass(t_device,
-        .attachmentCount = 1,
+        .attachmentCount = no_image ? 0 : 1,
         .pAttachments = (VkAttachmentDescription[]) {
             {
                 QO_ATTACHMENT_DESCRIPTION_DEFAULTS,
@@ -365,7 +367,7 @@ run_simple_mesh_pipeline(VkShaderModule mesh,
         .pSubpasses = (VkSubpassDescription[]) {
             {
                 QO_SUBPASS_DESCRIPTION_DEFAULTS,
-                .colorAttachmentCount = 1,
+                .colorAttachmentCount = no_image ? 0 : 1,
                 .pColorAttachments = (VkAttachmentReference[]) {
                     {
                         .attachment = 0,
@@ -531,17 +533,40 @@ run_simple_mesh_pipeline(VkShaderModule mesh,
             .renderPass = pass,
             .layout = pipeline_layout,
             .subpass = 0,
+            .pRasterizationState = &(VkPipelineRasterizationStateCreateInfo) {
+                QO_PIPELINE_RASTERIZATION_STATE_CREATE_INFO_DEFAULTS,
+                .rasterizerDiscardEnable = no_image,
+            },
         }});
 
     if (descSetCount)
         vkUpdateDescriptorSets(t_device, descSetCount, vkWriteDescriptorSet, 0, NULL);
 
+    uint32_t width, height;
+    VkFramebuffer framebuffer;
+    if (no_image) {
+        // Pick a size, make this an option if we care later.
+        width = 128;
+        height = 128;
+        framebuffer = qoCreateFramebuffer(t_device,
+            .renderPass = pass,
+            .width = width,
+            .height = height,
+            .layers = 1,
+            .attachmentCount = 0,
+            .pAttachments = 0);
+    } else {
+        width = t_width;
+        height = t_height;
+        framebuffer = t_framebuffer;
+    }
+
     vkCmdBeginRenderPass(t_cmd_buffer,
         &(VkRenderPassBeginInfo) {
             .sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO,
             .renderPass = pass,
-            .framebuffer = t_framebuffer,
-            .renderArea = { { 0, 0 }, { t_width, t_height } },
+            .framebuffer = framebuffer,
+            .renderArea = { { 0, 0 }, { width, height } },
             .clearValueCount = 1,
             .pClearValues = (VkClearValue[]) {
                 { .color = { .float32 = {0.3, 0.3, 0.3, 1.0} } },
