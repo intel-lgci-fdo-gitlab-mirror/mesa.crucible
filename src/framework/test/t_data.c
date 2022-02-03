@@ -283,6 +283,15 @@ __t_user_data(void)
     return t->def->user_data;
 }
 
+const bool *
+__t_no_image(void)
+{
+    ASSERT_TEST_IN_MAJOR_PHASE;
+    GET_CURRENT_TEST(t);
+
+    return &t->def->no_image;
+}
+
 cru_image_t *
 t_ref_image(void)
 {
