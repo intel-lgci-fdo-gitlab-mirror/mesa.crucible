@@ -21,10 +21,10 @@
 
 #include "tapi/t.h"
 
-#include "src/tests/func/compute-spirv.h"
+#include "src/tests/func/compute/basic-spirv.h"
 
 static void
-test(void)
+basic(void)
 {
     VkDescriptorSetLayout set_layout;
 
@@ -151,8 +151,8 @@ test(void)
 }
 
 test_define {
-    .name = "func.compute",
-    .start = test,
+    .name = "func.compute.basic",
+    .start = basic,
     .no_image = true,
     .queue_setup = QUEUE_SETUP_COMPUTE,
 };
