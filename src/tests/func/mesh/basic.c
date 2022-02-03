@@ -24,6 +24,16 @@
 
 #include "src/tests/func/mesh/basic-spirv.h"
 
+static unsigned
+parse_require_subgroup_size(const char *s)
+{
+    const char *p = strstr(s, "_require");
+    if (p)
+        return strtol(p + sizeof("_require") - 1, NULL, 10);
+    else
+        return 0;
+}
+
 static void
 basic_mesh(void)
 {
@@ -31,7 +41,7 @@ basic_mesh(void)
 
     VkShaderModule mesh = qoCreateShaderModuleGLSL(t_device, MESH,
         QO_EXTENSION GL_NV_mesh_shader : require
-        layout(local_size_x = 4) in;
+        layout(local_size_x = 32) in;
         layout(max_vertices = 6) out;
         layout(max_primitives = 3) out;
         layout(triangles) out;
@@ -42,7 +52,7 @@ basic_mesh(void)
 
         void main()
         {
-            if (gl_LocalInvocationID.x == 0) {
+            if (gl_LocalInvocationID.x == 31) {
                 gl_PrimitiveCountNV = 2;
 
                 gl_PrimitiveIndicesNV[0] = 0;
@@ -73,7 +83,11 @@ basic_mesh(void)
         }
     );
 
-    run_simple_mesh_pipeline(mesh, NULL);
+    simple_mesh_pipeline_options_t opts = {
+        .required_subgroup_size = parse_require_subgroup_size(t_name),
+    };
+
+    run_simple_mesh_pipeline(mesh, &opts);
 }
 
 test_define {
@@ -81,6 +95,31 @@ test_define {
     .start = basic_mesh,
     .image_filename = "func.mesh.basic.ref.png",
 };
+
+test_define {
+    .name = "func.mesh.basic.mesh_require8",
+    .start = basic_mesh,
+    .image_filename = "func.mesh.basic.ref.png",
+};
+
+test_define {
+    .name = "func.mesh.basic.mesh_require16",
+    .start = basic_mesh,
+    .image_filename = "func.mesh.basic.ref.png",
+};
+
+test_define {
+    .name = "func.mesh.basic.mesh_require32",
+    .start = basic_mesh,
+    .image_filename = "func.mesh.basic.ref.png",
+};
+
+test_define {
+    .name = "func.mesh.basic.mesh_require64",
+    .start = basic_mesh,
+    .image_filename = "func.mesh.basic.ref.png",
+};
+
 
 
 static void
@@ -90,7 +129,7 @@ basic_task(void)
 
     VkShaderModule task = qoCreateShaderModuleGLSL(t_device, TASK,
         QO_EXTENSION GL_NV_mesh_shader : require
-        layout(local_size_x = 2) in;
+        layout(local_size_x = 32) in;
 
         taskNV out Task {
             uint primitives;
@@ -98,7 +137,7 @@ basic_task(void)
 
         void main()
         {
-            if (gl_LocalInvocationID.x == 1) {
+            if (gl_LocalInvocationID.x == 15) {
                 gl_TaskCountNV = 1;
                 taskOut.primitives = 2;
             }
@@ -107,7 +146,7 @@ basic_task(void)
 
     VkShaderModule mesh = qoCreateShaderModuleGLSL(t_device, MESH,
         QO_EXTENSION GL_NV_mesh_shader : require
-        layout(local_size_x = 4) in;
+        layout(local_size_x = 32) in;
         layout(max_vertices = 6) out;
         layout(max_primitives = 3) out;
         layout(triangles) out;
@@ -122,7 +161,7 @@ basic_task(void)
 
         void main()
         {
-            if (gl_LocalInvocationID.x == 0) {
+            if (gl_LocalInvocationID.x == 31) {
                 gl_PrimitiveCountNV = taskIn.primitives;
 
                 gl_PrimitiveIndicesNV[0] = 0;
@@ -155,6 +194,7 @@ basic_task(void)
 
     simple_mesh_pipeline_options_t opts = {
         .task = task,
+        .required_subgroup_size = parse_require_subgroup_size(t_name),
     };
 
     run_simple_mesh_pipeline(mesh, &opts);
@@ -162,6 +202,30 @@ basic_task(void)
 
 test_define {
     .name = "func.mesh.basic.task",
+    .start = basic_task,
+    .image_filename = "func.mesh.basic.ref.png",
+};
+
+test_define {
+    .name = "func.mesh.basic.task_require8",
+    .start = basic_task,
+    .image_filename = "func.mesh.basic.ref.png",
+};
+
+test_define {
+    .name = "func.mesh.basic.task_require16",
+    .start = basic_task,
+    .image_filename = "func.mesh.basic.ref.png",
+};
+
+test_define {
+    .name = "func.mesh.basic.task_require32",
+    .start = basic_task,
+    .image_filename = "func.mesh.basic.ref.png",
+};
+
+test_define {
+    .name = "func.mesh.basic.task_require64",
     .start = basic_task,
     .image_filename = "func.mesh.basic.ref.png",
 };
