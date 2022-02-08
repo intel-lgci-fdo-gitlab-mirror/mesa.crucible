@@ -171,3 +171,149 @@ test_define {
     .start = multiply32x16_uint32,
     .image_filename = "128x128-green.ref.png",
 };
+
+/* This test case exposes a bug in constant propagation in the compiler
+ * backend for the Intel Mesa drivers.  The multiply32x16 instructions used
+ * here will initially create a sequence like
+ *
+ *    mov(8)          g8<1>D          0x7fffffffD
+ *    mul(8)          g16<1>D         g8<8,8,1>D      g15<16,8,2>W
+ *
+ * The constant propagation in the compiler backend will transform that to
+ *
+ *    mul(8)          g16<1>D         g15<16,8,2>W    0x7fffffffD
+ *
+ * On some Intel GPUs that will lead to a violation of hardware restrictions:
+ *
+ *    When multiplying a DW and any lower precision integer, the DW operand
+ *    must on src0.
+ *
+ * On other Intel GPUs a correct result is produced, but an inefficient
+ * instruction sequence (i.e., the exact sequence the multiply32x16 function
+ * is trying to avoid) is used.
+ */
+static void
+multiply32x16_int32_large_constant(void)
+{
+    const QoShaderModuleCreateInfo fs_info = qoShaderModuleCreateInfoGLSL(FRAGMENT,
+        QO_EXTENSION GL_INTEL_shader_integer_functions2: require
+
+        layout(set = 0, binding = 0, std140) uniform Data {
+            /* Store everything in one array to avoid any unused components. */
+            uvec4 data[128 / 4];
+            ivec2 field;
+        };
+
+        uint get_word(uint i)
+        {
+            return data[i / 4u][i % 4u];
+        }
+
+        uint fake_multiply32x16(uint x, uint y)
+        {
+            /* The bitfieldExtract nonsense is to prevent clever compilers
+             * from turning this multiply into a multiply32x16.  Such a
+             * (reasonable!) optimization would make the test pointless.
+             */
+            return x * bitfieldExtract(y, field.x, field.y);
+        }
+
+        layout(location = 0) out vec4 f_color;
+
+        void main()
+        {
+            uint i = uint(gl_FragCoord.x) % 128u;
+
+            uint a = get_word(i);
+            if (multiply32x16(0x3fffff, a) == fake_multiply32x16(0x3fffff, a))
+                f_color = vec4(0.0, 1.0, 0.0, 1.0);
+            else
+                f_color = vec4(1.0, 0.0, 0.0, 1.0);
+        }
+    );
+
+    // This ensures that there are the correct number of data elements listed
+    // in the array definition.
+    assert(ARRAY_SIZE(src_32bit) == (128 + 2));
+
+    run_integer_functions2_test(&fs_info, src_32bit, sizeof(src_32bit),	NULL, 0);
+}
+
+test_define {
+    .name = "func.shader.multiply32x16.large_int_constant",
+    .start = multiply32x16_int32_large_constant,
+    .image_filename = "128x128-green.ref.png",
+};
+
+/* This test case exposes a bug in constant propagation in the compiler
+ * backend for the Intel Mesa drivers.  The multiply32x16 instructions used
+ * here will initially create a sequence like
+ *
+ *    mov(8)          g8<1>UD         0x7fffffffUD
+ *    mul(8)          g16<1>UD        g8<8,8,1>UD     g15<16,8,2>UW
+ *
+ * The constant propagation in the compiler backend will transform that to
+ *
+ *    mul(8)          g16<1>UD        g15<16,8,2>UW   0x7fffffffUD
+ *
+ * On some Intel GPUs that will lead to a violation of hardware restrictions:
+ *
+ *    When multiplying a DW and any lower precision integer, the DW operand
+ *    must on src0.
+ *
+ * On other Intel GPUs a correct result is produced, but an inefficient
+ * instruction sequence (i.e., the exact sequence the multiply32x16 function
+ * is trying to avoid) is used.
+ */
+static void
+multiply32x16_uint32_large_constant(void)
+{
+    const QoShaderModuleCreateInfo fs_info = qoShaderModuleCreateInfoGLSL(FRAGMENT,
+        QO_EXTENSION GL_INTEL_shader_integer_functions2: require
+
+        layout(set = 0, binding = 0, std140) uniform Data {
+            /* Store everything in one array to avoid any unused components. */
+            uvec4 data[128 / 4];
+            ivec2 field;
+        };
+
+        uint get_word(uint i)
+        {
+            return data[i / 4u][i % 4u];
+        }
+
+        uint fake_multiply32x16(uint x, uint y)
+        {
+            /* The bitfieldExtract nonsense is to prevent clever compilers
+             * from turning this multiply into a multiply32x16.  Such a
+             * (reasonable!) optimization would make the test pointless.
+             */
+            return x * bitfieldExtract(y, field.x, field.y);
+        }
+
+        layout(location = 0) out vec4 f_color;
+
+        void main()
+        {
+            uint i = uint(gl_FragCoord.x) % 128u;
+
+            uint a = get_word(i);
+            if (multiply32x16(0x3fffffu, a) == fake_multiply32x16(0x3fffffu, a))
+                f_color = vec4(0.0, 1.0, 0.0, 1.0);
+            else
+                f_color = vec4(1.0, 0.0, 0.0, 1.0);
+        }
+    );
+
+    // This ensures that there are the correct number of data elements listed
+    // in the array definition.
+    assert(ARRAY_SIZE(src_32bit) == (128 + 2));
+
+    run_integer_functions2_test(&fs_info, src_32bit, sizeof(src_32bit),	NULL, 0);
+}
+
+test_define {
+    .name = "func.shader.multiply32x16.large_uint_constant",
+    .start = multiply32x16_uint32_large_constant,
+    .image_filename = "128x128-green.ref.png",
+};
