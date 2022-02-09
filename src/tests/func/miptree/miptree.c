@@ -1158,8 +1158,6 @@ copy_color_images_with_draw(const test_data_t *data,
                 .renderPass = data->draw.render_pass,
                 .framebuffer = fb,
                 .renderArea = { {0, 0}, {width, height} },
-                .clearValueCount = 1,
-                .pClearValues = NULL
             },
             VK_SUBPASS_CONTENTS_INLINE);
         vkCmdBindDescriptorSets(cmd, VK_PIPELINE_BIND_POINT_GRAPHICS,
