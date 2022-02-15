@@ -110,6 +110,83 @@ test_define {
     .no_image = true,
 };
 
+
+static void
+task_memory_uint64(void)
+{
+    t_require_ext("VK_NV_mesh_shader");
+
+    VkShaderModule task = qoCreateShaderModuleGLSL(t_device, TASK,
+        QO_EXTENSION GL_NV_mesh_shader : require
+        QO_EXTENSION GL_EXT_shader_explicit_arithmetic_types_int64: enable
+        layout(local_size_x = 32) in;
+
+        taskNV out Task {
+            uint64_t a;
+        } taskOut;
+
+        void main()
+        {
+            uint index = gl_LocalInvocationID.x;
+            if (index == 13) {
+                taskOut.a = (uint64_t(0x60616263) << 32U) + uint64_t(0x64656667);
+            }
+            gl_TaskCountNV = 1;
+        }
+    );
+
+    VkShaderModule mesh = qoCreateShaderModuleGLSL(t_device, MESH,
+        QO_EXTENSION GL_NV_mesh_shader : require
+        QO_EXTENSION GL_EXT_shader_explicit_arithmetic_types_int64: enable
+        layout(local_size_x = 32) in;
+        layout(max_vertices = 6) out;
+        layout(max_primitives = 3) out;
+        layout(triangles) out;
+
+        taskNV in Task {
+            uint64_t a;
+        } taskIn;
+
+        layout(set = 0, binding = 0) buffer Storage {
+            uint result[2];
+        };
+
+        void main()
+        {
+            uint index = gl_LocalInvocationID.x;
+            if (index == 2) {
+                result[0] = uint((taskIn.a >> 32U) & 0xFFFFFFFFU);
+                result[1] = uint(taskIn.a & 0xFFFFFFFFU);
+            }
+
+            gl_PrimitiveCountNV = 0;
+        }
+    );
+
+    uint32_t result[]   = { 0xCCCCCCCC, 0xCCCCCCCC };
+    uint32_t expected[] = { 0x60616263, 0x64656667 };
+
+    simple_mesh_pipeline_options_t opts = {
+        .task = task,
+        .storage = &result,
+        .storage_size = sizeof(result),
+    };
+
+    run_simple_mesh_pipeline(mesh, &opts);
+
+    for (unsigned i = 0; i < ARRAY_LENGTH(expected); i++) {
+        t_assertf(result[i] == expected[i],
+                  "buffer mismatch at uint %u: found 0x%02x, "
+                  "expected 0x%02x", i, result[i], expected[i]);
+    }
+}
+
+test_define {
+    .name = "func.mesh.task_memory.uint64",
+    .start = task_memory_uint64,
+    .no_image = true,
+};
+
 static void
 task_memory_uvec4(void)
 {
