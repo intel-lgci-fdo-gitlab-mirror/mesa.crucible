@@ -1063,3 +1063,90 @@ test_define {
     .start = task_memory_many_tasks_and_meshes,
     .no_image = true,
 };
+
+
+static void
+task_memory_large_array(void)
+{
+    t_require_ext("VK_NV_mesh_shader");
+
+    VkShaderModule task = qoCreateShaderModuleGLSL(t_device, TASK,
+        QO_EXTENSION GL_NV_mesh_shader : require
+        layout(local_size_x = 32) in;
+
+        taskNV out Task {
+            uvec4 v[1024];  // At least 16Kb, which is the minimum limit.
+        } taskOut;
+
+        void main()
+        {
+            uint index = gl_LocalInvocationID.x;
+            if (index == 1) {
+                for (uint i = 0; i < taskOut.v.length(); i++) {
+                    taskOut.v[i] = uvec4(i, taskOut.v.length() - i - 1,
+                                         i, taskOut.v.length() - i - 1);
+                }
+            }
+            gl_TaskCountNV = 1;
+        }
+    );
+
+    VkShaderModule mesh = qoCreateShaderModuleGLSL(t_device, MESH,
+        QO_EXTENSION GL_NV_mesh_shader : require
+        layout(local_size_x = 32) in;
+        layout(max_vertices = 6) out;
+        layout(max_primitives = 3) out;
+        layout(triangles) out;
+
+        taskNV in Task {
+            uvec4 v[1024];
+        } taskIn;
+
+        layout(set = 0, binding = 0) buffer Storage {
+            uint result[4];
+        };
+
+        void main()
+        {
+            uint index = gl_LocalInvocationID.x;
+            if (index == 1) {
+                uint sum[4] = { 0, 0, 0, 0 };
+                for (int i = 0; i < taskIn.v.length(); i++) {
+                    sum[0] += taskIn.v[i].x;
+                    sum[1] += taskIn.v[i].y;
+                    sum[2] += taskIn.v[i].z;
+                    sum[3] += taskIn.v[i].w;
+                }
+                for (int i = 0; i < result.length(); i++)
+                    result[i] = sum[i];
+            }
+            gl_PrimitiveCountNV = 0;
+        }
+    );
+
+    // Sum of the first 1023 integers.
+    uint32_t sum        = (1023 * 1024) / 2;
+
+    uint32_t result[]   = { 0xCC, 0xCC, 0xCC, 0xCC };
+    uint32_t expected[] = { sum,  sum,  sum,  sum  };
+
+    simple_mesh_pipeline_options_t opts = {
+        .task = task,
+        .storage = &result,
+        .storage_size = sizeof(result),
+    };
+
+    run_simple_mesh_pipeline(mesh, &opts);
+
+    for (unsigned i = 0; i < ARRAY_LENGTH(expected); i++) {
+        t_assertf(result[i] == expected[i],
+                  "buffer mismatch at uint %u: found 0x%02x, "
+                  "expected 0x%02x", i, result[i], expected[i]);
+    }
+}
+
+test_define {
+    .name = "func.mesh.task_memory.large_array",
+    .start = task_memory_large_array,
+    .no_image = true,
+};
