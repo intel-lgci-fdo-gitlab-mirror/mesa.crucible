@@ -80,7 +80,20 @@ template = dedent("""
             .stencil_pass_op = {vk_pass_op},
             .stencil_fail_op = {vk_fail_op},
         }},
-        .ref_stencil_filename = "DEFAULT",
+        .image_filename = "func.depthstencil.stencil-triangles/"
+                          "clear-0x{clear_value:x}"
+                          ".ref-0x{ref:x}"
+                          ".compare-op-{short_compare_op}"
+                          ".pass-op-{short_pass_op}"
+                          ".fail-op-{short_fail_op}"
+                          ".ref.png",
+        .ref_stencil_filename = "func.depthstencil.stencil-triangles/"
+                                "clear-0x{clear_value:x}"
+                                ".ref-0x{ref:x}"
+                                ".compare-op-{short_compare_op}"
+                                ".pass-op-{short_pass_op}"
+                                ".fail-op-{short_fail_op}"
+                                ".ref-stencil.png",
         .depthstencil_format = VK_FORMAT_S8_UINT,
     }};
     """)
