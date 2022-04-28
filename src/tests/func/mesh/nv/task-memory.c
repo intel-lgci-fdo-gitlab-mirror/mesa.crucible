@@ -1227,3 +1227,77 @@ test_define {
     .start = task_memory_large_array,
     .no_image = true,
 };
+
+/* https://gitlab.freedesktop.org/mesa/mesa/-/issues/7141 */
+static void
+task_memory_issue7141(void)
+{
+    t_require_ext("VK_NV_mesh_shader");
+
+    VkShaderModule task = qoCreateShaderModuleGLSL(t_device, TASK,
+        QO_EXTENSION GL_NV_mesh_shader : require
+        layout(local_size_x = 1) in;
+
+        taskNV out Task {
+            uint a;
+        } taskOut;
+
+        void main()
+        {
+            taskOut.a = 0x60;
+            gl_TaskCountNV = 9;
+        }
+    );
+
+    VkShaderModule mesh = qoCreateShaderModuleGLSL(t_device, MESH,
+        QO_EXTENSION GL_NV_mesh_shader : require
+        layout(local_size_x = 1) in;
+        layout(max_vertices = 3) out;
+        layout(max_primitives = 1) out;
+        layout(triangles) out;
+
+        taskNV in Task {
+            uint a;
+        } taskIn;
+
+        layout(set = 0, binding = 0) buffer Storage {
+            uint result[1];
+        };
+
+        void main()
+        {
+            if (gl_WorkGroupID.x == 8)
+                result[0] = taskIn.a; /* this reads uninitialized data */
+
+            gl_PrimitiveCountNV = 0;
+        }
+    );
+
+    uint32_t result[] = {
+        0xCC,
+    };
+
+    uint32_t expected[] = {
+        0x60,
+    };
+
+    simple_mesh_pipeline_options_t opts = {
+        .task = task,
+        .storage = &result,
+        .storage_size = sizeof(result),
+    };
+
+    run_simple_mesh_pipeline(mesh, &opts);
+
+    for (unsigned i = 0; i < ARRAY_LENGTH(expected); i++) {
+        t_assertf(result[i] == expected[i],
+                  "buffer mismatch at uint %u: found 0x%02x, "
+                  "expected 0x%02x", i, result[i], expected[i]);
+    }
+}
+
+test_define {
+    .name = "func.mesh.nv.task_memory.issue7141",
+    .start = task_memory_issue7141,
+    .no_image = true,
+};
