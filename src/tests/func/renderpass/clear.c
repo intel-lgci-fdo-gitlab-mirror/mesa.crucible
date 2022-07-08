@@ -735,7 +735,7 @@ test_color_render_area(void)
                 .samples = 1,
                 .loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR,
                 .storeOp = VK_ATTACHMENT_STORE_OP_STORE,
-                .initialLayout = VK_IMAGE_LAYOUT_UNDEFINED,
+                .initialLayout = VK_IMAGE_LAYOUT_GENERAL,
                 .finalLayout = VK_IMAGE_LAYOUT_GENERAL,
             },
         },
@@ -757,7 +757,7 @@ test_color_render_area(void)
     vkCmdBeginRenderPass(t_cmd_buffer,
         &(VkRenderPassBeginInfo) {
             .sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO,
-            .renderPass = pass,
+            .renderPass = t_render_pass,
             .framebuffer = t_framebuffer,
             .renderArea = {
                 { 0, 0 },
