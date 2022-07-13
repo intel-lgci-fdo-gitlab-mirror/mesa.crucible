@@ -349,3 +349,88 @@ test_define {
     .start = outputs_write_packed_indices,
     .image_filename = "func.mesh.basic.ref.png",
 };
+
+static void
+outputs_per_primitive_unused(void)
+{
+    t_require_ext("VK_NV_mesh_shader");
+
+    VkShaderModule mesh = qoCreateShaderModuleGLSL(t_device, MESH,
+        QO_EXTENSION GL_NV_mesh_shader : require
+        layout(local_size_x = 32) in;
+        layout(max_vertices = 6) out;
+        layout(max_primitives = 3) out;
+        layout(triangles) out;
+
+        layout(location = 0) out PerVertex {
+            vec4 color;
+        } per_vertex[];
+
+        perprimitiveNV layout(location = 5) out float alphaprim[];
+        layout(location = 4) out flat float alpha[];
+
+        void main()
+        {
+            uint local = gl_LocalInvocationID.x;
+            gl_PrimitiveCountNV = 2;
+
+            if (local < 6) {
+                gl_PrimitiveIndicesNV[local] = local;
+            }
+
+            if (local < 2) {
+                alphaprim[local] = 1.0;
+            }
+
+            if (local == 31) {
+                vec4 scale = vec4(0.5, 0.5, 0.5, 1.0);
+                vec4 pos_a = vec4(-0.5f, -0.5f, 0, 0);
+                gl_MeshVerticesNV[0].gl_Position = scale * vec4(0.5f, 0.5f, 0.0f, 1.0f) + pos_a;
+                gl_MeshVerticesNV[1].gl_Position = scale * vec4(-0.5f, 0.5f, 0.0f, 1.0f) + pos_a;
+                gl_MeshVerticesNV[2].gl_Position = scale * vec4(0.0f, -0.5f, 0.0f, 1.0f) + pos_a;
+
+                vec4 pos_b = vec4(0.5f, 0.5f, 0, 0);
+                gl_MeshVerticesNV[3].gl_Position = scale * vec4(0.5f, 0.5f, 0.0f, 1.0f) + pos_b;
+                gl_MeshVerticesNV[4].gl_Position = scale * vec4(-0.5f, 0.5f, 0.0f, 1.0f) + pos_b;
+                gl_MeshVerticesNV[5].gl_Position = scale * vec4(0.0f, -0.5f, 0.0f, 1.0f) + pos_b;
+
+                per_vertex[0].color = vec4(1, 0, 0, 0);
+                per_vertex[1].color = vec4(0, 1, 0, 0);
+                per_vertex[2].color = vec4(0, 0, 1, 0);
+                per_vertex[3].color = vec4(0, 1, 1, 0);
+                per_vertex[4].color = vec4(1, 0, 1, 0);
+                per_vertex[5].color = vec4(1, 1, 0, 0);
+            }
+
+            groupMemoryBarrier();
+            barrier();
+
+            alpha[0] = alphaprim[0];
+            alpha[3] = alphaprim[1];
+        }
+    );
+
+    VkShaderModule fs = qoCreateShaderModuleGLSL(t_device, FRAGMENT,
+        QO_EXTENSION GL_NV_mesh_shader : require
+        layout(location = 0) in vec4 in_color;
+        layout(location = 4) in flat float in_alpha;
+        layout(location = 0) out vec4 out_color;
+        void main()
+        {
+            out_color = in_color;
+            out_color.a = in_alpha;
+        }
+    );
+
+    simple_mesh_pipeline_options_t opts = {
+        .fs = fs,
+    };
+
+    run_simple_mesh_pipeline(mesh, &opts);
+}
+
+test_define {
+    .name = "func.mesh.outputs.per_primitive.unused",
+    .start = outputs_per_primitive_unused,
+    .image_filename = "func.mesh.basic.ref.png",
+};
