@@ -90,7 +90,14 @@ init_context(struct test_context *ctx, float priority,
 
     ctx->atomic = qoCreateBuffer(ctx->device, .size = 4,
                                  .usage = VK_BUFFER_USAGE_STORAGE_BUFFER_BIT);
-    VkDeviceMemory atomic_mem = qoAllocBufferMemory(ctx->device, ctx->atomic);
+
+    VkMemoryRequirements atomic_buffer_reqs =
+      qoGetBufferMemoryRequirements(t_device, ctx->atomic);
+
+    VkDeviceMemory atomic_mem =
+      qoAllocMemoryFromRequirements(ctx->device, &atomic_buffer_reqs,
+                                    .properties = VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT |
+                                                  VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
     uint32_t *atomic_map = qoMapMemory(ctx->device, atomic_mem, 0, 4, 0);
     *atomic_map = 0;
     vkFlushMappedMemoryRanges(ctx->device, 1,
@@ -545,10 +552,20 @@ init_memory_contents(struct test_context *ctx,
         data[i * 2 + 1] = 0;
     }
 
+    VkBuffer tmp_buf =
+      qoCreateBuffer(ctx->device, .size = sizeof(struct buffer_layout),
+                     .pNext = &(VkExternalMemoryBufferCreateInfoKHR) {
+                       .sType = VK_STRUCTURE_TYPE_EXTERNAL_MEMORY_BUFFER_CREATE_INFO_KHR,
+                       .handleTypes = handle_type,
+                     });
+
+    VkMemoryRequirements tmp_buffer_reqs =
+      qoGetBufferMemoryRequirements(t_device, tmp_buf);
+
     VkDeviceMemory tmp_mem =
-        qoAllocMemory(ctx->device,
-                      .allocationSize = sizeof(struct buffer_layout),
-                      .memoryTypeIndex = 0 /* TODO */);
+      qoAllocMemoryFromRequirements(ctx->device, &tmp_buffer_reqs,
+                                    .properties = VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT |
+                                                  VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
 
     struct buffer_layout *map = qoMapMemory(ctx->device, tmp_mem, 0,
                                             sizeof(struct buffer_layout), 0);
@@ -579,10 +596,20 @@ check_memory_contents(struct test_context *ctx,
     /* First, do the computation on the CPU */
     cpu_process_data(data);
 
+    VkBuffer tmp_buf =
+      qoCreateBuffer(ctx->device, .size = sizeof(struct buffer_layout),
+                     .pNext = &(VkExternalMemoryBufferCreateInfoKHR) {
+                       .sType = VK_STRUCTURE_TYPE_EXTERNAL_MEMORY_BUFFER_CREATE_INFO_KHR,
+                       .handleTypes = handle_type,
+                     });
+
+    VkMemoryRequirements tmp_buffer_reqs =
+      qoGetBufferMemoryRequirements(t_device, tmp_buf);
+
     VkDeviceMemory tmp_mem =
-        qoAllocMemory(ctx->device,
-                      .allocationSize = sizeof(struct buffer_layout),
-                      .memoryTypeIndex = 0 /* TODO */);
+      qoAllocMemoryFromRequirements(ctx->device, &tmp_buffer_reqs,
+                                    .properties = VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT |
+                                                  VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
 
     copy_memory(ctx,
                 tmp_mem, VK_ACCESS_HOST_READ_BIT, VK_PIPELINE_STAGE_HOST_BIT, 0,
