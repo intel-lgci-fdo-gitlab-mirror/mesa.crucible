@@ -102,6 +102,7 @@ test_sources_with_spirv = [
   'func/shader_group_vote/ext_shader_subgroup_vote.c',
   'func/ssbo/interleave.c',
   'func/sync/semaphore-fd.c',
+  'func/tessellation/basic.c',
   'func/ubo/robust-push-ubo.c',
   'stress/lots-of-surface-state.c',
   'func/uniform-subgroup.c',
