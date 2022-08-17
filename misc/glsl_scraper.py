@@ -20,8 +20,8 @@ version_re = re.compile(r'QO_VERSION\s+(\S+)')
 
 stage_to_glslang_stage = {
     'VERTEX': 'vert',
-    'TESS_CONTROL': 'tesc',
-    'TESS_EVALUATION': 'tese',
+    'TESSELLATION_CONTROL': 'tesc',
+    'TESSELLATION_EVALUATION': 'tese',
     'GEOMETRY': 'geom',
     'FRAGMENT': 'frag',
     'COMPUTE': 'comp',
