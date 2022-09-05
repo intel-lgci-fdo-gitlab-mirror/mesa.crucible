@@ -22,7 +22,7 @@
 #include "util/simple_pipeline.h"
 #include "tapi/t.h"
 
-#include "src/tests/func/mesh/push-constants-spirv.h"
+#include "src/tests/func/mesh/nv/push-constants-spirv.h"
 
 static void
 push_constants_mesh_read(void)
@@ -87,7 +87,7 @@ push_constants_mesh_read(void)
 }
 
 test_define {
-    .name = "func.mesh.push_constants.mesh_read",
+    .name = "func.mesh.nv.push_constants.mesh_read",
     .start = push_constants_mesh_read,
     .image_filename = "func.mesh.basic.ref.png",
 };

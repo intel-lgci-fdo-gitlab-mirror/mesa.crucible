@@ -22,7 +22,7 @@
 #include "util/simple_pipeline.h"
 #include "tapi/t.h"
 
-#include "src/tests/func/mesh/primitiveid-spirv.h"
+#include "src/tests/func/mesh/nv/primitiveid-spirv.h"
 
 static void
 primitive_id_fs(void)
@@ -89,7 +89,7 @@ primitive_id_fs(void)
 }
 
 test_define {
-    .name = "func.mesh.primitive_id.fs",
+    .name = "func.mesh.nv.primitive_id.fs",
     .start = primitive_id_fs,
     .image_filename = "func.mesh.primitive_id.fs.ref.png",
 };

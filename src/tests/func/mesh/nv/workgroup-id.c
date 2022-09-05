@@ -22,7 +22,7 @@
 #include "util/simple_pipeline.h"
 #include "tapi/t.h"
 
-#include "src/tests/func/mesh/workgroup-id-spirv.h"
+#include "src/tests/func/mesh/nv/workgroup-id-spirv.h"
 
 static void
 workgroup_id_mesh(void)
@@ -96,7 +96,7 @@ workgroup_id_mesh(void)
 }
 
 test_define {
-    .name = "func.mesh.workgroup_id.mesh",
+    .name = "func.mesh.nv.workgroup_id.mesh",
     .start = workgroup_id_mesh,
     .image_filename = "func.mesh.basic.ref.png",
 };
@@ -193,7 +193,7 @@ workgroup_id_task(void)
 }
 
 test_define {
-    .name = "func.mesh.workgroup_id.task",
+    .name = "func.mesh.nv.workgroup_id.task",
     .start = workgroup_id_task,
     .image_filename = "func.mesh.basic.ref.png",
 };

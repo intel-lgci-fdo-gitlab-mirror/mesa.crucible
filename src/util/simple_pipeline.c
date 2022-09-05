@@ -296,6 +296,17 @@ void
 run_simple_mesh_pipeline(VkShaderModule mesh,
                          const struct simple_mesh_pipeline_options *_opts)
 {
+    struct simple_mesh_pipeline_options opts = {};
+    if (_opts)
+        opts = *_opts;
+
+    if (opts.type == UNKNOWN_MESH_SHADER) {
+        if (strncmp(t_name, "func.mesh.nv.", strlen("func.mesh.nv.")) == 0)
+            opts.type = NV_MESH_SHADER;
+        else
+            t_assert(!"unknown mesh shader extension");
+    }
+
     t_require_ext("VK_NV_mesh_shader");
 
     VkPhysicalDeviceMeshShaderFeaturesNV mesh_features = {
@@ -311,9 +322,6 @@ run_simple_mesh_pipeline(VkShaderModule mesh,
     };
     vkGetPhysicalDeviceFeatures2(t_physical_dev, &features);
 
-    struct simple_mesh_pipeline_options opts = {};
-    if (_opts)
-        opts = *_opts;
     if (opts.task_count == 0)
         opts.task_count = 1;
 

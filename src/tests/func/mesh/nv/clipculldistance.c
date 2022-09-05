@@ -22,7 +22,7 @@
 #include "util/simple_pipeline.h"
 #include "tapi/t.h"
 
-#include "src/tests/func/mesh/clipculldistance-spirv.h"
+#include "src/tests/func/mesh/nv/clipculldistance-spirv.h"
 
 static VkShaderModule
 get_clipdistance_1_shader(void)
@@ -97,7 +97,7 @@ clipdistance_1(void)
 }
 
 test_define {
-    .name = "func.mesh.clipdistance.1",
+    .name = "func.mesh.nv.clipdistance.1",
     .start = clipdistance_1,
     .image_filename = "func.mesh.clipdistance.ref.png",
 };
@@ -174,7 +174,7 @@ clipdistance_5(void)
 }
 
 test_define {
-    .name = "func.mesh.clipdistance.5",
+    .name = "func.mesh.nv.clipdistance.5",
     .start = clipdistance_5,
     .image_filename = "func.mesh.clipdistance.ref.png",
 };
@@ -244,7 +244,7 @@ culldistance_1(void)
 }
 
 test_define {
-    .name = "func.mesh.culldistance.1",
+    .name = "func.mesh.nv.culldistance.1",
     .start = culldistance_1,
     .image_filename = "func.mesh.culldistance.ref.png",
 };
@@ -321,7 +321,7 @@ culldistance_5(void)
 }
 
 test_define {
-    .name = "func.mesh.culldistance.5",
+    .name = "func.mesh.nv.culldistance.5",
     .start = culldistance_5,
     .image_filename = "func.mesh.culldistance.ref.png",
 };
@@ -408,7 +408,7 @@ clipdistance_1_culldistance_1(void)
 }
 
 test_define {
-    .name = "func.mesh.clipdistance_culldistance.1",
+    .name = "func.mesh.nv.clipdistance_culldistance.1",
     .start = clipdistance_1_culldistance_1,
     .image_filename = "func.mesh.clipdistance_culldistance.ref.png",
 };
@@ -442,7 +442,7 @@ clipdistance_1_fs(void)
 }
 
 test_define {
-    .name = "func.mesh.clipdistance.1.fs",
+    .name = "func.mesh.nv.clipdistance.1.fs",
     .start = clipdistance_1_fs,
     .image_filename = "func.mesh.clipdistance.fs.ref.png",
 };

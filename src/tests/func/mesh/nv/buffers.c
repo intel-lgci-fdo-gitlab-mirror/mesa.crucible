@@ -22,7 +22,7 @@
 #include "util/simple_pipeline.h"
 #include "tapi/t.h"
 
-#include "src/tests/func/mesh/buffers-spirv.h"
+#include "src/tests/func/mesh/nv/buffers-spirv.h"
 
 static void
 buffers_mesh_ssbo_read(void)
@@ -87,7 +87,7 @@ buffers_mesh_ssbo_read(void)
 }
 
 test_define {
-    .name = "func.mesh.buffers.mesh_ssbo_read",
+    .name = "func.mesh.nv.buffers.mesh_ssbo_read",
     .start = buffers_mesh_ssbo_read,
     .image_filename = "func.mesh.basic.ref.png",
 };
@@ -166,7 +166,7 @@ buffers_mesh_ssbo_write(void)
 }
 
 test_define {
-    .name = "func.mesh.buffers.mesh_ssbo_write",
+    .name = "func.mesh.nv.buffers.mesh_ssbo_write",
     .start = buffers_mesh_ssbo_write,
     .image_filename = "func.mesh.basic.ref.png",
 };
@@ -236,7 +236,7 @@ buffers_mesh_ubo_read(void)
 }
 
 test_define {
-    .name = "func.mesh.buffers.mesh_ubo_read",
+    .name = "func.mesh.nv.buffers.mesh_ubo_read",
     .start = buffers_mesh_ubo_read,
     .image_filename = "func.mesh.basic.ref.png",
 };
@@ -330,7 +330,7 @@ buffers_task_ssbo_read(void)
 }
 
 test_define {
-    .name = "func.mesh.buffers.task_ssbo_read",
+    .name = "func.mesh.nv.buffers.task_ssbo_read",
     .start = buffers_task_ssbo_read,
     .image_filename = "func.mesh.basic.ref.png",
 };
@@ -424,7 +424,7 @@ buffers_task_ubo_read(void)
 }
 
 test_define {
-    .name = "func.mesh.buffers.task_ubo_read",
+    .name = "func.mesh.nv.buffers.task_ubo_read",
     .start = buffers_task_ubo_read,
     .image_filename = "func.mesh.basic.ref.png",
 };
@@ -531,7 +531,7 @@ buffers_task_ubo_read_ssbo_write(void)
 }
 
 test_define {
-    .name = "func.mesh.buffers.task_ubo_read_ssbo_write",
+    .name = "func.mesh.nv.buffers.task_ubo_read_ssbo_write",
     .start = buffers_task_ubo_read_ssbo_write,
     .image_filename = "func.mesh.basic.ref.png",
 };

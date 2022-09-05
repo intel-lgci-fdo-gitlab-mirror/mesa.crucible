@@ -22,7 +22,7 @@
 #include "util/simple_pipeline.h"
 #include "tapi/t.h"
 
-#include "src/tests/func/mesh/workgroup-memory-spirv.h"
+#include "src/tests/func/mesh/nv/workgroup-memory-spirv.h"
 
 static void
 workgroup_memory_mesh_uint(void)
@@ -83,7 +83,7 @@ workgroup_memory_mesh_uint(void)
 }
 
 test_define {
-    .name = "func.mesh.workgroup_memory.mesh_uint",
+    .name = "func.mesh.nv.workgroup_memory.mesh_uint",
     .start = workgroup_memory_mesh_uint,
     .no_image = true,
 };
@@ -156,7 +156,7 @@ workgroup_memory_task_uint(void)
 }
 
 test_define {
-    .name = "func.mesh.workgroup_memory.task_uint",
+    .name = "func.mesh.nv.workgroup_memory.task_uint",
     .start = workgroup_memory_task_uint,
     .no_image = true,
 };

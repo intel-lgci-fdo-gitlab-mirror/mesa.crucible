@@ -44,9 +44,16 @@ struct simple_compute_pipeline_options {
 void run_simple_compute_pipeline(VkShaderModule cs,
                                  const struct simple_compute_pipeline_options *opts);
 
+enum mesh_shader_type {
+    UNKNOWN_MESH_SHADER = 0,
+    NV_MESH_SHADER = 1,
+};
+
 typedef struct simple_mesh_pipeline_options simple_mesh_pipeline_options_t;
 
 struct simple_mesh_pipeline_options {
+    enum mesh_shader_type type;
+
     VkShaderModule task;
 
     // Bound to set 0, descriptor 0.

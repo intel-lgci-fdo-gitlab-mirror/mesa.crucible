@@ -22,7 +22,7 @@
 #include "util/simple_pipeline.h"
 #include "tapi/t.h"
 
-#include "src/tests/func/mesh/basic-spirv.h"
+#include "src/tests/func/mesh/nv/basic-spirv.h"
 
 static unsigned
 parse_require_subgroup_size(const char *s)
@@ -91,31 +91,31 @@ basic_mesh(void)
 }
 
 test_define {
-    .name = "func.mesh.basic.mesh",
+    .name = "func.mesh.nv.basic.mesh",
     .start = basic_mesh,
     .image_filename = "func.mesh.basic.ref.png",
 };
 
 test_define {
-    .name = "func.mesh.basic.mesh_require8",
+    .name = "func.mesh.nv.basic.mesh_require8",
     .start = basic_mesh,
     .image_filename = "func.mesh.basic.ref.png",
 };
 
 test_define {
-    .name = "func.mesh.basic.mesh_require16",
+    .name = "func.mesh.nv.basic.mesh_require16",
     .start = basic_mesh,
     .image_filename = "func.mesh.basic.ref.png",
 };
 
 test_define {
-    .name = "func.mesh.basic.mesh_require32",
+    .name = "func.mesh.nv.basic.mesh_require32",
     .start = basic_mesh,
     .image_filename = "func.mesh.basic.ref.png",
 };
 
 test_define {
-    .name = "func.mesh.basic.mesh_require64",
+    .name = "func.mesh.nv.basic.mesh_require64",
     .start = basic_mesh,
     .image_filename = "func.mesh.basic.ref.png",
 };
@@ -201,31 +201,31 @@ basic_task(void)
 }
 
 test_define {
-    .name = "func.mesh.basic.task",
+    .name = "func.mesh.nv.basic.task",
     .start = basic_task,
     .image_filename = "func.mesh.basic.ref.png",
 };
 
 test_define {
-    .name = "func.mesh.basic.task_require8",
+    .name = "func.mesh.nv.basic.task_require8",
     .start = basic_task,
     .image_filename = "func.mesh.basic.ref.png",
 };
 
 test_define {
-    .name = "func.mesh.basic.task_require16",
+    .name = "func.mesh.nv.basic.task_require16",
     .start = basic_task,
     .image_filename = "func.mesh.basic.ref.png",
 };
 
 test_define {
-    .name = "func.mesh.basic.task_require32",
+    .name = "func.mesh.nv.basic.task_require32",
     .start = basic_task,
     .image_filename = "func.mesh.basic.ref.png",
 };
 
 test_define {
-    .name = "func.mesh.basic.task_require64",
+    .name = "func.mesh.nv.basic.task_require64",
     .start = basic_task,
     .image_filename = "func.mesh.basic.ref.png",
 };

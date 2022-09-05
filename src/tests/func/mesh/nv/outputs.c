@@ -22,7 +22,7 @@
 #include "util/simple_pipeline.h"
 #include "tapi/t.h"
 
-#include "src/tests/func/mesh/outputs-spirv.h"
+#include "src/tests/func/mesh/nv/outputs-spirv.h"
 
 static void
 outputs_per_vertex(void)
@@ -73,7 +73,7 @@ outputs_per_vertex(void)
 }
 
 test_define {
-    .name = "func.mesh.outputs.per_vertex",
+    .name = "func.mesh.nv.outputs.per_vertex",
     .start = outputs_per_vertex,
     .image_filename = "func.mesh.basic.ref.png",
 };
@@ -129,7 +129,7 @@ outputs_per_vertex_block(void)
 }
 
 test_define {
-    .name = "func.mesh.outputs.per_vertex_block",
+    .name = "func.mesh.nv.outputs.per_vertex_block",
     .start = outputs_per_vertex_block,
     .image_filename = "func.mesh.basic.ref.png",
 };
@@ -208,7 +208,7 @@ outputs_per_primitive(void)
 }
 
 test_define {
-    .name = "func.mesh.outputs.per_primitive",
+    .name = "func.mesh.nv.outputs.per_primitive",
     .start = outputs_per_primitive,
     .image_filename = "func.mesh.basic.ref.png",
 };
@@ -289,7 +289,7 @@ outputs_per_primitive_block(void)
 }
 
 test_define {
-    .name = "func.mesh.outputs.per_primitive_block",
+    .name = "func.mesh.nv.outputs.per_primitive_block",
     .start = outputs_per_primitive_block,
     .image_filename = "func.mesh.basic.ref.png",
 };
@@ -345,7 +345,7 @@ outputs_write_packed_indices(void)
 }
 
 test_define {
-    .name = "func.mesh.outputs.write_packed_indices",
+    .name = "func.mesh.nv.outputs.write_packed_indices",
     .start = outputs_write_packed_indices,
     .image_filename = "func.mesh.basic.ref.png",
 };
@@ -430,7 +430,7 @@ outputs_per_primitive_unused(void)
 }
 
 test_define {
-    .name = "func.mesh.outputs.per_primitive.unused",
+    .name = "func.mesh.nv.outputs.per_primitive.unused",
     .start = outputs_per_primitive_unused,
     .image_filename = "func.mesh.basic.ref.png",
 };

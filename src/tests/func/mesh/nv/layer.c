@@ -22,7 +22,7 @@
 #include "tapi/t.h"
 #include "util/string.h"
 
-#include "src/tests/func/mesh/layer-spirv.h"
+#include "src/tests/func/mesh/nv/layer-spirv.h"
 
 #define GET_DEVICE_FUNCTION_PTR(name) \
     PFN_##name name = (PFN_##name)vkGetDeviceProcAddr(t_device, #name); \
@@ -261,7 +261,7 @@ layer(void)
 }
 
 test_define {
-    .name = "func.mesh.layer",
+    .name = "func.mesh.nv.layer",
     .start = layer,
     .no_image = true,
 };

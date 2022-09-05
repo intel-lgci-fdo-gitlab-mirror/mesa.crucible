@@ -22,7 +22,7 @@
 #include "util/simple_pipeline.h"
 #include "tapi/t.h"
 
-#include "src/tests/func/mesh/viewportmask-spirv.h"
+#include "src/tests/func/mesh/nv/viewportmask-spirv.h"
 
 static void
 viewport_mask_simple(void)
@@ -146,7 +146,7 @@ viewport_mask_simple(void)
 }
 
 test_define {
-    .name = "func.mesh.viewport_mask.simple",
+    .name = "func.mesh.nv.viewport_mask.simple",
     .start = viewport_mask_simple,
     .image_filename = "func.mesh.viewport_mask.simple.ref.png",
 };
@@ -273,7 +273,7 @@ viewport_mask_mixed(void)
 }
 
 test_define {
-    .name = "func.mesh.viewport_mask.mixed",
+    .name = "func.mesh.nv.viewport_mask.mixed",
     .start = viewport_mask_mixed,
     .image_filename = "func.mesh.viewport_mask.mixed.ref.png",
 };

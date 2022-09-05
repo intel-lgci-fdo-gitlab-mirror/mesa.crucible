@@ -23,7 +23,7 @@
 #include "tapi/t.h"
 #include "util/string.h"
 
-#include "src/tests/func/mesh/multiview-spirv.h"
+#include "src/tests/func/mesh/nv/multiview-spirv.h"
 
 #define GET_DEVICE_FUNCTION_PTR(name) \
     PFN_##name name = (PFN_##name)vkGetDeviceProcAddr(t_device, #name); \
@@ -305,31 +305,31 @@ multiview(void)
 }
 
 test_define {
-    .name = "func.mesh.multiview.3.111",
+    .name = "func.mesh.nv.multiview.3.111",
     .start = multiview,
     .no_image = true,
 };
 
 test_define {
-    .name = "func.mesh.multiview.3.110",
+    .name = "func.mesh.nv.multiview.3.110",
     .start = multiview,
     .no_image = true,
 };
 
 test_define {
-    .name = "func.mesh.multiview.2.10",
+    .name = "func.mesh.nv.multiview.2.10",
     .start = multiview,
     .no_image = true,
 };
 
 test_define {
-    .name = "func.mesh.multiview.2.11",
+    .name = "func.mesh.nv.multiview.2.11",
     .start = multiview,
     .no_image = true,
 };
 
 test_define {
-    .name = "func.mesh.multiview.1.1",
+    .name = "func.mesh.nv.multiview.1.1",
     .start = multiview,
     .no_image = true,
 };
@@ -406,7 +406,7 @@ multiview_perview_nonblock(void)
 }
 
 test_define {
-    .name = "func.mesh.multiview.perview.nonblock.2.11",
+    .name = "func.mesh.nv.multiview.perview.nonblock.2.11",
     .start = multiview_perview_nonblock,
     .no_image = true,
 };
@@ -486,7 +486,7 @@ multiview_perview_block(void)
 }
 
 test_define {
-    .name = "func.mesh.multiview.perview.block.2.11",
+    .name = "func.mesh.nv.multiview.perview.block.2.11",
     .start = multiview_perview_block,
     .no_image = true,
 };
@@ -603,7 +603,7 @@ multiview_clipdistance(void)
 }
 
 test_define {
-    .name = "func.mesh.multiview.clipdistance.2.11",
+    .name = "func.mesh.nv.multiview.clipdistance.2.11",
     .start = multiview_clipdistance,
     .no_image = true,
 };
@@ -720,7 +720,7 @@ multiview_culldistance(void)
 }
 
 test_define {
-    .name = "func.mesh.multiview.culldistance.2.11",
+    .name = "func.mesh.nv.multiview.culldistance.2.11",
     .start = multiview_culldistance,
     .no_image = true,
 };
@@ -862,7 +862,7 @@ multiview_viewportmask_perview(void)
 }
 
 test_define {
-    .name = "func.mesh.multiview.viewportmask_perview.2.11",
+    .name = "func.mesh.nv.multiview.viewportmask_perview.2.11",
     .start = multiview_viewportmask_perview,
     .no_image = true,
 };

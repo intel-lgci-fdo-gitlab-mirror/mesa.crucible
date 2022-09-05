@@ -22,7 +22,7 @@
 #include "util/simple_pipeline.h"
 #include "tapi/t.h"
 
-#include "src/tests/func/mesh/task-memory-spirv.h"
+#include "src/tests/func/mesh/nv/task-memory-spirv.h"
 
 /* Task memory flows from each Task workgroup to all its "children"
  * Mesh workgroups.  That implies ordering between their execution.
@@ -105,7 +105,7 @@ task_memory_uint(void)
 }
 
 test_define {
-    .name = "func.mesh.task_memory.uint",
+    .name = "func.mesh.nv.task_memory.uint",
     .start = task_memory_uint,
     .no_image = true,
 };
@@ -182,7 +182,7 @@ task_memory_uint64(void)
 }
 
 test_define {
-    .name = "func.mesh.task_memory.uint64",
+    .name = "func.mesh.nv.task_memory.uint64",
     .start = task_memory_uint64,
     .no_image = true,
 };
@@ -263,7 +263,7 @@ task_memory_uvec4(void)
 }
 
 test_define {
-    .name = "func.mesh.task_memory.uvec4",
+    .name = "func.mesh.nv.task_memory.uvec4",
     .start = task_memory_uvec4,
     .no_image = true,
 };
@@ -359,7 +359,7 @@ task_memory_array_direct(void)
 }
 
 test_define {
-    .name = "func.mesh.task_memory.array_direct",
+    .name = "func.mesh.nv.task_memory.array_direct",
     .start = task_memory_array_direct,
     .no_image = true,
 };
@@ -440,7 +440,7 @@ task_memory_array_indirect(void)
 }
 
 test_define {
-    .name = "func.mesh.task_memory.array_indirect",
+    .name = "func.mesh.nv.task_memory.array_indirect",
     .start = task_memory_array_indirect,
     .no_image = true,
 };
@@ -544,7 +544,7 @@ task_memory_many(void)
 }
 
 test_define {
-    .name = "func.mesh.task_memory.many",
+    .name = "func.mesh.nv.task_memory.many",
     .start = task_memory_many,
     .no_image = true,
 };
@@ -656,7 +656,7 @@ task_memory_struct(void)
 }
 
 test_define {
-    .name = "func.mesh.task_memory.struct",
+    .name = "func.mesh.nv.task_memory.struct",
     .start = task_memory_struct,
     .no_image = true,
 };
@@ -767,7 +767,7 @@ task_memory_some_not_used(void)
 }
 
 test_define {
-    .name = "func.mesh.task_memory.some_not_used",
+    .name = "func.mesh.nv.task_memory.some_not_used",
     .start = task_memory_some_not_used,
     .no_image = true,
 };
@@ -892,7 +892,7 @@ task_memory_load_output_struct(void)
 }
 
 test_define {
-    .name = "func.mesh.task_memory.load_output_struct",
+    .name = "func.mesh.nv.task_memory.load_output_struct",
     .start = task_memory_load_output_struct,
     .no_image = true,
 };
@@ -969,7 +969,7 @@ task_memory_many_meshes(void)
 }
 
 test_define {
-    .name = "func.mesh.task_memory.many_meshes",
+    .name = "func.mesh.nv.task_memory.many_meshes",
     .start = task_memory_many_meshes,
     .no_image = true,
 };
@@ -1049,7 +1049,7 @@ task_memory_many_tasks(void)
 }
 
 test_define {
-    .name = "func.mesh.task_memory.many_tasks",
+    .name = "func.mesh.nv.task_memory.many_tasks",
     .start = task_memory_many_tasks,
     .no_image = true,
 };
@@ -1136,7 +1136,7 @@ task_memory_many_tasks_and_meshes(void)
 }
 
 test_define {
-    .name = "func.mesh.task_memory.many_tasks_and_meshes",
+    .name = "func.mesh.nv.task_memory.many_tasks_and_meshes",
     .start = task_memory_many_tasks_and_meshes,
     .no_image = true,
 };
@@ -1223,7 +1223,7 @@ task_memory_large_array(void)
 }
 
 test_define {
-    .name = "func.mesh.task_memory.large_array",
+    .name = "func.mesh.nv.task_memory.large_array",
     .start = task_memory_large_array,
     .no_image = true,
 };
