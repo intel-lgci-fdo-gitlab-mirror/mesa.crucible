@@ -1034,7 +1034,7 @@ task_memory_many_tasks(void)
 
     simple_mesh_pipeline_options_t opts = {
         .task = task,
-        .task_count = 4,
+        .group_count_x = 4,
         .storage = &result,
         .storage_size = sizeof(result),
     };
@@ -1121,7 +1121,7 @@ task_memory_many_tasks_and_meshes(void)
 
     simple_mesh_pipeline_options_t opts = {
         .task = task,
-        .task_count = 4,
+        .group_count_x = 4,
         .storage = &result,
         .storage_size = sizeof(result),
     };

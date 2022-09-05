@@ -89,7 +89,7 @@ workgroup_id_mesh(void)
     );
 
     simple_mesh_pipeline_options_t opts = {
-        .task_count = 3,
+        .group_count_x = 3,
     };
 
     run_simple_mesh_pipeline(mesh, &opts);
@@ -186,7 +186,7 @@ workgroup_id_task(void)
 
     simple_mesh_pipeline_options_t opts = {
         .task = task,
-        .task_count = 4,
+        .group_count_x = 4,
     };
 
     run_simple_mesh_pipeline(mesh, &opts);

@@ -303,32 +303,71 @@ run_simple_mesh_pipeline(VkShaderModule mesh,
     if (opts.type == UNKNOWN_MESH_SHADER) {
         if (strncmp(t_name, "func.mesh.nv.", strlen("func.mesh.nv.")) == 0)
             opts.type = NV_MESH_SHADER;
+        else if (strncmp(t_name, "func.mesh.ext.", strlen("func.mesh.ext.")) == 0)
+            opts.type = EXT_MESH_SHADER;
         else
             t_assert(!"unknown mesh shader extension");
     }
 
-    t_require_ext("VK_NV_mesh_shader");
+    t_assert(opts.type == NV_MESH_SHADER || opts.type == EXT_MESH_SHADER);
 
-    VkPhysicalDeviceMeshShaderFeaturesNV mesh_features = {
+    enum VkShaderStageFlagBits vk_shader_stage_mesh_bit;
+    enum VkShaderStageFlagBits vk_shader_stage_task_bit;
+
+    VkPhysicalDeviceMeshShaderFeaturesNV mesh_features_nv = {
         .sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_MESH_SHADER_FEATURES_NV,
     };
+    VkPhysicalDeviceMeshShaderFeaturesEXT mesh_features_ext = {
+        .sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_MESH_SHADER_FEATURES_EXT,
+    };
+
     VkPhysicalDeviceSubgroupSizeControlFeaturesEXT ssc_features = {
         .sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SUBGROUP_SIZE_CONTROL_FEATURES_EXT,
-        .pNext = &mesh_features,
     };
+
+    if (opts.group_count_x == 0)
+        opts.group_count_x = 1;
+    if (opts.group_count_y == 0)
+        opts.group_count_y = 1;
+    if (opts.group_count_z == 0)
+        opts.group_count_z = 1;
+
+    if (opts.type == NV_MESH_SHADER) {
+        t_require_ext("VK_NV_mesh_shader");
+        t_assert(opts.group_count_y == 1);
+        t_assert(opts.group_count_z == 1);
+        vk_shader_stage_mesh_bit = VK_SHADER_STAGE_MESH_BIT_NV;
+        vk_shader_stage_task_bit = VK_SHADER_STAGE_TASK_BIT_NV;
+        ssc_features.pNext = &mesh_features_nv;
+    } else if (opts.type == EXT_MESH_SHADER) {
+        t_require_ext("VK_EXT_mesh_shader");
+        vk_shader_stage_mesh_bit = VK_SHADER_STAGE_MESH_BIT_EXT;
+        vk_shader_stage_task_bit = VK_SHADER_STAGE_TASK_BIT_EXT;
+        ssc_features.pNext = &mesh_features_ext;
+    }
+
     VkPhysicalDeviceFeatures2 features = {
         .sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_FEATURES_2,
         .pNext = &ssc_features,
     };
     vkGetPhysicalDeviceFeatures2(t_physical_dev, &features);
 
-    if (opts.task_count == 0)
-        opts.task_count = 1;
+    VkBool32 task_shader_supported;
+    VkBool32 mesh_shader_supported;
 
-    if (!mesh_features.meshShader)
+    if (opts.type == NV_MESH_SHADER) {
+        mesh_shader_supported = mesh_features_nv.meshShader;
+        task_shader_supported = mesh_features_nv.taskShader;
+    } else if (opts.type == EXT_MESH_SHADER) {
+        mesh_shader_supported = mesh_features_ext.meshShader;
+        task_shader_supported = mesh_features_ext.taskShader;
+    }
+
+    if (!mesh_shader_supported)
         t_skipf("meshShader not supported");
-    if (opts.task != VK_NULL_HANDLE && !mesh_features.taskShader)
+    if (!task_shader_supported && opts.task != VK_NULL_HANDLE)
         t_skipf("taskShader not supported");
+
     if (opts.required_subgroup_size) {
         if (!ssc_features.subgroupSizeControl)
             t_skipf("subgroupSizeControl not supported, needed to require a subgroup size");
@@ -342,10 +381,10 @@ run_simple_mesh_pipeline(VkShaderModule mesh,
         };
         vkGetPhysicalDeviceProperties2(t_physical_dev, &props);
 
-        if ((ssc_props.requiredSubgroupSizeStages & VK_SHADER_STAGE_MESH_BIT_NV) == 0)
+        if ((ssc_props.requiredSubgroupSizeStages & vk_shader_stage_mesh_bit) == 0)
             t_skipf("subgroupSizeControl not supported for Mesh shader stage");
         if (opts.task != VK_NULL_HANDLE &&
-            (ssc_props.requiredSubgroupSizeStages & VK_SHADER_STAGE_TASK_BIT_NV) == 0)
+            (ssc_props.requiredSubgroupSizeStages & vk_shader_stage_task_bit) == 0)
             t_skipf("subgroupSizeControl not supported for Task shader stage");
 
         if (opts.required_subgroup_size < ssc_props.minSubgroupSize) {
@@ -357,8 +396,6 @@ run_simple_mesh_pipeline(VkShaderModule mesh,
                 opts.required_subgroup_size, ssc_props.maxSubgroupSize);
         }
     }
-
-    GET_DEVICE_FUNCTION_PTR(vkCmdDrawMeshTasksNV);
 
     const bool no_image = t_no_image;
 
@@ -405,8 +442,8 @@ run_simple_mesh_pipeline(VkShaderModule mesh,
                 .binding = descSetCount,
                 .descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER,
                 .descriptorCount = 1,
-                .stageFlags = VK_SHADER_STAGE_TASK_BIT_NV |
-                              VK_SHADER_STAGE_MESH_BIT_NV |
+                .stageFlags = vk_shader_stage_task_bit |
+                              vk_shader_stage_mesh_bit |
                               VK_SHADER_STAGE_FRAGMENT_BIT,
                 .pImmutableSamplers = NULL,
         };
@@ -462,8 +499,8 @@ run_simple_mesh_pipeline(VkShaderModule mesh,
                 .binding = descSetCount,
                 .descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
                 .descriptorCount = 1,
-                .stageFlags = VK_SHADER_STAGE_TASK_BIT_NV |
-                              VK_SHADER_STAGE_MESH_BIT_NV |
+                .stageFlags = vk_shader_stage_task_bit |
+                              vk_shader_stage_mesh_bit |
                               VK_SHADER_STAGE_FRAGMENT_BIT,
                 .pImmutableSamplers = NULL,
         };
@@ -515,7 +552,7 @@ run_simple_mesh_pipeline(VkShaderModule mesh,
 
     VkPushConstantRange push_range;
     if (has_push_constants) {
-        push_range.stageFlags = VK_SHADER_STAGE_MESH_BIT_NV;
+        push_range.stageFlags = vk_shader_stage_mesh_bit;
         push_range.offset = 0;
         push_range.size = opts.push_constants_size;
     }
@@ -593,11 +630,18 @@ run_simple_mesh_pipeline(VkShaderModule mesh,
 
     if (has_push_constants) {
         vkCmdPushConstants(t_cmd_buffer, pipeline_layout,
-                VK_SHADER_STAGE_MESH_BIT_NV, 0, opts.push_constants_size,
+                vk_shader_stage_mesh_bit, 0, opts.push_constants_size,
                 opts.push_constants);
     }
 
-    vkCmdDrawMeshTasksNV(t_cmd_buffer, opts.task_count, 0);
+    if (opts.type == NV_MESH_SHADER) {
+        GET_DEVICE_FUNCTION_PTR(vkCmdDrawMeshTasksNV);
+        vkCmdDrawMeshTasksNV(t_cmd_buffer, opts.group_count_x, 0);
+    } else if (opts.type == EXT_MESH_SHADER) {
+        GET_DEVICE_FUNCTION_PTR(vkCmdDrawMeshTasksEXT);
+        vkCmdDrawMeshTasksEXT(t_cmd_buffer, opts.group_count_x,
+                opts.group_count_y, opts.group_count_z);
+    }
 
     vkCmdEndRenderPass(t_cmd_buffer);
     qoEndCommandBuffer(t_cmd_buffer);

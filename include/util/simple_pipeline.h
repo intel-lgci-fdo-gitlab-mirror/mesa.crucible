@@ -47,6 +47,7 @@ void run_simple_compute_pipeline(VkShaderModule cs,
 enum mesh_shader_type {
     UNKNOWN_MESH_SHADER = 0,
     NV_MESH_SHADER = 1,
+    EXT_MESH_SHADER = 2,
 };
 
 typedef struct simple_mesh_pipeline_options simple_mesh_pipeline_options_t;
@@ -69,8 +70,10 @@ struct simple_mesh_pipeline_options {
     // Defaults to passthrough location 0 to color if not specified.
     VkShaderModule fs;
 
-    // Defaults to 1 if not specified.
-    uint32_t task_count;
+    /* For NV_mesh_shader, only group_count_x is used.
+     * Defaults to (1, 1, 1).
+     */
+    uint32_t group_count_x, group_count_y, group_count_z;
 
     // If non-zero, will be used when creating the shader modules.
     // See VK_EXT_subgroup_size_control.
