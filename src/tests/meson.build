@@ -72,8 +72,6 @@ test_sources_with_spirv = [
   'func/intel_shader_integer_functions2/intel_shader_integer_functions2_common.c',
   'func/intel_shader_integer_functions2/multiply32x16.c',
   'func/intel_shader_integer_functions2/subtractSaturate.c',
-  'func/mesh/ext/basic.c',
-  'func/mesh/ext/buffers.c',
   'func/mesh/nv/basic.c',
   'func/mesh/nv/buffers.c',
   'func/mesh/nv/clipculldistance.c',
@@ -109,6 +107,15 @@ test_sources_with_spirv = [
   'stress/lots-of-surface-state.c',
   'func/uniform-subgroup.c',
 ]
+
+if glslang_version.version_compare('>11.11.0')
+  test_sources_with_spirv += [
+    'func/mesh/ext/basic.c',
+    'func/mesh/ext/buffers.c',
+  ]
+else
+  warning('Skipping VK_EXT_mesh_shader because GLSLang version ' + glslang_version + ' is too old')
+endif
 
 test_sources_with_gen = [
   'func/depthstencil/stencil_triangles.c',

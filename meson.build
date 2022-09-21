@@ -57,6 +57,10 @@ prog_cp = find_program('cp')
 # Generator to create *-spirv.h.
 
 prog_glslang = find_program('glslangValidator')
+
+glslang_version = run_command(prog_glslang, '--version', capture: true, check: true).stdout().split()[2].split(':')[1]
+message('glslangValidator version: ' + glslang_version)
+
 c_to_spirv_h = generator(
   prog_python,
   output : '@BASENAME@-spirv.h',
