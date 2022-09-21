@@ -22,15 +22,16 @@
 #include "util/simple_pipeline.h"
 #include "tapi/t.h"
 
-#include "src/tests/func/mesh/nv/buffers-spirv.h"
+#include "src/tests/func/mesh/ext/buffers-spirv.h"
 
 static void
 buffers_mesh_ssbo_read(void)
 {
-    t_require_ext("VK_NV_mesh_shader");
+    t_require_ext("VK_EXT_mesh_shader");
 
     VkShaderModule mesh = qoCreateShaderModuleGLSL(t_device, MESH,
-        QO_EXTENSION GL_NV_mesh_shader : require
+        QO_EXTENSION GL_EXT_mesh_shader : require
+        QO_TARGET_ENV spirv1.4
         layout(local_size_x = 4) in;
         layout(max_vertices = 6) out;
         layout(max_primitives = 3) out;
@@ -46,22 +47,24 @@ buffers_mesh_ssbo_read(void)
 
         void main()
         {
-            if (gl_LocalInvocationID.x == 0) {
-                gl_PrimitiveCountNV = 2;
+            SetMeshOutputsEXT(6, 2);
 
-                for (int i = 0; i < 6; i++)
-                    gl_PrimitiveIndicesNV[i] = indices[i];
+            if (gl_LocalInvocationID.x == 0) {
+                for (int i = 0; i < 2; i++) {
+                    gl_PrimitiveTriangleIndicesEXT[i] =
+                            uvec3(indices[i * 3 + 0], indices[i * 3 + 1], indices[i * 3 + 2]);
+                }
 
                 vec4 scale = vec4(0.5, 0.5, 0.5, 1.0);
                 vec4 pos_a = vec4(-0.5f, -0.5f, 0, 0);
-                gl_MeshVerticesNV[0].gl_Position = scale * vec4(0.5f, 0.5f, 0.0f, 1.0f) + pos_a;
-                gl_MeshVerticesNV[1].gl_Position = scale * vec4(-0.5f, 0.5f, 0.0f, 1.0f) + pos_a;
-                gl_MeshVerticesNV[2].gl_Position = scale * vec4(0.0f, -0.5f, 0.0f, 1.0f) + pos_a;
+                gl_MeshVerticesEXT[0].gl_Position = scale * vec4(0.5f, 0.5f, 0.0f, 1.0f) + pos_a;
+                gl_MeshVerticesEXT[1].gl_Position = scale * vec4(-0.5f, 0.5f, 0.0f, 1.0f) + pos_a;
+                gl_MeshVerticesEXT[2].gl_Position = scale * vec4(0.0f, -0.5f, 0.0f, 1.0f) + pos_a;
 
                 vec4 pos_b = vec4(0.5f, 0.5f, 0, 0);
-                gl_MeshVerticesNV[3].gl_Position = scale * vec4(0.5f, 0.5f, 0.0f, 1.0f) + pos_b;
-                gl_MeshVerticesNV[4].gl_Position = scale * vec4(-0.5f, 0.5f, 0.0f, 1.0f) + pos_b;
-                gl_MeshVerticesNV[5].gl_Position = scale * vec4(0.0f, -0.5f, 0.0f, 1.0f) + pos_b;
+                gl_MeshVerticesEXT[3].gl_Position = scale * vec4(0.5f, 0.5f, 0.0f, 1.0f) + pos_b;
+                gl_MeshVerticesEXT[4].gl_Position = scale * vec4(-0.5f, 0.5f, 0.0f, 1.0f) + pos_b;
+                gl_MeshVerticesEXT[5].gl_Position = scale * vec4(0.0f, -0.5f, 0.0f, 1.0f) + pos_b;
 
                 per_vertex[0].color = vec4(1, 0, 0, 1);
                 per_vertex[1].color = vec4(0, 1, 0, 1);
@@ -87,7 +90,7 @@ buffers_mesh_ssbo_read(void)
 }
 
 test_define {
-    .name = "func.mesh.nv.buffers.mesh_ssbo_read",
+    .name = "func.mesh.ext.buffers.mesh_ssbo_read",
     .start = buffers_mesh_ssbo_read,
     .image_filename = "func.mesh.basic.ref.png",
 };
@@ -96,10 +99,11 @@ test_define {
 static void
 buffers_mesh_ssbo_write(void)
 {
-    t_require_ext("VK_NV_mesh_shader");
+    t_require_ext("VK_EXT_mesh_shader");
 
     VkShaderModule mesh = qoCreateShaderModuleGLSL(t_device, MESH,
-        QO_EXTENSION GL_NV_mesh_shader : require
+        QO_EXTENSION GL_EXT_mesh_shader : require
+        QO_TARGET_ENV spirv1.4
         layout(local_size_x = 4) in;
         layout(max_vertices = 6) out;
         layout(max_primitives = 3) out;
@@ -115,26 +119,22 @@ buffers_mesh_ssbo_write(void)
 
         void main()
         {
-            if (gl_LocalInvocationID.x == 0) {
-                gl_PrimitiveCountNV = 2;
+            SetMeshOutputsEXT(6, 2);
 
-                gl_PrimitiveIndicesNV[0] = 0;
-                gl_PrimitiveIndicesNV[1] = 1;
-                gl_PrimitiveIndicesNV[2] = 2;
-                gl_PrimitiveIndicesNV[3] = 3;
-                gl_PrimitiveIndicesNV[4] = 4;
-                gl_PrimitiveIndicesNV[5] = 5;
+            if (gl_LocalInvocationID.x == 0) {
+                gl_PrimitiveTriangleIndicesEXT[0] = uvec3(0, 1, 2);
+                gl_PrimitiveTriangleIndicesEXT[1] = uvec3(3, 4, 5);
 
                 vec4 scale = vec4(0.5, 0.5, 0.5, 1.0);
                 vec4 pos_a = vec4(-0.5f, -0.5f, 0, 0);
-                gl_MeshVerticesNV[0].gl_Position = scale * vec4(0.5f, 0.5f, 0.0f, 1.0f) + pos_a;
-                gl_MeshVerticesNV[1].gl_Position = scale * vec4(-0.5f, 0.5f, 0.0f, 1.0f) + pos_a;
-                gl_MeshVerticesNV[2].gl_Position = scale * vec4(0.0f, -0.5f, 0.0f, 1.0f) + pos_a;
+                gl_MeshVerticesEXT[0].gl_Position = scale * vec4(0.5f, 0.5f, 0.0f, 1.0f) + pos_a;
+                gl_MeshVerticesEXT[1].gl_Position = scale * vec4(-0.5f, 0.5f, 0.0f, 1.0f) + pos_a;
+                gl_MeshVerticesEXT[2].gl_Position = scale * vec4(0.0f, -0.5f, 0.0f, 1.0f) + pos_a;
 
                 vec4 pos_b = vec4(0.5f, 0.5f, 0, 0);
-                gl_MeshVerticesNV[3].gl_Position = scale * vec4(0.5f, 0.5f, 0.0f, 1.0f) + pos_b;
-                gl_MeshVerticesNV[4].gl_Position = scale * vec4(-0.5f, 0.5f, 0.0f, 1.0f) + pos_b;
-                gl_MeshVerticesNV[5].gl_Position = scale * vec4(0.0f, -0.5f, 0.0f, 1.0f) + pos_b;
+                gl_MeshVerticesEXT[3].gl_Position = scale * vec4(0.5f, 0.5f, 0.0f, 1.0f) + pos_b;
+                gl_MeshVerticesEXT[4].gl_Position = scale * vec4(-0.5f, 0.5f, 0.0f, 1.0f) + pos_b;
+                gl_MeshVerticesEXT[5].gl_Position = scale * vec4(0.0f, -0.5f, 0.0f, 1.0f) + pos_b;
 
                 per_vertex[0].color = vec4(1, 0, 0, 1);
                 per_vertex[1].color = vec4(0, 1, 0, 1);
@@ -166,7 +166,7 @@ buffers_mesh_ssbo_write(void)
 }
 
 test_define {
-    .name = "func.mesh.nv.buffers.mesh_ssbo_write",
+    .name = "func.mesh.ext.buffers.mesh_ssbo_write",
     .start = buffers_mesh_ssbo_write,
     .image_filename = "func.mesh.basic.ref.png",
 };
@@ -175,11 +175,12 @@ test_define {
 static void
 buffers_mesh_ubo_read(void)
 {
-    t_require_ext("VK_NV_mesh_shader");
+    t_require_ext("VK_EXT_mesh_shader");
 
     VkShaderModule mesh = qoCreateShaderModuleGLSL(t_device, MESH,
-        QO_EXTENSION GL_NV_mesh_shader : require
+        QO_EXTENSION GL_EXT_mesh_shader : require
         QO_EXTENSION GL_EXT_scalar_block_layout : require
+        QO_TARGET_ENV spirv1.4
         layout(local_size_x = 4) in;
         layout(max_vertices = 6) out;
         layout(max_primitives = 3) out;
@@ -195,22 +196,24 @@ buffers_mesh_ubo_read(void)
 
         void main()
         {
-            if (gl_LocalInvocationID.x == 0) {
-                gl_PrimitiveCountNV = 2;
+            SetMeshOutputsEXT(6, 2);
 
-                for (int i = 0; i < 6; i++)
-                    gl_PrimitiveIndicesNV[i] = indices[i];
+            if (gl_LocalInvocationID.x == 0) {
+                for (int i = 0; i < 2; i++) {
+                    gl_PrimitiveTriangleIndicesEXT[i] =
+                            uvec3(indices[i * 3 + 0], indices[i * 3 + 1], indices[i * 3 + 2]);
+                }
 
                 vec4 scale = vec4(0.5, 0.5, 0.5, 1.0);
                 vec4 pos_a = vec4(-0.5f, -0.5f, 0, 0);
-                gl_MeshVerticesNV[0].gl_Position = scale * vec4(0.5f, 0.5f, 0.0f, 1.0f) + pos_a;
-                gl_MeshVerticesNV[1].gl_Position = scale * vec4(-0.5f, 0.5f, 0.0f, 1.0f) + pos_a;
-                gl_MeshVerticesNV[2].gl_Position = scale * vec4(0.0f, -0.5f, 0.0f, 1.0f) + pos_a;
+                gl_MeshVerticesEXT[0].gl_Position = scale * vec4(0.5f, 0.5f, 0.0f, 1.0f) + pos_a;
+                gl_MeshVerticesEXT[1].gl_Position = scale * vec4(-0.5f, 0.5f, 0.0f, 1.0f) + pos_a;
+                gl_MeshVerticesEXT[2].gl_Position = scale * vec4(0.0f, -0.5f, 0.0f, 1.0f) + pos_a;
 
                 vec4 pos_b = vec4(0.5f, 0.5f, 0, 0);
-                gl_MeshVerticesNV[3].gl_Position = scale * vec4(0.5f, 0.5f, 0.0f, 1.0f) + pos_b;
-                gl_MeshVerticesNV[4].gl_Position = scale * vec4(-0.5f, 0.5f, 0.0f, 1.0f) + pos_b;
-                gl_MeshVerticesNV[5].gl_Position = scale * vec4(0.0f, -0.5f, 0.0f, 1.0f) + pos_b;
+                gl_MeshVerticesEXT[3].gl_Position = scale * vec4(0.5f, 0.5f, 0.0f, 1.0f) + pos_b;
+                gl_MeshVerticesEXT[4].gl_Position = scale * vec4(-0.5f, 0.5f, 0.0f, 1.0f) + pos_b;
+                gl_MeshVerticesEXT[5].gl_Position = scale * vec4(0.0f, -0.5f, 0.0f, 1.0f) + pos_b;
 
                 per_vertex[0].color = vec4(1, 0, 0, 1);
                 per_vertex[1].color = vec4(0, 1, 0, 1);
@@ -236,7 +239,7 @@ buffers_mesh_ubo_read(void)
 }
 
 test_define {
-    .name = "func.mesh.nv.buffers.mesh_ubo_read",
+    .name = "func.mesh.ext.buffers.mesh_ubo_read",
     .start = buffers_mesh_ubo_read,
     .image_filename = "func.mesh.basic.ref.png",
 };
@@ -245,39 +248,45 @@ test_define {
 static void
 buffers_task_ssbo_read(void)
 {
-    t_require_ext("VK_NV_mesh_shader");
+    t_require_ext("VK_EXT_mesh_shader");
 
     VkShaderModule task = qoCreateShaderModuleGLSL(t_device, TASK,
-        QO_EXTENSION GL_NV_mesh_shader : require
+        QO_EXTENSION GL_EXT_mesh_shader : require
+        QO_TARGET_ENV spirv1.4
         layout(local_size_x = 2) in;
 
         layout(set = 0, binding = 0) buffer Storage {
             uint tc;
         };
 
-        taskNV out Task {
+        struct Task {
             uint primitives;
-        } taskOut;
+        };
+
+        taskPayloadSharedEXT Task taskOut;
 
         void main()
         {
-            if (gl_LocalInvocationID.x == 1) {
-                gl_TaskCountNV = tc - 71;
+            if (gl_LocalInvocationID.x == 1)
                 taskOut.primitives = 2;
-            }
+
+            EmitMeshTasksEXT(tc - 71, 1, 1);
         }
     );
 
     VkShaderModule mesh = qoCreateShaderModuleGLSL(t_device, MESH,
-        QO_EXTENSION GL_NV_mesh_shader : require
+        QO_EXTENSION GL_EXT_mesh_shader : require
+        QO_TARGET_ENV spirv1.4
         layout(local_size_x = 4) in;
         layout(max_vertices = 6) out;
         layout(max_primitives = 3) out;
         layout(triangles) out;
 
-        taskNV in Task {
+        struct Task {
             uint primitives;
-        } taskIn;
+        };
+
+        taskPayloadSharedEXT Task taskIn;
 
         layout(location = 0) out PerVertex {
             vec4 color;
@@ -285,26 +294,22 @@ buffers_task_ssbo_read(void)
 
         void main()
         {
-            if (gl_LocalInvocationID.x == 0) {
-                gl_PrimitiveCountNV = taskIn.primitives;
+            SetMeshOutputsEXT(6, taskIn.primitives);
 
-                gl_PrimitiveIndicesNV[0] = 0;
-                gl_PrimitiveIndicesNV[1] = 1;
-                gl_PrimitiveIndicesNV[2] = 2;
-                gl_PrimitiveIndicesNV[3] = 3;
-                gl_PrimitiveIndicesNV[4] = 4;
-                gl_PrimitiveIndicesNV[5] = 5;
+            if (gl_LocalInvocationID.x == 0) {
+                gl_PrimitiveTriangleIndicesEXT[0] = uvec3(0, 1, 2);
+                gl_PrimitiveTriangleIndicesEXT[1] = uvec3(3, 4, 5);
 
                 vec4 scale = vec4(0.5, 0.5, 0.5, 1.0);
                 vec4 pos_a = vec4(-0.5f, -0.5f, 0, 0);
-                gl_MeshVerticesNV[0].gl_Position = scale * vec4(0.5f, 0.5f, 0.0f, 1.0f) + pos_a;
-                gl_MeshVerticesNV[1].gl_Position = scale * vec4(-0.5f, 0.5f, 0.0f, 1.0f) + pos_a;
-                gl_MeshVerticesNV[2].gl_Position = scale * vec4(0.0f, -0.5f, 0.0f, 1.0f) + pos_a;
+                gl_MeshVerticesEXT[0].gl_Position = scale * vec4(0.5f, 0.5f, 0.0f, 1.0f) + pos_a;
+                gl_MeshVerticesEXT[1].gl_Position = scale * vec4(-0.5f, 0.5f, 0.0f, 1.0f) + pos_a;
+                gl_MeshVerticesEXT[2].gl_Position = scale * vec4(0.0f, -0.5f, 0.0f, 1.0f) + pos_a;
 
                 vec4 pos_b = vec4(0.5f, 0.5f, 0, 0);
-                gl_MeshVerticesNV[3].gl_Position = scale * vec4(0.5f, 0.5f, 0.0f, 1.0f) + pos_b;
-                gl_MeshVerticesNV[4].gl_Position = scale * vec4(-0.5f, 0.5f, 0.0f, 1.0f) + pos_b;
-                gl_MeshVerticesNV[5].gl_Position = scale * vec4(0.0f, -0.5f, 0.0f, 1.0f) + pos_b;
+                gl_MeshVerticesEXT[3].gl_Position = scale * vec4(0.5f, 0.5f, 0.0f, 1.0f) + pos_b;
+                gl_MeshVerticesEXT[4].gl_Position = scale * vec4(-0.5f, 0.5f, 0.0f, 1.0f) + pos_b;
+                gl_MeshVerticesEXT[5].gl_Position = scale * vec4(0.0f, -0.5f, 0.0f, 1.0f) + pos_b;
 
                 per_vertex[0].color = vec4(1, 0, 0, 1);
                 per_vertex[1].color = vec4(0, 1, 0, 1);
@@ -330,7 +335,7 @@ buffers_task_ssbo_read(void)
 }
 
 test_define {
-    .name = "func.mesh.nv.buffers.task_ssbo_read",
+    .name = "func.mesh.ext.buffers.task_ssbo_read",
     .start = buffers_task_ssbo_read,
     .image_filename = "func.mesh.basic.ref.png",
 };
@@ -339,39 +344,45 @@ test_define {
 static void
 buffers_task_ubo_read(void)
 {
-    t_require_ext("VK_NV_mesh_shader");
+    t_require_ext("VK_EXT_mesh_shader");
 
     VkShaderModule task = qoCreateShaderModuleGLSL(t_device, TASK,
-        QO_EXTENSION GL_NV_mesh_shader : require
+        QO_EXTENSION GL_EXT_mesh_shader : require
+        QO_TARGET_ENV spirv1.4
         layout(local_size_x = 2) in;
 
         layout(set = 0, binding = 0) uniform UBO {
             uint tc;
         };
 
-        taskNV out Task {
+        struct Task {
             uint primitives;
-        } taskOut;
+        };
+
+        taskPayloadSharedEXT Task taskOut;
 
         void main()
         {
-            if (gl_LocalInvocationID.x == 1) {
-                gl_TaskCountNV = tc - 71;
-                taskOut.primitives = 2;
-            }
+            if (gl_LocalInvocationID.x == 1)
+               taskOut.primitives = 2;
+
+            EmitMeshTasksEXT(tc - 71, 1, 1);
         }
     );
 
     VkShaderModule mesh = qoCreateShaderModuleGLSL(t_device, MESH,
-        QO_EXTENSION GL_NV_mesh_shader : require
+        QO_EXTENSION GL_EXT_mesh_shader : require
+        QO_TARGET_ENV spirv1.4
         layout(local_size_x = 4) in;
         layout(max_vertices = 6) out;
         layout(max_primitives = 3) out;
         layout(triangles) out;
 
-        taskNV in Task {
+        struct Task {
             uint primitives;
-        } taskIn;
+        };
+
+        taskPayloadSharedEXT Task taskIn;
 
         layout(location = 0) out PerVertex {
             vec4 color;
@@ -379,26 +390,22 @@ buffers_task_ubo_read(void)
 
         void main()
         {
-            if (gl_LocalInvocationID.x == 0) {
-                gl_PrimitiveCountNV = taskIn.primitives;
+            SetMeshOutputsEXT(6, taskIn.primitives);
 
-                gl_PrimitiveIndicesNV[0] = 0;
-                gl_PrimitiveIndicesNV[1] = 1;
-                gl_PrimitiveIndicesNV[2] = 2;
-                gl_PrimitiveIndicesNV[3] = 3;
-                gl_PrimitiveIndicesNV[4] = 4;
-                gl_PrimitiveIndicesNV[5] = 5;
+            if (gl_LocalInvocationID.x == 0) {
+                gl_PrimitiveTriangleIndicesEXT[0] = uvec3(0, 1, 2);
+                gl_PrimitiveTriangleIndicesEXT[1] = uvec3(3, 4, 5);
 
                 vec4 scale = vec4(0.5, 0.5, 0.5, 1.0);
                 vec4 pos_a = vec4(-0.5f, -0.5f, 0, 0);
-                gl_MeshVerticesNV[0].gl_Position = scale * vec4(0.5f, 0.5f, 0.0f, 1.0f) + pos_a;
-                gl_MeshVerticesNV[1].gl_Position = scale * vec4(-0.5f, 0.5f, 0.0f, 1.0f) + pos_a;
-                gl_MeshVerticesNV[2].gl_Position = scale * vec4(0.0f, -0.5f, 0.0f, 1.0f) + pos_a;
+                gl_MeshVerticesEXT[0].gl_Position = scale * vec4(0.5f, 0.5f, 0.0f, 1.0f) + pos_a;
+                gl_MeshVerticesEXT[1].gl_Position = scale * vec4(-0.5f, 0.5f, 0.0f, 1.0f) + pos_a;
+                gl_MeshVerticesEXT[2].gl_Position = scale * vec4(0.0f, -0.5f, 0.0f, 1.0f) + pos_a;
 
                 vec4 pos_b = vec4(0.5f, 0.5f, 0, 0);
-                gl_MeshVerticesNV[3].gl_Position = scale * vec4(0.5f, 0.5f, 0.0f, 1.0f) + pos_b;
-                gl_MeshVerticesNV[4].gl_Position = scale * vec4(-0.5f, 0.5f, 0.0f, 1.0f) + pos_b;
-                gl_MeshVerticesNV[5].gl_Position = scale * vec4(0.0f, -0.5f, 0.0f, 1.0f) + pos_b;
+                gl_MeshVerticesEXT[3].gl_Position = scale * vec4(0.5f, 0.5f, 0.0f, 1.0f) + pos_b;
+                gl_MeshVerticesEXT[4].gl_Position = scale * vec4(-0.5f, 0.5f, 0.0f, 1.0f) + pos_b;
+                gl_MeshVerticesEXT[5].gl_Position = scale * vec4(0.0f, -0.5f, 0.0f, 1.0f) + pos_b;
 
                 per_vertex[0].color = vec4(1, 0, 0, 1);
                 per_vertex[1].color = vec4(0, 1, 0, 1);
@@ -424,7 +431,7 @@ buffers_task_ubo_read(void)
 }
 
 test_define {
-    .name = "func.mesh.nv.buffers.task_ubo_read",
+    .name = "func.mesh.ext.buffers.task_ubo_read",
     .start = buffers_task_ubo_read,
     .image_filename = "func.mesh.basic.ref.png",
 };
@@ -433,10 +440,11 @@ test_define {
 static void
 buffers_task_ubo_read_ssbo_write(void)
 {
-    t_require_ext("VK_NV_mesh_shader");
+    t_require_ext("VK_EXT_mesh_shader");
 
     VkShaderModule task = qoCreateShaderModuleGLSL(t_device, TASK,
-        QO_EXTENSION GL_NV_mesh_shader : require
+        QO_EXTENSION GL_EXT_mesh_shader : require
+        QO_TARGET_ENV spirv1.4
         layout(local_size_x = 2) in;
 
         layout(set = 1, binding = 1) uniform UBO {
@@ -447,30 +455,36 @@ buffers_task_ubo_read_ssbo_write(void)
             uint tc_ssbo;
         };
 
-        taskNV out Task {
+        struct Task {
             uint primitives;
-        } taskOut;
+        };
+
+        taskPayloadSharedEXT Task taskOut;
 
         void main()
         {
             if (gl_LocalInvocationID.x == 1) {
-                gl_TaskCountNV = tc - 71;
                 tc_ssbo = tc * 2;
                 taskOut.primitives = 2;
             }
+
+            EmitMeshTasksEXT(tc - 71, 1, 1);
         }
     );
 
     VkShaderModule mesh = qoCreateShaderModuleGLSL(t_device, MESH,
-        QO_EXTENSION GL_NV_mesh_shader : require
+        QO_EXTENSION GL_EXT_mesh_shader : require
+        QO_TARGET_ENV spirv1.4
         layout(local_size_x = 4) in;
         layout(max_vertices = 6) out;
         layout(max_primitives = 3) out;
         layout(triangles) out;
 
-        taskNV in Task {
+        struct Task {
             uint primitives;
-        } taskIn;
+        };
+
+        taskPayloadSharedEXT Task taskIn;
 
         layout(location = 0) out PerVertex {
             vec4 color;
@@ -478,26 +492,22 @@ buffers_task_ubo_read_ssbo_write(void)
 
         void main()
         {
-            if (gl_LocalInvocationID.x == 0) {
-                gl_PrimitiveCountNV = taskIn.primitives;
+            SetMeshOutputsEXT(6, taskIn.primitives);
 
-                gl_PrimitiveIndicesNV[0] = 0;
-                gl_PrimitiveIndicesNV[1] = 1;
-                gl_PrimitiveIndicesNV[2] = 2;
-                gl_PrimitiveIndicesNV[3] = 3;
-                gl_PrimitiveIndicesNV[4] = 4;
-                gl_PrimitiveIndicesNV[5] = 5;
+            if (gl_LocalInvocationID.x == 0) {
+                gl_PrimitiveTriangleIndicesEXT[0] = uvec3(0, 1, 2);
+                gl_PrimitiveTriangleIndicesEXT[1] = uvec3(3, 4, 5);
 
                 vec4 scale = vec4(0.5, 0.5, 0.5, 1.0);
                 vec4 pos_a = vec4(-0.5f, -0.5f, 0, 0);
-                gl_MeshVerticesNV[0].gl_Position = scale * vec4(0.5f, 0.5f, 0.0f, 1.0f) + pos_a;
-                gl_MeshVerticesNV[1].gl_Position = scale * vec4(-0.5f, 0.5f, 0.0f, 1.0f) + pos_a;
-                gl_MeshVerticesNV[2].gl_Position = scale * vec4(0.0f, -0.5f, 0.0f, 1.0f) + pos_a;
+                gl_MeshVerticesEXT[0].gl_Position = scale * vec4(0.5f, 0.5f, 0.0f, 1.0f) + pos_a;
+                gl_MeshVerticesEXT[1].gl_Position = scale * vec4(-0.5f, 0.5f, 0.0f, 1.0f) + pos_a;
+                gl_MeshVerticesEXT[2].gl_Position = scale * vec4(0.0f, -0.5f, 0.0f, 1.0f) + pos_a;
 
                 vec4 pos_b = vec4(0.5f, 0.5f, 0, 0);
-                gl_MeshVerticesNV[3].gl_Position = scale * vec4(0.5f, 0.5f, 0.0f, 1.0f) + pos_b;
-                gl_MeshVerticesNV[4].gl_Position = scale * vec4(-0.5f, 0.5f, 0.0f, 1.0f) + pos_b;
-                gl_MeshVerticesNV[5].gl_Position = scale * vec4(0.0f, -0.5f, 0.0f, 1.0f) + pos_b;
+                gl_MeshVerticesEXT[3].gl_Position = scale * vec4(0.5f, 0.5f, 0.0f, 1.0f) + pos_b;
+                gl_MeshVerticesEXT[4].gl_Position = scale * vec4(-0.5f, 0.5f, 0.0f, 1.0f) + pos_b;
+                gl_MeshVerticesEXT[5].gl_Position = scale * vec4(0.0f, -0.5f, 0.0f, 1.0f) + pos_b;
 
                 per_vertex[0].color = vec4(1, 0, 0, 1);
                 per_vertex[1].color = vec4(0, 1, 0, 1);
@@ -531,7 +541,7 @@ buffers_task_ubo_read_ssbo_write(void)
 }
 
 test_define {
-    .name = "func.mesh.nv.buffers.task_ubo_read_ssbo_write",
+    .name = "func.mesh.ext.buffers.task_ubo_read_ssbo_write",
     .start = buffers_task_ubo_read_ssbo_write,
     .image_filename = "func.mesh.basic.ref.png",
 };
