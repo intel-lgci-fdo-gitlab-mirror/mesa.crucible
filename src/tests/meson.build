@@ -108,13 +108,11 @@ test_sources_with_spirv = [
   'func/uniform-subgroup.c',
 ]
 
-if glslang_version.version_compare('>11.11.0')
+if with_VK_EXT_mesh_shader
   test_sources_with_spirv += [
     'func/mesh/ext/basic.c',
     'func/mesh/ext/buffers.c',
   ]
-else
-  warning('Skipping VK_EXT_mesh_shader because GLSLang version ' + glslang_version + ' is too old')
 endif
 
 test_sources_with_gen = [
