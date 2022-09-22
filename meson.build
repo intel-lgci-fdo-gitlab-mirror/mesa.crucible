@@ -107,7 +107,7 @@ executable(
 
 # Dependency checks that will only cause problems at build time
 
-has_python_opencv = run_command(prog_python, '-c', 'import cv2')
+has_python_opencv = run_command(prog_python, '-c', 'import cv2', check: false)
 if has_python_opencv.returncode() != 0
   error('Python opencv module is required to build crucible.')
 endif
