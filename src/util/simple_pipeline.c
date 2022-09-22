@@ -352,8 +352,8 @@ run_simple_mesh_pipeline(VkShaderModule mesh,
     };
     vkGetPhysicalDeviceFeatures2(t_physical_dev, &features);
 
-    VkBool32 task_shader_supported;
-    VkBool32 mesh_shader_supported;
+    VkBool32 task_shader_supported = false;
+    VkBool32 mesh_shader_supported = false;
 
     if (opts.type == NV_MESH_SHADER) {
         mesh_shader_supported = mesh_features_nv.meshShader;
