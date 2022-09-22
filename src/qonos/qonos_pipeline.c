@@ -222,7 +222,7 @@ qoCreateGraphicsPipeline(VkDevice device,
     if (!has_vs && !is_mesh_pipeline) {
         VkShaderModule vs = extra->vertexShader;
 
-        if (!vs != VK_NULL_HANDLE) {
+        if (vs == VK_NULL_HANDLE) {
             vs = qoCreateShaderModuleGLSL(device, VERTEX,
                 layout(location = 0) in vec4 a_position;
                 layout(location = 1) in vec4 a_color;
@@ -287,7 +287,7 @@ qoCreateGraphicsPipeline(VkDevice device,
     if (!has_fs) {
         VkShaderModule fs = extra->fragmentShader;
 
-        if (!fs != VK_NULL_HANDLE) {
+        if (fs == VK_NULL_HANDLE) {
             fs = qoCreateShaderModuleGLSL(device, FRAGMENT,
                 layout(location = 0) out vec4 f_color;
                 layout(location = 0) in vec4 v_color;
