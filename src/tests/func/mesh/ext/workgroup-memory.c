@@ -22,15 +22,16 @@
 #include "util/simple_pipeline.h"
 #include "tapi/t.h"
 
-#include "src/tests/func/mesh/nv/workgroup-memory-spirv.h"
+#include "src/tests/func/mesh/ext/workgroup-memory-spirv.h"
 
 static void
 workgroup_memory_mesh_uint(void)
 {
-    t_require_ext("VK_NV_mesh_shader");
+    t_require_ext("VK_EXT_mesh_shader");
 
     VkShaderModule mesh = qoCreateShaderModuleGLSL(t_device, MESH,
-        QO_EXTENSION GL_NV_mesh_shader : require
+        QO_EXTENSION GL_EXT_mesh_shader : require
+        QO_TARGET_ENV spirv1.4
         layout(local_size_x = 32) in;
         layout(max_vertices = 6) out;
         layout(max_primitives = 3) out;
@@ -56,7 +57,7 @@ workgroup_memory_mesh_uint(void)
                 result[0] = a;
             }
 
-            gl_PrimitiveCountNV = 0;
+            SetMeshOutputsEXT(0, 0);
         }
     );
 
@@ -83,7 +84,7 @@ workgroup_memory_mesh_uint(void)
 }
 
 test_define {
-    .name = "func.mesh.nv.workgroup_memory.mesh_uint",
+    .name = "func.mesh.ext.workgroup_memory.mesh_uint",
     .start = workgroup_memory_mesh_uint,
     .no_image = true,
 };
@@ -91,10 +92,11 @@ test_define {
 static void
 workgroup_memory_task_uint(void)
 {
-    t_require_ext("VK_NV_mesh_shader");
+    t_require_ext("VK_EXT_mesh_shader");
 
     VkShaderModule task = qoCreateShaderModuleGLSL(t_device, TASK,
-        QO_EXTENSION GL_NV_mesh_shader : require
+        QO_EXTENSION GL_EXT_mesh_shader : require
+        QO_TARGET_ENV spirv1.4
         layout(local_size_x = 32) in;
 
         shared uint a;
@@ -115,12 +117,13 @@ workgroup_memory_task_uint(void)
                 result[0] = a;
             }
 
-            gl_TaskCountNV = 1;
+            EmitMeshTasksEXT(1, 1, 1);
         }
     );
 
     VkShaderModule mesh = qoCreateShaderModuleGLSL(t_device, MESH,
-        QO_EXTENSION GL_NV_mesh_shader : require
+        QO_EXTENSION GL_EXT_mesh_shader : require
+        QO_TARGET_ENV spirv1.4
         layout(local_size_x = 32) in;
         layout(max_vertices = 6) out;
         layout(max_primitives = 3) out;
@@ -128,7 +131,7 @@ workgroup_memory_task_uint(void)
 
         void main()
         {
-            gl_PrimitiveCountNV = 0;
+            SetMeshOutputsEXT(0, 0);
         }
     );
 
@@ -156,7 +159,7 @@ workgroup_memory_task_uint(void)
 }
 
 test_define {
-    .name = "func.mesh.nv.workgroup_memory.task_uint",
+    .name = "func.mesh.ext.workgroup_memory.task_uint",
     .start = workgroup_memory_task_uint,
     .no_image = true,
 };

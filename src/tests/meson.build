@@ -112,6 +112,15 @@ if with_VK_EXT_mesh_shader
   test_sources_with_spirv += [
     'func/mesh/ext/basic.c',
     'func/mesh/ext/buffers.c',
+    'func/mesh/ext/clipculldistance.c',
+    'func/mesh/ext/layer.c',
+    'func/mesh/ext/outputs.c',
+    'func/mesh/ext/primitiveid.c',
+    'func/mesh/ext/push-constants.c',
+    'func/mesh/ext/task-memory.c',
+    'func/mesh/ext/viewportindex.c',
+    'func/mesh/ext/workgroup-id.c',
+    'func/mesh/ext/workgroup-memory.c',
   ]
 endif
 

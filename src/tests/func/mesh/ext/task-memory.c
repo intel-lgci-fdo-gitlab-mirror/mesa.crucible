@@ -22,7 +22,7 @@
 #include "util/simple_pipeline.h"
 #include "tapi/t.h"
 
-#include "src/tests/func/mesh/nv/task-memory-spirv.h"
+#include "src/tests/func/mesh/ext/task-memory-spirv.h"
 
 /* Task memory flows from each Task workgroup to all its "children"
  * Mesh workgroups.  That implies ordering between their execution.
@@ -35,13 +35,14 @@
 static void
 task_memory_uint(void)
 {
-    t_require_ext("VK_NV_mesh_shader");
+    t_require_ext("VK_EXT_mesh_shader");
 
     VkShaderModule task = qoCreateShaderModuleGLSL(t_device, TASK,
-        QO_EXTENSION GL_NV_mesh_shader : require
+        QO_EXTENSION GL_EXT_mesh_shader : require
+        QO_TARGET_ENV spirv1.4
         layout(local_size_x = 32) in;
 
-        taskNV out Task {
+        taskPayloadSharedEXT struct Task {
             uint a;
         } taskOut;
 
@@ -51,18 +52,19 @@ task_memory_uint(void)
             if (index == 28) {
                 taskOut.a = 0x60;
             }
-            gl_TaskCountNV = 1;
+            EmitMeshTasksEXT(1, 1, 1);
         }
     );
 
     VkShaderModule mesh = qoCreateShaderModuleGLSL(t_device, MESH,
-        QO_EXTENSION GL_NV_mesh_shader : require
+        QO_EXTENSION GL_EXT_mesh_shader : require
+        QO_TARGET_ENV spirv1.4
         layout(local_size_x = 32) in;
         layout(max_vertices = 6) out;
         layout(max_primitives = 3) out;
         layout(triangles) out;
 
-        taskNV in Task {
+        taskPayloadSharedEXT struct Task {
             uint a;
         } taskIn;
 
@@ -77,7 +79,7 @@ task_memory_uint(void)
                 result[0] = taskIn.a;
             }
 
-            gl_PrimitiveCountNV = 0;
+            SetMeshOutputsEXT(0, 0);
         }
     );
 
@@ -105,7 +107,7 @@ task_memory_uint(void)
 }
 
 test_define {
-    .name = "func.mesh.nv.task_memory.uint",
+    .name = "func.mesh.ext.task_memory.uint",
     .start = task_memory_uint,
     .no_image = true,
 };
@@ -114,14 +116,15 @@ test_define {
 static void
 task_memory_uint64(void)
 {
-    t_require_ext("VK_NV_mesh_shader");
+    t_require_ext("VK_EXT_mesh_shader");
 
     VkShaderModule task = qoCreateShaderModuleGLSL(t_device, TASK,
-        QO_EXTENSION GL_NV_mesh_shader : require
+        QO_EXTENSION GL_EXT_mesh_shader : require
         QO_EXTENSION GL_EXT_shader_explicit_arithmetic_types_int64: enable
+        QO_TARGET_ENV spirv1.4
         layout(local_size_x = 32) in;
 
-        taskNV out Task {
+        taskPayloadSharedEXT struct Task {
             uint64_t a;
         } taskOut;
 
@@ -131,19 +134,20 @@ task_memory_uint64(void)
             if (index == 13) {
                 taskOut.a = (uint64_t(0x60616263) << 32U) + uint64_t(0x64656667);
             }
-            gl_TaskCountNV = 1;
+            EmitMeshTasksEXT(1, 1, 1);
         }
     );
 
     VkShaderModule mesh = qoCreateShaderModuleGLSL(t_device, MESH,
-        QO_EXTENSION GL_NV_mesh_shader : require
+        QO_EXTENSION GL_EXT_mesh_shader : require
         QO_EXTENSION GL_EXT_shader_explicit_arithmetic_types_int64: enable
+        QO_TARGET_ENV spirv1.4
         layout(local_size_x = 32) in;
         layout(max_vertices = 6) out;
         layout(max_primitives = 3) out;
         layout(triangles) out;
 
-        taskNV in Task {
+        taskPayloadSharedEXT struct Task {
             uint64_t a;
         } taskIn;
 
@@ -159,7 +163,7 @@ task_memory_uint64(void)
                 result[1] = uint(taskIn.a & 0xFFFFFFFFU);
             }
 
-            gl_PrimitiveCountNV = 0;
+            SetMeshOutputsEXT(0, 0);
         }
     );
 
@@ -182,7 +186,7 @@ task_memory_uint64(void)
 }
 
 test_define {
-    .name = "func.mesh.nv.task_memory.uint64",
+    .name = "func.mesh.ext.task_memory.uint64",
     .start = task_memory_uint64,
     .no_image = true,
 };
@@ -190,13 +194,14 @@ test_define {
 static void
 task_memory_uvec4(void)
 {
-    t_require_ext("VK_NV_mesh_shader");
+    t_require_ext("VK_EXT_mesh_shader");
 
     VkShaderModule task = qoCreateShaderModuleGLSL(t_device, TASK,
-        QO_EXTENSION GL_NV_mesh_shader : require
+        QO_EXTENSION GL_EXT_mesh_shader : require
+        QO_TARGET_ENV spirv1.4
         layout(local_size_x = 32) in;
 
-        taskNV out Task {
+        taskPayloadSharedEXT struct Task {
             uvec4 a;
         } taskOut;
 
@@ -206,18 +211,19 @@ task_memory_uvec4(void)
             if (index == 28) {
                 taskOut.a = uvec4(0x60, 0x61, 0x62, 0x63);
             }
-            gl_TaskCountNV = 1;
+            EmitMeshTasksEXT(1, 1, 1);
         }
     );
 
     VkShaderModule mesh = qoCreateShaderModuleGLSL(t_device, MESH,
-        QO_EXTENSION GL_NV_mesh_shader : require
+        QO_EXTENSION GL_EXT_mesh_shader : require
+        QO_TARGET_ENV spirv1.4
         layout(local_size_x = 32) in;
         layout(max_vertices = 6) out;
         layout(max_primitives = 3) out;
         layout(triangles) out;
 
-        taskNV in Task {
+        taskPayloadSharedEXT struct Task {
             uvec4 a;
         } taskIn;
 
@@ -235,7 +241,7 @@ task_memory_uvec4(void)
                 result[3] = taskIn.a.w;
             }
 
-            gl_PrimitiveCountNV = 0;
+            SetMeshOutputsEXT(0, 0);
         }
     );
 
@@ -263,7 +269,7 @@ task_memory_uvec4(void)
 }
 
 test_define {
-    .name = "func.mesh.nv.task_memory.uvec4",
+    .name = "func.mesh.ext.task_memory.uvec4",
     .start = task_memory_uvec4,
     .no_image = true,
 };
@@ -271,13 +277,14 @@ test_define {
 static void
 task_memory_array_direct(void)
 {
-    t_require_ext("VK_NV_mesh_shader");
+    t_require_ext("VK_EXT_mesh_shader");
 
     VkShaderModule task = qoCreateShaderModuleGLSL(t_device, TASK,
-        QO_EXTENSION GL_NV_mesh_shader : require
+        QO_EXTENSION GL_EXT_mesh_shader : require
+        QO_TARGET_ENV spirv1.4
         layout(local_size_x = 32) in;
 
-        taskNV out Task {
+        taskPayloadSharedEXT struct Task {
             uint v[8];
         } taskOut;
 
@@ -296,18 +303,19 @@ task_memory_array_direct(void)
                 taskOut.v[6] = 0x66;
                 taskOut.v[7] = 0x67;
             }
-            gl_TaskCountNV = 1;
+            EmitMeshTasksEXT(1, 1, 1);
         }
     );
 
     VkShaderModule mesh = qoCreateShaderModuleGLSL(t_device, MESH,
-        QO_EXTENSION GL_NV_mesh_shader : require
+        QO_EXTENSION GL_EXT_mesh_shader : require
+        QO_TARGET_ENV spirv1.4
         layout(local_size_x = 32) in;
         layout(max_vertices = 6) out;
         layout(max_primitives = 3) out;
         layout(triangles) out;
 
-        taskNV in Task {
+        taskPayloadSharedEXT struct Task {
             uint v[8];
         } taskIn;
 
@@ -331,7 +339,7 @@ task_memory_array_direct(void)
                 result[7] = taskIn.v[7];
             }
 
-            gl_PrimitiveCountNV = 0;
+            SetMeshOutputsEXT(0, 0);
         }
     );
 
@@ -359,7 +367,7 @@ task_memory_array_direct(void)
 }
 
 test_define {
-    .name = "func.mesh.nv.task_memory.array_direct",
+    .name = "func.mesh.ext.task_memory.array_direct",
     .start = task_memory_array_direct,
     .no_image = true,
 };
@@ -368,13 +376,14 @@ test_define {
 static void
 task_memory_array_indirect(void)
 {
-    t_require_ext("VK_NV_mesh_shader");
+    t_require_ext("VK_EXT_mesh_shader");
 
     VkShaderModule task = qoCreateShaderModuleGLSL(t_device, TASK,
-        QO_EXTENSION GL_NV_mesh_shader : require
+        QO_EXTENSION GL_EXT_mesh_shader : require
+        QO_TARGET_ENV spirv1.4
         layout(local_size_x = 32) in;
 
-        taskNV out Task {
+        taskPayloadSharedEXT struct Task {
             uint v[32];
         } taskOut;
 
@@ -382,18 +391,19 @@ task_memory_array_indirect(void)
         {
             uint index = gl_LocalInvocationID.x;
             taskOut.v[index] = index;
-            gl_TaskCountNV = 1;
+            EmitMeshTasksEXT(1, 1, 1);
         }
     );
 
     VkShaderModule mesh = qoCreateShaderModuleGLSL(t_device, MESH,
-        QO_EXTENSION GL_NV_mesh_shader : require
+        QO_EXTENSION GL_EXT_mesh_shader : require
+        QO_TARGET_ENV spirv1.4
         layout(local_size_x = 32) in;
         layout(max_vertices = 6) out;
         layout(max_primitives = 3) out;
         layout(triangles) out;
 
-        taskNV in Task {
+        taskPayloadSharedEXT struct Task {
             uint v[32];
         } taskIn;
 
@@ -406,7 +416,7 @@ task_memory_array_indirect(void)
             uint index = gl_LocalInvocationID.x;
             result[index] = taskIn.v[index] + 0x60;
 
-            gl_PrimitiveCountNV = 0;
+            SetMeshOutputsEXT(0, 0);
         }
     );
 
@@ -440,7 +450,7 @@ task_memory_array_indirect(void)
 }
 
 test_define {
-    .name = "func.mesh.nv.task_memory.array_indirect",
+    .name = "func.mesh.ext.task_memory.array_indirect",
     .start = task_memory_array_indirect,
     .no_image = true,
 };
@@ -448,13 +458,14 @@ test_define {
 static void
 task_memory_many(void)
 {
-    t_require_ext("VK_NV_mesh_shader");
+    t_require_ext("VK_EXT_mesh_shader");
 
     VkShaderModule task = qoCreateShaderModuleGLSL(t_device, TASK,
-        QO_EXTENSION GL_NV_mesh_shader : require
+        QO_EXTENSION GL_EXT_mesh_shader : require
+        QO_TARGET_ENV spirv1.4
         layout(local_size_x = 32) in;
 
-        taskNV out Task {
+        taskPayloadSharedEXT struct Task {
             uint a;
             uvec2 b;
             uvec3 c;
@@ -473,18 +484,19 @@ task_memory_many(void)
             } else if (index == 2) {
                 taskOut.d = uvec4(0x66, 0x67, 0x68, 0x69);
             }
-            gl_TaskCountNV = 1;
+            EmitMeshTasksEXT(1, 1, 1);
         }
     );
 
     VkShaderModule mesh = qoCreateShaderModuleGLSL(t_device, MESH,
-        QO_EXTENSION GL_NV_mesh_shader : require
+        QO_EXTENSION GL_EXT_mesh_shader : require
+        QO_TARGET_ENV spirv1.4
         layout(local_size_x = 32) in;
         layout(max_vertices = 6) out;
         layout(max_primitives = 3) out;
         layout(triangles) out;
 
-        taskNV in Task {
+        taskPayloadSharedEXT struct Task {
             uint a;
             uvec2 b;
             uvec3 c;
@@ -514,7 +526,7 @@ task_memory_many(void)
                 result[9] = taskIn.d.w;
             }
 
-            gl_PrimitiveCountNV = 0;
+            SetMeshOutputsEXT(0, 0);
         }
     );
 
@@ -544,7 +556,7 @@ task_memory_many(void)
 }
 
 test_define {
-    .name = "func.mesh.nv.task_memory.many",
+    .name = "func.mesh.ext.task_memory.many",
     .start = task_memory_many,
     .no_image = true,
 };
@@ -552,10 +564,11 @@ test_define {
 static void
 task_memory_struct(void)
 {
-    t_require_ext("VK_NV_mesh_shader");
+    t_require_ext("VK_EXT_mesh_shader");
 
     VkShaderModule task = qoCreateShaderModuleGLSL(t_device, TASK,
-        QO_EXTENSION GL_NV_mesh_shader : require
+        QO_EXTENSION GL_EXT_mesh_shader : require
+        QO_TARGET_ENV spirv1.4
         layout(local_size_x = 32) in;
 
         struct S {
@@ -565,7 +578,7 @@ task_memory_struct(void)
             uvec4 d;
         };
 
-        taskNV out Task {
+        taskPayloadSharedEXT struct Task {
             S s;
         } taskOut;
 
@@ -581,12 +594,13 @@ task_memory_struct(void)
             } else if (index == 2) {
                 taskOut.s.d = uvec4(0x66, 0x67, 0x68, 0x69);
             }
-            gl_TaskCountNV = 1;
+            EmitMeshTasksEXT(1, 1, 1);
         }
     );
 
     VkShaderModule mesh = qoCreateShaderModuleGLSL(t_device, MESH,
-        QO_EXTENSION GL_NV_mesh_shader : require
+        QO_EXTENSION GL_EXT_mesh_shader : require
+        QO_TARGET_ENV spirv1.4
         layout(local_size_x = 32) in;
         layout(max_vertices = 6) out;
         layout(max_primitives = 3) out;
@@ -599,7 +613,7 @@ task_memory_struct(void)
             uvec4 d;
         };
 
-        taskNV in Task {
+        taskPayloadSharedEXT struct Task {
             S s;
         } taskIn;
 
@@ -626,7 +640,7 @@ task_memory_struct(void)
                 result[9] = taskIn.s.d.w;
             }
 
-            gl_PrimitiveCountNV = 0;
+            SetMeshOutputsEXT(0, 0);
         }
     );
 
@@ -656,7 +670,7 @@ task_memory_struct(void)
 }
 
 test_define {
-    .name = "func.mesh.nv.task_memory.struct",
+    .name = "func.mesh.ext.task_memory.struct",
     .start = task_memory_struct,
     .no_image = true,
 };
@@ -664,13 +678,14 @@ test_define {
 static void
 task_memory_some_not_used(void)
 {
-    t_require_ext("VK_NV_mesh_shader");
+    t_require_ext("VK_EXT_mesh_shader");
 
     VkShaderModule task = qoCreateShaderModuleGLSL(t_device, TASK,
-        QO_EXTENSION GL_NV_mesh_shader : require
+        QO_EXTENSION GL_EXT_mesh_shader : require
+        QO_TARGET_ENV spirv1.4
         layout(local_size_x = 32) in;
 
-        taskNV out Task {
+        taskPayloadSharedEXT struct Task {
             uint a;
             uvec2 b;
             uvec3 not_used;
@@ -694,18 +709,19 @@ task_memory_some_not_used(void)
                 taskOut.not_used = uvec3(0xEE, 0xEE, 0xEE);
                 taskOut.also_not_used = 0xEE;
             }
-            gl_TaskCountNV = 1;
+            EmitMeshTasksEXT(1, 1, 1);
         }
     );
 
     VkShaderModule mesh = qoCreateShaderModuleGLSL(t_device, MESH,
-        QO_EXTENSION GL_NV_mesh_shader : require
+        QO_EXTENSION GL_EXT_mesh_shader : require
+        QO_TARGET_ENV spirv1.4
         layout(local_size_x = 32) in;
         layout(max_vertices = 6) out;
         layout(max_primitives = 3) out;
         layout(triangles) out;
 
-        taskNV in Task {
+        taskPayloadSharedEXT struct Task {
             uint a;
             uvec2 b;
             uvec3 not_used;
@@ -737,7 +753,7 @@ task_memory_some_not_used(void)
                 result[9] = taskIn.d.w;
             }
 
-            gl_PrimitiveCountNV = 0;
+            SetMeshOutputsEXT(0, 0);
         }
     );
 
@@ -767,7 +783,7 @@ task_memory_some_not_used(void)
 }
 
 test_define {
-    .name = "func.mesh.nv.task_memory.some_not_used",
+    .name = "func.mesh.ext.task_memory.some_not_used",
     .start = task_memory_some_not_used,
     .no_image = true,
 };
@@ -775,10 +791,11 @@ test_define {
 static void
 task_memory_load_output_struct(void)
 {
-    t_require_ext("VK_NV_mesh_shader");
+    t_require_ext("VK_EXT_mesh_shader");
 
     VkShaderModule task = qoCreateShaderModuleGLSL(t_device, TASK,
-        QO_EXTENSION GL_NV_mesh_shader : require
+        QO_EXTENSION GL_EXT_mesh_shader : require
+        QO_TARGET_ENV spirv1.4
         layout(local_size_x = 32) in;
 
         struct S {
@@ -788,7 +805,7 @@ task_memory_load_output_struct(void)
             uvec4 d;
         };
 
-        taskNV out Task {
+        taskPayloadSharedEXT struct Task {
             S s;
         } taskOut;
 
@@ -817,12 +834,13 @@ task_memory_load_output_struct(void)
                 taskOut.s.d -= 0x10;
             }
 
-            gl_TaskCountNV = 1;
+            EmitMeshTasksEXT(1, 1, 1);
         }
     );
 
     VkShaderModule mesh = qoCreateShaderModuleGLSL(t_device, MESH,
-        QO_EXTENSION GL_NV_mesh_shader : require
+        QO_EXTENSION GL_EXT_mesh_shader : require
+        QO_TARGET_ENV spirv1.4
         layout(local_size_x = 32) in;
         layout(max_vertices = 6) out;
         layout(max_primitives = 3) out;
@@ -835,7 +853,7 @@ task_memory_load_output_struct(void)
             uvec4 d;
         };
 
-        taskNV in Task {
+        taskPayloadSharedEXT struct Task {
             S s;
         } taskIn;
 
@@ -862,7 +880,7 @@ task_memory_load_output_struct(void)
                 result[9] = taskIn.s.d.w;
             }
 
-            gl_PrimitiveCountNV = 0;
+            SetMeshOutputsEXT(0, 0);
         }
     );
 
@@ -892,7 +910,7 @@ task_memory_load_output_struct(void)
 }
 
 test_define {
-    .name = "func.mesh.nv.task_memory.load_output_struct",
+    .name = "func.mesh.ext.task_memory.load_output_struct",
     .start = task_memory_load_output_struct,
     .no_image = true,
 };
@@ -901,13 +919,14 @@ test_define {
 static void
 task_memory_many_meshes(void)
 {
-    t_require_ext("VK_NV_mesh_shader");
+    t_require_ext("VK_EXT_mesh_shader");
 
     VkShaderModule task = qoCreateShaderModuleGLSL(t_device, TASK,
-        QO_EXTENSION GL_NV_mesh_shader : require
+        QO_EXTENSION GL_EXT_mesh_shader : require
+        QO_TARGET_ENV spirv1.4
         layout(local_size_x = 32) in;
 
-        taskNV out Task {
+        taskPayloadSharedEXT struct Task {
             uint value;
         } taskOut;
 
@@ -915,18 +934,19 @@ task_memory_many_meshes(void)
         {
             uint index = gl_LocalInvocationID.x;
             taskOut.value = 0x60;
-            gl_TaskCountNV = 4;
+            EmitMeshTasksEXT(4, 1, 1);
         }
     );
 
     VkShaderModule mesh = qoCreateShaderModuleGLSL(t_device, MESH,
-        QO_EXTENSION GL_NV_mesh_shader : require
+        QO_EXTENSION GL_EXT_mesh_shader : require
+        QO_TARGET_ENV spirv1.4
         layout(local_size_x = 32) in;
         layout(max_vertices = 6) out;
         layout(max_primitives = 3) out;
         layout(triangles) out;
 
-        taskNV in Task {
+        taskPayloadSharedEXT struct Task {
             uint value;
         } taskIn;
 
@@ -941,7 +961,7 @@ task_memory_many_meshes(void)
             if (index == 0) {
                 result[mesh_id] = taskIn.value + mesh_id;
             }
-            gl_PrimitiveCountNV = 0;
+            SetMeshOutputsEXT(0, 0);
         }
     );
 
@@ -969,7 +989,7 @@ task_memory_many_meshes(void)
 }
 
 test_define {
-    .name = "func.mesh.nv.task_memory.many_meshes",
+    .name = "func.mesh.ext.task_memory.many_meshes",
     .start = task_memory_many_meshes,
     .no_image = true,
 };
@@ -978,13 +998,14 @@ test_define {
 static void
 task_memory_many_tasks(void)
 {
-    t_require_ext("VK_NV_mesh_shader");
+    t_require_ext("VK_EXT_mesh_shader");
 
     VkShaderModule task = qoCreateShaderModuleGLSL(t_device, TASK,
-        QO_EXTENSION GL_NV_mesh_shader : require
+        QO_EXTENSION GL_EXT_mesh_shader : require
+        QO_TARGET_ENV spirv1.4
         layout(local_size_x = 32) in;
 
-        taskNV out Task {
+        taskPayloadSharedEXT struct Task {
             uint task_id;
             uint value;
         } taskOut;
@@ -994,18 +1015,19 @@ task_memory_many_tasks(void)
             uint index = gl_LocalInvocationID.x;
             taskOut.task_id = gl_WorkGroupID.x;
             taskOut.value = gl_WorkGroupID.x * 0x10 + 0x60;
-            gl_TaskCountNV = 1;
+            EmitMeshTasksEXT(1, 1, 1);
         }
     );
 
     VkShaderModule mesh = qoCreateShaderModuleGLSL(t_device, MESH,
-        QO_EXTENSION GL_NV_mesh_shader : require
+        QO_EXTENSION GL_EXT_mesh_shader : require
+        QO_TARGET_ENV spirv1.4
         layout(local_size_x = 32) in;
         layout(max_vertices = 6) out;
         layout(max_primitives = 3) out;
         layout(triangles) out;
 
-        taskNV in Task {
+        taskPayloadSharedEXT struct Task {
             uint task_id;
             uint value;
         } taskIn;
@@ -1020,7 +1042,7 @@ task_memory_many_tasks(void)
             if (index == 0) {
                 result[taskIn.task_id] = taskIn.value;
             }
-            gl_PrimitiveCountNV = 0;
+            SetMeshOutputsEXT(0, 0);
         }
     );
 
@@ -1049,7 +1071,7 @@ task_memory_many_tasks(void)
 }
 
 test_define {
-    .name = "func.mesh.nv.task_memory.many_tasks",
+    .name = "func.mesh.ext.task_memory.many_tasks",
     .start = task_memory_many_tasks,
     .no_image = true,
 };
@@ -1058,13 +1080,14 @@ test_define {
 static void
 task_memory_many_tasks_and_meshes(void)
 {
-    t_require_ext("VK_NV_mesh_shader");
+    t_require_ext("VK_EXT_mesh_shader");
 
     VkShaderModule task = qoCreateShaderModuleGLSL(t_device, TASK,
-        QO_EXTENSION GL_NV_mesh_shader : require
+        QO_EXTENSION GL_EXT_mesh_shader : require
+        QO_TARGET_ENV spirv1.4
         layout(local_size_x = 32) in;
 
-        taskNV out Task {
+        taskPayloadSharedEXT struct Task {
             uint task_id;
             uint value;
         } taskOut;
@@ -1074,18 +1097,19 @@ task_memory_many_tasks_and_meshes(void)
             uint index = gl_LocalInvocationID.x;
             taskOut.task_id = gl_WorkGroupID.x;
             taskOut.value = gl_WorkGroupID.x * 0x10 + 0x60;
-            gl_TaskCountNV = 4;
+            EmitMeshTasksEXT(4, 1, 1);
         }
     );
 
     VkShaderModule mesh = qoCreateShaderModuleGLSL(t_device, MESH,
-        QO_EXTENSION GL_NV_mesh_shader : require
+        QO_EXTENSION GL_EXT_mesh_shader : require
+        QO_TARGET_ENV spirv1.4
         layout(local_size_x = 32) in;
         layout(max_vertices = 6) out;
         layout(max_primitives = 3) out;
         layout(triangles) out;
 
-        taskNV in Task {
+        taskPayloadSharedEXT struct Task {
             uint task_id;
             uint value;
         } taskIn;
@@ -1101,7 +1125,7 @@ task_memory_many_tasks_and_meshes(void)
             if (index == 0) {
                 result[taskIn.task_id * 4 + mesh_id] = taskIn.value + mesh_id;
             }
-            gl_PrimitiveCountNV = 0;
+            SetMeshOutputsEXT(0, 0);
         }
     );
 
@@ -1136,7 +1160,7 @@ task_memory_many_tasks_and_meshes(void)
 }
 
 test_define {
-    .name = "func.mesh.nv.task_memory.many_tasks_and_meshes",
+    .name = "func.mesh.ext.task_memory.many_tasks_and_meshes",
     .start = task_memory_many_tasks_and_meshes,
     .no_image = true,
 };
@@ -1145,13 +1169,14 @@ test_define {
 static void
 task_memory_large_array(void)
 {
-    t_require_ext("VK_NV_mesh_shader");
+    t_require_ext("VK_EXT_mesh_shader");
 
     VkShaderModule task = qoCreateShaderModuleGLSL(t_device, TASK,
-        QO_EXTENSION GL_NV_mesh_shader : require
+        QO_EXTENSION GL_EXT_mesh_shader : require
+        QO_TARGET_ENV spirv1.4
         layout(local_size_x = 32) in;
 
-        taskNV out Task {
+        taskPayloadSharedEXT struct Task {
             uvec4 v[1024];  // At least 16Kb, which is the minimum limit.
         } taskOut;
 
@@ -1164,18 +1189,19 @@ task_memory_large_array(void)
                                          i, taskOut.v.length() - i - 1);
                 }
             }
-            gl_TaskCountNV = 1;
+            EmitMeshTasksEXT(1, 1, 1);
         }
     );
 
     VkShaderModule mesh = qoCreateShaderModuleGLSL(t_device, MESH,
-        QO_EXTENSION GL_NV_mesh_shader : require
+        QO_EXTENSION GL_EXT_mesh_shader : require
+        QO_TARGET_ENV spirv1.4
         layout(local_size_x = 32) in;
         layout(max_vertices = 6) out;
         layout(max_primitives = 3) out;
         layout(triangles) out;
 
-        taskNV in Task {
+        taskPayloadSharedEXT struct Task {
             uvec4 v[1024];
         } taskIn;
 
@@ -1197,7 +1223,7 @@ task_memory_large_array(void)
                 for (int i = 0; i < result.length(); i++)
                     result[i] = sum[i];
             }
-            gl_PrimitiveCountNV = 0;
+            SetMeshOutputsEXT(0, 0);
         }
     );
 
@@ -1223,7 +1249,7 @@ task_memory_large_array(void)
 }
 
 test_define {
-    .name = "func.mesh.nv.task_memory.large_array",
+    .name = "func.mesh.ext.task_memory.large_array",
     .start = task_memory_large_array,
     .no_image = true,
 };

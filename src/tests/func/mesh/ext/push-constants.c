@@ -22,15 +22,16 @@
 #include "util/simple_pipeline.h"
 #include "tapi/t.h"
 
-#include "src/tests/func/mesh/nv/push-constants-spirv.h"
+#include "src/tests/func/mesh/ext/push-constants-spirv.h"
 
 static void
 push_constants_mesh_read(void)
 {
-    t_require_ext("VK_NV_mesh_shader");
+    t_require_ext("VK_EXT_mesh_shader");
 
     VkShaderModule mesh = qoCreateShaderModuleGLSL(t_device, MESH,
-        QO_EXTENSION GL_NV_mesh_shader : require
+        QO_EXTENSION GL_EXT_mesh_shader : require
+        QO_TARGET_ENV spirv1.4
         layout(local_size_x = 4) in;
         layout(max_vertices = 6) out;
         layout(max_primitives = 3) out;
@@ -46,22 +47,22 @@ push_constants_mesh_read(void)
 
         void main()
         {
+            SetMeshOutputsEXT(6, 2);
+
+            for (int i = 0; i < 2; ++i)
+                gl_PrimitiveTriangleIndicesEXT[i] = uvec3(i * 3 + 0, i * 3 + 1, i * 3 + 2);
+
             if (gl_LocalInvocationID.x == 0) {
-                gl_PrimitiveCountNV = 2;
-
-                for (int i = 0; i < 6; i++)
-                    gl_PrimitiveIndicesNV[i] = indices[i];
-
                 vec4 scale = vec4(0.5, 0.5, 0.5, 1.0);
                 vec4 pos_a = vec4(-0.5f, -0.5f, 0, 0);
-                gl_MeshVerticesNV[0].gl_Position = scale * vec4(0.5f, 0.5f, 0.0f, 1.0f) + pos_a;
-                gl_MeshVerticesNV[1].gl_Position = scale * vec4(-0.5f, 0.5f, 0.0f, 1.0f) + pos_a;
-                gl_MeshVerticesNV[2].gl_Position = scale * vec4(0.0f, -0.5f, 0.0f, 1.0f) + pos_a;
+                gl_MeshVerticesEXT[0].gl_Position = scale * vec4(0.5f, 0.5f, 0.0f, 1.0f) + pos_a;
+                gl_MeshVerticesEXT[1].gl_Position = scale * vec4(-0.5f, 0.5f, 0.0f, 1.0f) + pos_a;
+                gl_MeshVerticesEXT[2].gl_Position = scale * vec4(0.0f, -0.5f, 0.0f, 1.0f) + pos_a;
 
                 vec4 pos_b = vec4(0.5f, 0.5f, 0, 0);
-                gl_MeshVerticesNV[3].gl_Position = scale * vec4(0.5f, 0.5f, 0.0f, 1.0f) + pos_b;
-                gl_MeshVerticesNV[4].gl_Position = scale * vec4(-0.5f, 0.5f, 0.0f, 1.0f) + pos_b;
-                gl_MeshVerticesNV[5].gl_Position = scale * vec4(0.0f, -0.5f, 0.0f, 1.0f) + pos_b;
+                gl_MeshVerticesEXT[3].gl_Position = scale * vec4(0.5f, 0.5f, 0.0f, 1.0f) + pos_b;
+                gl_MeshVerticesEXT[4].gl_Position = scale * vec4(-0.5f, 0.5f, 0.0f, 1.0f) + pos_b;
+                gl_MeshVerticesEXT[5].gl_Position = scale * vec4(0.0f, -0.5f, 0.0f, 1.0f) + pos_b;
 
                 per_vertex[0].color = vec4(1, 0, 0, 1);
                 per_vertex[1].color = vec4(0, 1, 0, 1);
@@ -87,7 +88,7 @@ push_constants_mesh_read(void)
 }
 
 test_define {
-    .name = "func.mesh.nv.push_constants.mesh_read",
+    .name = "func.mesh.ext.push_constants.mesh_read",
     .start = push_constants_mesh_read,
     .image_filename = "func.mesh.basic.ref.png",
 };

@@ -22,13 +22,14 @@
 #include "util/simple_pipeline.h"
 #include "tapi/t.h"
 
-#include "src/tests/func/mesh/nv/clipculldistance-spirv.h"
+#include "src/tests/func/mesh/ext/clipculldistance-spirv.h"
 
 static VkShaderModule
 get_clipdistance_1_shader(void)
 {
     VkShaderModule mesh = qoCreateShaderModuleGLSL(t_device, MESH,
-        QO_EXTENSION GL_NV_mesh_shader : require
+        QO_EXTENSION GL_EXT_mesh_shader : require
+        QO_TARGET_ENV spirv1.4
         layout(local_size_x = 1) in;
         layout(max_vertices = 12) out;
         layout(max_primitives = 4) out;
@@ -38,32 +39,32 @@ get_clipdistance_1_shader(void)
 
         void main()
         {
-            gl_PrimitiveCountNV = 4;
+            SetMeshOutputsEXT(12, 4);
 
-            for (int i = 0; i < 12; ++i)
-                gl_PrimitiveIndicesNV[i] = i;
+            for (int i = 0; i < 4; ++i)
+                gl_PrimitiveTriangleIndicesEXT[i] = uvec3(i * 3 + 0, i * 3 + 1, i * 3 + 2);
 
             for (int i = 0; i < 4; ++i) {
-                gl_MeshVerticesNV[i * 3 + 0].gl_Position = vec4(-0.5f,   0.25f, 0.0f, 1.0f) + i * vec4(0.5, 0, 0, 0);
-                gl_MeshVerticesNV[i * 3 + 1].gl_Position = vec4(-1.0f,   0.25f, 0.0f, 1.0f) + i * vec4(0.5, 0, 0, 0);
-                gl_MeshVerticesNV[i * 3 + 2].gl_Position = vec4(-0.75f, -0.25f, 0.0f, 1.0f) + i * vec4(0.5, 0, 0, 0);
+                gl_MeshVerticesEXT[i * 3 + 0].gl_Position = vec4(-0.5f,   0.25f, 0.0f, 1.0f) + i * vec4(0.5, 0, 0, 0);
+                gl_MeshVerticesEXT[i * 3 + 1].gl_Position = vec4(-1.0f,   0.25f, 0.0f, 1.0f) + i * vec4(0.5, 0, 0, 0);
+                gl_MeshVerticesEXT[i * 3 + 2].gl_Position = vec4(-0.75f, -0.25f, 0.0f, 1.0f) + i * vec4(0.5, 0, 0, 0);
             }
 
-            gl_MeshVerticesNV[0].gl_ClipDistance[0] = 1;
-            gl_MeshVerticesNV[1].gl_ClipDistance[0] = 1;
-            gl_MeshVerticesNV[2].gl_ClipDistance[0] = 1;
+            gl_MeshVerticesEXT[0].gl_ClipDistance[0] = 1;
+            gl_MeshVerticesEXT[1].gl_ClipDistance[0] = 1;
+            gl_MeshVerticesEXT[2].gl_ClipDistance[0] = 1;
 
-            gl_MeshVerticesNV[3].gl_ClipDistance[0] = -1;
-            gl_MeshVerticesNV[4].gl_ClipDistance[0] =  1;
-            gl_MeshVerticesNV[5].gl_ClipDistance[0] =  1;
+            gl_MeshVerticesEXT[3].gl_ClipDistance[0] = -1;
+            gl_MeshVerticesEXT[4].gl_ClipDistance[0] =  1;
+            gl_MeshVerticesEXT[5].gl_ClipDistance[0] =  1;
 
-            gl_MeshVerticesNV[6].gl_ClipDistance[0] = -1;
-            gl_MeshVerticesNV[7].gl_ClipDistance[0] = -1;
-            gl_MeshVerticesNV[8].gl_ClipDistance[0] =  1;
+            gl_MeshVerticesEXT[6].gl_ClipDistance[0] = -1;
+            gl_MeshVerticesEXT[7].gl_ClipDistance[0] = -1;
+            gl_MeshVerticesEXT[8].gl_ClipDistance[0] =  1;
 
-            gl_MeshVerticesNV[9].gl_ClipDistance[0]  = -1;
-            gl_MeshVerticesNV[10].gl_ClipDistance[0] = -1;
-            gl_MeshVerticesNV[11].gl_ClipDistance[0] = -1;
+            gl_MeshVerticesEXT[9].gl_ClipDistance[0]  = -1;
+            gl_MeshVerticesEXT[10].gl_ClipDistance[0] = -1;
+            gl_MeshVerticesEXT[11].gl_ClipDistance[0] = -1;
 
             color[0] = vec4(1, 1, 1, 1);
             color[1] = vec4(1, 1, 1, 1);
@@ -89,7 +90,7 @@ get_clipdistance_1_shader(void)
 static void
 clipdistance_1(void)
 {
-    t_require_ext("VK_NV_mesh_shader");
+    t_require_ext("VK_EXT_mesh_shader");
 
     VkShaderModule mesh = get_clipdistance_1_shader();
 
@@ -97,7 +98,7 @@ clipdistance_1(void)
 }
 
 test_define {
-    .name = "func.mesh.nv.clipdistance.1",
+    .name = "func.mesh.ext.clipdistance.1",
     .start = clipdistance_1,
     .image_filename = "func.mesh.clipdistance.ref.png",
 };
@@ -105,51 +106,52 @@ test_define {
 static void
 clipdistance_5(void)
 {
-    t_require_ext("VK_NV_mesh_shader");
+    t_require_ext("VK_EXT_mesh_shader");
 
     VkShaderModule mesh = qoCreateShaderModuleGLSL(t_device, MESH,
-        QO_EXTENSION GL_NV_mesh_shader : require
+        QO_EXTENSION GL_EXT_mesh_shader : require
+        QO_TARGET_ENV spirv1.4
         layout(local_size_x = 1) in;
         layout(max_vertices = 12) out;
         layout(max_primitives = 4) out;
         layout(triangles) out;
 
-        out gl_MeshPerVertexNV {
+        out gl_MeshPerVertexEXT {
             vec4  gl_Position;
             float gl_ClipDistance[5];
-        } gl_MeshVerticesNV[];
+        } gl_MeshVerticesEXT[];
 
         layout(location = 0) out vec4 color[];
 
         void main()
         {
-            gl_PrimitiveCountNV = 4;
+            SetMeshOutputsEXT(12, 4);
 
-            for (int i = 0; i < 12; ++i)
-                gl_PrimitiveIndicesNV[i] = i;
+            for (int i = 0; i < 4; ++i)
+                gl_PrimitiveTriangleIndicesEXT[i] = uvec3(i * 3 + 0, i * 3 + 1, i * 3 + 2);
 
             for (int i = 0; i < 4; ++i) {
-                gl_MeshVerticesNV[i * 3 + 0].gl_Position = vec4(-0.5f,   0.25f, 0.0f, 1.0f) + i * vec4(0.5, 0, 0, 0);
-                gl_MeshVerticesNV[i * 3 + 1].gl_Position = vec4(-1.0f,   0.25f, 0.0f, 1.0f) + i * vec4(0.5, 0, 0, 0);
-                gl_MeshVerticesNV[i * 3 + 2].gl_Position = vec4(-0.75f, -0.25f, 0.0f, 1.0f) + i * vec4(0.5, 0, 0, 0);
+                gl_MeshVerticesEXT[i * 3 + 0].gl_Position = vec4(-0.5f,   0.25f, 0.0f, 1.0f) + i * vec4(0.5, 0, 0, 0);
+                gl_MeshVerticesEXT[i * 3 + 1].gl_Position = vec4(-1.0f,   0.25f, 0.0f, 1.0f) + i * vec4(0.5, 0, 0, 0);
+                gl_MeshVerticesEXT[i * 3 + 2].gl_Position = vec4(-0.75f, -0.25f, 0.0f, 1.0f) + i * vec4(0.5, 0, 0, 0);
             }
 
             for (int i = 0; i < 5; ++i) {
-                gl_MeshVerticesNV[0].gl_ClipDistance[i] = 1 + i;
-                gl_MeshVerticesNV[1].gl_ClipDistance[i] = 1 + i;
-                gl_MeshVerticesNV[2].gl_ClipDistance[i] = 1 + i;
+                gl_MeshVerticesEXT[0].gl_ClipDistance[i] = 1 + i;
+                gl_MeshVerticesEXT[1].gl_ClipDistance[i] = 1 + i;
+                gl_MeshVerticesEXT[2].gl_ClipDistance[i] = 1 + i;
 
-                gl_MeshVerticesNV[3].gl_ClipDistance[i] = -1 - i;
-                gl_MeshVerticesNV[4].gl_ClipDistance[i] =  1 + i;
-                gl_MeshVerticesNV[5].gl_ClipDistance[i] =  1 + i;
+                gl_MeshVerticesEXT[3].gl_ClipDistance[i] = -1 - i;
+                gl_MeshVerticesEXT[4].gl_ClipDistance[i] =  1 + i;
+                gl_MeshVerticesEXT[5].gl_ClipDistance[i] =  1 + i;
 
-                gl_MeshVerticesNV[6].gl_ClipDistance[i] = -1 - i;
-                gl_MeshVerticesNV[7].gl_ClipDistance[i] = -1 - i;
-                gl_MeshVerticesNV[8].gl_ClipDistance[i] =  1 + i;
+                gl_MeshVerticesEXT[6].gl_ClipDistance[i] = -1 - i;
+                gl_MeshVerticesEXT[7].gl_ClipDistance[i] = -1 - i;
+                gl_MeshVerticesEXT[8].gl_ClipDistance[i] =  1 + i;
 
-                gl_MeshVerticesNV[9].gl_ClipDistance[i]  = -1 - i;
-                gl_MeshVerticesNV[10].gl_ClipDistance[i] = -1 - i;
-                gl_MeshVerticesNV[11].gl_ClipDistance[i] = -1 - i;
+                gl_MeshVerticesEXT[9].gl_ClipDistance[i]  = -1 - i;
+                gl_MeshVerticesEXT[10].gl_ClipDistance[i] = -1 - i;
+                gl_MeshVerticesEXT[11].gl_ClipDistance[i] = -1 - i;
             }
 
             color[0] = vec4(1, 1, 1, 1);
@@ -174,7 +176,7 @@ clipdistance_5(void)
 }
 
 test_define {
-    .name = "func.mesh.nv.clipdistance.5",
+    .name = "func.mesh.ext.clipdistance.5",
     .start = clipdistance_5,
     .image_filename = "func.mesh.clipdistance.ref.png",
 };
@@ -182,10 +184,11 @@ test_define {
 static void
 culldistance_1(void)
 {
-    t_require_ext("VK_NV_mesh_shader");
+    t_require_ext("VK_EXT_mesh_shader");
 
     VkShaderModule mesh = qoCreateShaderModuleGLSL(t_device, MESH,
-        QO_EXTENSION GL_NV_mesh_shader : require
+        QO_EXTENSION GL_EXT_mesh_shader : require
+        QO_TARGET_ENV spirv1.4
         layout(local_size_x = 1) in;
         layout(max_vertices = 12) out;
         layout(max_primitives = 4) out;
@@ -195,32 +198,32 @@ culldistance_1(void)
 
         void main()
         {
-            gl_PrimitiveCountNV = 4;
+            SetMeshOutputsEXT(12, 4);
 
-            for (int i = 0; i < 12; ++i)
-                gl_PrimitiveIndicesNV[i] = i;
+            for (int i = 0; i < 4; ++i)
+                gl_PrimitiveTriangleIndicesEXT[i] = uvec3(i * 3 + 0, i * 3 + 1, i * 3 + 2);
 
             for (int i = 0; i < 4; ++i) {
-                gl_MeshVerticesNV[i * 3 + 0].gl_Position = vec4(-0.5f,   0.25f, 0.0f, 1.0f) + i * vec4(0.5, 0, 0, 0);
-                gl_MeshVerticesNV[i * 3 + 1].gl_Position = vec4(-1.0f,   0.25f, 0.0f, 1.0f) + i * vec4(0.5, 0, 0, 0);
-                gl_MeshVerticesNV[i * 3 + 2].gl_Position = vec4(-0.75f, -0.25f, 0.0f, 1.0f) + i * vec4(0.5, 0, 0, 0);
+                gl_MeshVerticesEXT[i * 3 + 0].gl_Position = vec4(-0.5f,   0.25f, 0.0f, 1.0f) + i * vec4(0.5, 0, 0, 0);
+                gl_MeshVerticesEXT[i * 3 + 1].gl_Position = vec4(-1.0f,   0.25f, 0.0f, 1.0f) + i * vec4(0.5, 0, 0, 0);
+                gl_MeshVerticesEXT[i * 3 + 2].gl_Position = vec4(-0.75f, -0.25f, 0.0f, 1.0f) + i * vec4(0.5, 0, 0, 0);
             }
 
-            gl_MeshVerticesNV[0].gl_CullDistance[0] = 1;
-            gl_MeshVerticesNV[1].gl_CullDistance[0] = 1;
-            gl_MeshVerticesNV[2].gl_CullDistance[0] = 1;
+            gl_MeshVerticesEXT[0].gl_CullDistance[0] = 1;
+            gl_MeshVerticesEXT[1].gl_CullDistance[0] = 1;
+            gl_MeshVerticesEXT[2].gl_CullDistance[0] = 1;
 
-            gl_MeshVerticesNV[3].gl_CullDistance[0] = -1;
-            gl_MeshVerticesNV[4].gl_CullDistance[0] =  1;
-            gl_MeshVerticesNV[5].gl_CullDistance[0] =  1;
+            gl_MeshVerticesEXT[3].gl_CullDistance[0] = -1;
+            gl_MeshVerticesEXT[4].gl_CullDistance[0] =  1;
+            gl_MeshVerticesEXT[5].gl_CullDistance[0] =  1;
 
-            gl_MeshVerticesNV[6].gl_CullDistance[0] = -1;
-            gl_MeshVerticesNV[7].gl_CullDistance[0] = -1;
-            gl_MeshVerticesNV[8].gl_CullDistance[0] =  1;
+            gl_MeshVerticesEXT[6].gl_CullDistance[0] = -1;
+            gl_MeshVerticesEXT[7].gl_CullDistance[0] = -1;
+            gl_MeshVerticesEXT[8].gl_CullDistance[0] =  1;
 
-            gl_MeshVerticesNV[9].gl_CullDistance[0]  = -1;
-            gl_MeshVerticesNV[10].gl_CullDistance[0] = -1;
-            gl_MeshVerticesNV[11].gl_CullDistance[0] = -1;
+            gl_MeshVerticesEXT[9].gl_CullDistance[0]  = -1;
+            gl_MeshVerticesEXT[10].gl_CullDistance[0] = -1;
+            gl_MeshVerticesEXT[11].gl_CullDistance[0] = -1;
 
             color[0] = vec4(1, 1, 1, 1);
             color[1] = vec4(1, 1, 1, 1);
@@ -244,7 +247,7 @@ culldistance_1(void)
 }
 
 test_define {
-    .name = "func.mesh.nv.culldistance.1",
+    .name = "func.mesh.ext.culldistance.1",
     .start = culldistance_1,
     .image_filename = "func.mesh.culldistance.ref.png",
 };
@@ -252,10 +255,11 @@ test_define {
 static void
 culldistance_5(void)
 {
-    t_require_ext("VK_NV_mesh_shader");
+    t_require_ext("VK_EXT_mesh_shader");
 
     VkShaderModule mesh = qoCreateShaderModuleGLSL(t_device, MESH,
-        QO_EXTENSION GL_NV_mesh_shader : require
+        QO_EXTENSION GL_EXT_mesh_shader : require
+        QO_TARGET_ENV spirv1.4
         layout(local_size_x = 1) in;
         layout(max_vertices = 12) out;
         layout(max_primitives = 4) out;
@@ -263,40 +267,40 @@ culldistance_5(void)
 
         layout(location = 0) out vec4 color[];
 
-        out gl_MeshPerVertexNV {
+        out gl_MeshPerVertexEXT {
             vec4  gl_Position;
             float gl_CullDistance[5];
-        } gl_MeshVerticesNV[];
+        } gl_MeshVerticesEXT[];
 
         void main()
         {
-            gl_PrimitiveCountNV = 4;
+            SetMeshOutputsEXT(12, 4);
 
-            for (int i = 0; i < 12; ++i)
-                gl_PrimitiveIndicesNV[i] = i;
+            for (int i = 0; i < 4; ++i)
+                gl_PrimitiveTriangleIndicesEXT[i] = uvec3(i * 3 + 0, i * 3 + 1, i * 3 + 2);
 
             for (int i = 0; i < 4; ++i) {
-                gl_MeshVerticesNV[i * 3 + 0].gl_Position = vec4(-0.5f,   0.25f, 0.0f, 1.0f) + i * vec4(0.5, 0, 0, 0);
-                gl_MeshVerticesNV[i * 3 + 1].gl_Position = vec4(-1.0f,   0.25f, 0.0f, 1.0f) + i * vec4(0.5, 0, 0, 0);
-                gl_MeshVerticesNV[i * 3 + 2].gl_Position = vec4(-0.75f, -0.25f, 0.0f, 1.0f) + i * vec4(0.5, 0, 0, 0);
+                gl_MeshVerticesEXT[i * 3 + 0].gl_Position = vec4(-0.5f,   0.25f, 0.0f, 1.0f) + i * vec4(0.5, 0, 0, 0);
+                gl_MeshVerticesEXT[i * 3 + 1].gl_Position = vec4(-1.0f,   0.25f, 0.0f, 1.0f) + i * vec4(0.5, 0, 0, 0);
+                gl_MeshVerticesEXT[i * 3 + 2].gl_Position = vec4(-0.75f, -0.25f, 0.0f, 1.0f) + i * vec4(0.5, 0, 0, 0);
             }
 
             for (int i = 0; i < 5; ++i) {
-                gl_MeshVerticesNV[0].gl_CullDistance[i] = 1 + i;
-                gl_MeshVerticesNV[1].gl_CullDistance[i] = 1 + i;
-                gl_MeshVerticesNV[2].gl_CullDistance[i] = 1 + i;
+                gl_MeshVerticesEXT[0].gl_CullDistance[i] = 1 + i;
+                gl_MeshVerticesEXT[1].gl_CullDistance[i] = 1 + i;
+                gl_MeshVerticesEXT[2].gl_CullDistance[i] = 1 + i;
 
-                gl_MeshVerticesNV[3].gl_CullDistance[i] = -1 - i;
-                gl_MeshVerticesNV[4].gl_CullDistance[i] =  1 + i;
-                gl_MeshVerticesNV[5].gl_CullDistance[i] =  1 + i;
+                gl_MeshVerticesEXT[3].gl_CullDistance[i] = -1 - i;
+                gl_MeshVerticesEXT[4].gl_CullDistance[i] =  1 + i;
+                gl_MeshVerticesEXT[5].gl_CullDistance[i] =  1 + i;
 
-                gl_MeshVerticesNV[6].gl_CullDistance[i] = -1 - i;
-                gl_MeshVerticesNV[7].gl_CullDistance[i] = -1 - i;
-                gl_MeshVerticesNV[8].gl_CullDistance[i] =  1 + i;
+                gl_MeshVerticesEXT[6].gl_CullDistance[i] = -1 - i;
+                gl_MeshVerticesEXT[7].gl_CullDistance[i] = -1 - i;
+                gl_MeshVerticesEXT[8].gl_CullDistance[i] =  1 + i;
 
-                gl_MeshVerticesNV[9].gl_CullDistance[i]  = -1 - i;
-                gl_MeshVerticesNV[10].gl_CullDistance[i] = -1 - i;
-                gl_MeshVerticesNV[11].gl_CullDistance[i] = -1 - i;
+                gl_MeshVerticesEXT[9].gl_CullDistance[i]  = -1 - i;
+                gl_MeshVerticesEXT[10].gl_CullDistance[i] = -1 - i;
+                gl_MeshVerticesEXT[11].gl_CullDistance[i] = -1 - i;
             }
 
             color[0] = vec4(1, 1, 1, 1);
@@ -321,7 +325,7 @@ culldistance_5(void)
 }
 
 test_define {
-    .name = "func.mesh.nv.culldistance.5",
+    .name = "func.mesh.ext.culldistance.5",
     .start = culldistance_5,
     .image_filename = "func.mesh.culldistance.ref.png",
 };
@@ -329,10 +333,11 @@ test_define {
 static void
 clipdistance_1_culldistance_1(void)
 {
-    t_require_ext("VK_NV_mesh_shader");
+    t_require_ext("VK_EXT_mesh_shader");
 
     VkShaderModule mesh = qoCreateShaderModuleGLSL(t_device, MESH,
-        QO_EXTENSION GL_NV_mesh_shader : require
+        QO_EXTENSION GL_EXT_mesh_shader : require
+        QO_TARGET_ENV spirv1.4
         layout(local_size_x = 1) in;
         layout(max_vertices = 12) out;
         layout(max_primitives = 4) out;
@@ -342,49 +347,49 @@ clipdistance_1_culldistance_1(void)
 
         void main()
         {
-            gl_PrimitiveCountNV = 4;
+            SetMeshOutputsEXT(12, 4);
 
-            for (int i = 0; i < 12; ++i)
-                gl_PrimitiveIndicesNV[i] = i;
+            for (int i = 0; i < 4; ++i)
+                gl_PrimitiveTriangleIndicesEXT[i] = uvec3(i * 3 + 0, i * 3 + 1, i * 3 + 2);
 
             for (int i = 0; i < 4; ++i) {
-                gl_MeshVerticesNV[i * 3 + 0].gl_Position = vec4(-0.5f,   0.25f, 0.0f, 1.0f) + i * vec4(0.5, 0, 0, 0);
-                gl_MeshVerticesNV[i * 3 + 1].gl_Position = vec4(-1.0f,   0.25f, 0.0f, 1.0f) + i * vec4(0.5, 0, 0, 0);
-                gl_MeshVerticesNV[i * 3 + 2].gl_Position = vec4(-0.75f, -0.25f, 0.0f, 1.0f) + i * vec4(0.5, 0, 0, 0);
+                gl_MeshVerticesEXT[i * 3 + 0].gl_Position = vec4(-0.5f,   0.25f, 0.0f, 1.0f) + i * vec4(0.5, 0, 0, 0);
+                gl_MeshVerticesEXT[i * 3 + 1].gl_Position = vec4(-1.0f,   0.25f, 0.0f, 1.0f) + i * vec4(0.5, 0, 0, 0);
+                gl_MeshVerticesEXT[i * 3 + 2].gl_Position = vec4(-0.75f, -0.25f, 0.0f, 1.0f) + i * vec4(0.5, 0, 0, 0);
             }
 
-            gl_MeshVerticesNV[0].gl_ClipDistance[0] = -1;
-            gl_MeshVerticesNV[1].gl_ClipDistance[0] =  1;
-            gl_MeshVerticesNV[2].gl_ClipDistance[0] =  1;
+            gl_MeshVerticesEXT[0].gl_ClipDistance[0] = -1;
+            gl_MeshVerticesEXT[1].gl_ClipDistance[0] =  1;
+            gl_MeshVerticesEXT[2].gl_ClipDistance[0] =  1;
 
-            gl_MeshVerticesNV[3].gl_ClipDistance[0] = -1;
-            gl_MeshVerticesNV[4].gl_ClipDistance[0] =  1;
-            gl_MeshVerticesNV[5].gl_ClipDistance[0] = -1;
+            gl_MeshVerticesEXT[3].gl_ClipDistance[0] = -1;
+            gl_MeshVerticesEXT[4].gl_ClipDistance[0] =  1;
+            gl_MeshVerticesEXT[5].gl_ClipDistance[0] = -1;
 
-            gl_MeshVerticesNV[6].gl_ClipDistance[0] = 1;
-            gl_MeshVerticesNV[7].gl_ClipDistance[0] = 1;
-            gl_MeshVerticesNV[8].gl_ClipDistance[0] = 1;
+            gl_MeshVerticesEXT[6].gl_ClipDistance[0] = 1;
+            gl_MeshVerticesEXT[7].gl_ClipDistance[0] = 1;
+            gl_MeshVerticesEXT[8].gl_ClipDistance[0] = 1;
 
-            gl_MeshVerticesNV[9].gl_ClipDistance[0]  = 1;
-            gl_MeshVerticesNV[10].gl_ClipDistance[0] = 1;
-            gl_MeshVerticesNV[11].gl_ClipDistance[0] = 1;
+            gl_MeshVerticesEXT[9].gl_ClipDistance[0]  = 1;
+            gl_MeshVerticesEXT[10].gl_ClipDistance[0] = 1;
+            gl_MeshVerticesEXT[11].gl_ClipDistance[0] = 1;
 
 
-            gl_MeshVerticesNV[0].gl_CullDistance[0] = 1;
-            gl_MeshVerticesNV[1].gl_CullDistance[0] = 1;
-            gl_MeshVerticesNV[2].gl_CullDistance[0] = 1;
+            gl_MeshVerticesEXT[0].gl_CullDistance[0] = 1;
+            gl_MeshVerticesEXT[1].gl_CullDistance[0] = 1;
+            gl_MeshVerticesEXT[2].gl_CullDistance[0] = 1;
 
-            gl_MeshVerticesNV[3].gl_CullDistance[0] = 1;
-            gl_MeshVerticesNV[4].gl_CullDistance[0] = 1;
-            gl_MeshVerticesNV[5].gl_CullDistance[0] = 1;
+            gl_MeshVerticesEXT[3].gl_CullDistance[0] = 1;
+            gl_MeshVerticesEXT[4].gl_CullDistance[0] = 1;
+            gl_MeshVerticesEXT[5].gl_CullDistance[0] = 1;
 
-            gl_MeshVerticesNV[6].gl_CullDistance[0] = -1;
-            gl_MeshVerticesNV[7].gl_CullDistance[0] = -1;
-            gl_MeshVerticesNV[8].gl_CullDistance[0] = -1;
+            gl_MeshVerticesEXT[6].gl_CullDistance[0] = -1;
+            gl_MeshVerticesEXT[7].gl_CullDistance[0] = -1;
+            gl_MeshVerticesEXT[8].gl_CullDistance[0] = -1;
 
-            gl_MeshVerticesNV[9].gl_CullDistance[0]  = -1;
-            gl_MeshVerticesNV[10].gl_CullDistance[0] = -1;
-            gl_MeshVerticesNV[11].gl_CullDistance[0] =  1;
+            gl_MeshVerticesEXT[9].gl_CullDistance[0]  = -1;
+            gl_MeshVerticesEXT[10].gl_CullDistance[0] = -1;
+            gl_MeshVerticesEXT[11].gl_CullDistance[0] =  1;
 
             color[0] = vec4(1, 1, 1, 1);
             color[1] = vec4(1, 1, 1, 1);
@@ -408,7 +413,7 @@ clipdistance_1_culldistance_1(void)
 }
 
 test_define {
-    .name = "func.mesh.nv.clipdistance_culldistance.1",
+    .name = "func.mesh.ext.clipdistance_culldistance.1",
     .start = clipdistance_1_culldistance_1,
     .image_filename = "func.mesh.clipdistance_culldistance.ref.png",
 };
@@ -416,7 +421,7 @@ test_define {
 static void
 clipdistance_1_fs(void)
 {
-    t_require_ext("VK_NV_mesh_shader");
+    t_require_ext("VK_EXT_mesh_shader");
 
     VkShaderModule mesh = get_clipdistance_1_shader();
 
@@ -442,7 +447,7 @@ clipdistance_1_fs(void)
 }
 
 test_define {
-    .name = "func.mesh.nv.clipdistance.1.fs",
+    .name = "func.mesh.ext.clipdistance.1.fs",
     .start = clipdistance_1_fs,
     .image_filename = "func.mesh.clipdistance.fs.ref.png",
 };

@@ -22,13 +22,14 @@
 #include "util/simple_pipeline.h"
 #include "tapi/t.h"
 
-#include "src/tests/func/mesh/nv/viewportindex-spirv.h"
+#include "src/tests/func/mesh/ext/viewportindex-spirv.h"
 
 static VkShaderModule
 get_mesh_shader(void)
 {
     VkShaderModule mesh = qoCreateShaderModuleGLSL(t_device, MESH,
-        QO_EXTENSION GL_NV_mesh_shader : require
+        QO_EXTENSION GL_EXT_mesh_shader : require
+        QO_TARGET_ENV spirv1.4
         layout(local_size_x = 1) in;
         layout(max_vertices = 12) out;
         layout(max_primitives = 4) out;
@@ -38,21 +39,21 @@ get_mesh_shader(void)
 
         void main()
         {
-            gl_PrimitiveCountNV = 4;
+            SetMeshOutputsEXT(12, 4);
 
-            for (int i = 0; i < 12; ++i)
-                gl_PrimitiveIndicesNV[i] = i;
+            for (int i = 0; i < 4; ++i)
+                gl_PrimitiveTriangleIndicesEXT[i] = uvec3(i * 3 + 0, i * 3 + 1, i * 3 + 2);
 
             for (int i = 0; i < 4; ++i) {
-                gl_MeshVerticesNV[i * 3 + 0].gl_Position = vec4(-0.5f,   0.25f, 0.0f, 1.0f) + i * vec4(0.5, 0, 0, 0);
-                gl_MeshVerticesNV[i * 3 + 1].gl_Position = vec4(-1.0f,   0.25f, 0.0f, 1.0f) + i * vec4(0.5, 0, 0, 0);
-                gl_MeshVerticesNV[i * 3 + 2].gl_Position = vec4(-0.75f, -0.25f, 0.0f, 1.0f) + i * vec4(0.5, 0, 0, 0);
+                gl_MeshVerticesEXT[i * 3 + 0].gl_Position = vec4(-0.5f,   0.25f, 0.0f, 1.0f) + i * vec4(0.5, 0, 0, 0);
+                gl_MeshVerticesEXT[i * 3 + 1].gl_Position = vec4(-1.0f,   0.25f, 0.0f, 1.0f) + i * vec4(0.5, 0, 0, 0);
+                gl_MeshVerticesEXT[i * 3 + 2].gl_Position = vec4(-0.75f, -0.25f, 0.0f, 1.0f) + i * vec4(0.5, 0, 0, 0);
             }
 
-            gl_MeshPrimitivesNV[0].gl_ViewportIndex = 0;
-            gl_MeshPrimitivesNV[1].gl_ViewportIndex = 1;
-            gl_MeshPrimitivesNV[2].gl_ViewportIndex = 0;
-            gl_MeshPrimitivesNV[3].gl_ViewportIndex = 1;
+            gl_MeshPrimitivesEXT[0].gl_ViewportIndex = 0;
+            gl_MeshPrimitivesEXT[1].gl_ViewportIndex = 1;
+            gl_MeshPrimitivesEXT[2].gl_ViewportIndex = 0;
+            gl_MeshPrimitivesEXT[3].gl_ViewportIndex = 1;
 
             color[0] = vec4(1, 1, 1, 1);
             color[1] = vec4(1, 1, 1, 1);
@@ -78,7 +79,7 @@ get_mesh_shader(void)
 static void
 viewport_index(void)
 {
-    t_require_ext("VK_NV_mesh_shader");
+    t_require_ext("VK_EXT_mesh_shader");
 
     VkShaderModule mesh = get_mesh_shader();
 
@@ -129,7 +130,7 @@ viewport_index(void)
 }
 
 test_define {
-    .name = "func.mesh.nv.viewport_index",
+    .name = "func.mesh.ext.viewport_index",
     .start = viewport_index,
     .image_filename = "func.mesh.viewport_index.ref.png",
 };
@@ -137,7 +138,7 @@ test_define {
 static void
 viewport_index_fs(void)
 {
-    t_require_ext("VK_NV_mesh_shader");
+    t_require_ext("VK_EXT_mesh_shader");
 
     VkShaderModule mesh = get_mesh_shader();
 
@@ -202,7 +203,7 @@ viewport_index_fs(void)
 }
 
 test_define {
-    .name = "func.mesh.nv.viewport_index.fs",
+    .name = "func.mesh.ext.viewport_index.fs",
     .start = viewport_index_fs,
     .image_filename = "func.mesh.viewport_index.fs.ref.png",
 };
@@ -210,10 +211,11 @@ test_define {
 static void
 viewport_index_primitive_id_fs(void)
 {
-    t_require_ext("VK_NV_mesh_shader");
+    t_require_ext("VK_EXT_mesh_shader");
 
     VkShaderModule mesh = qoCreateShaderModuleGLSL(t_device, MESH,
-        QO_EXTENSION GL_NV_mesh_shader : require
+        QO_EXTENSION GL_EXT_mesh_shader : require
+        QO_TARGET_ENV spirv1.4
         layout(local_size_x = 1) in;
         layout(max_vertices = 12) out;
         layout(max_primitives = 4) out;
@@ -223,26 +225,26 @@ viewport_index_primitive_id_fs(void)
 
         void main()
         {
-            gl_PrimitiveCountNV = 4;
+            SetMeshOutputsEXT(12, 4);
 
-            for (int i = 0; i < 12; ++i)
-                gl_PrimitiveIndicesNV[i] = i;
+            for (int i = 0; i < 4; ++i)
+                gl_PrimitiveTriangleIndicesEXT[i] = uvec3(i * 3 + 0, i * 3 + 1, i * 3 + 2);
 
             for (int i = 0; i < 4; ++i) {
-                gl_MeshVerticesNV[i * 3 + 0].gl_Position = vec4(-0.5f,   0.25f, 0.0f, 1.0f) + i * vec4(0.5, 0, 0, 0);
-                gl_MeshVerticesNV[i * 3 + 1].gl_Position = vec4(-1.0f,   0.25f, 0.0f, 1.0f) + i * vec4(0.5, 0, 0, 0);
-                gl_MeshVerticesNV[i * 3 + 2].gl_Position = vec4(-0.75f, -0.25f, 0.0f, 1.0f) + i * vec4(0.5, 0, 0, 0);
+                gl_MeshVerticesEXT[i * 3 + 0].gl_Position = vec4(-0.5f,   0.25f, 0.0f, 1.0f) + i * vec4(0.5, 0, 0, 0);
+                gl_MeshVerticesEXT[i * 3 + 1].gl_Position = vec4(-1.0f,   0.25f, 0.0f, 1.0f) + i * vec4(0.5, 0, 0, 0);
+                gl_MeshVerticesEXT[i * 3 + 2].gl_Position = vec4(-0.75f, -0.25f, 0.0f, 1.0f) + i * vec4(0.5, 0, 0, 0);
             }
 
-            gl_MeshPrimitivesNV[0].gl_ViewportIndex = 0;
-            gl_MeshPrimitivesNV[1].gl_ViewportIndex = 1;
-            gl_MeshPrimitivesNV[2].gl_ViewportIndex = 0;
-            gl_MeshPrimitivesNV[3].gl_ViewportIndex = 1;
+            gl_MeshPrimitivesEXT[0].gl_ViewportIndex = 0;
+            gl_MeshPrimitivesEXT[1].gl_ViewportIndex = 1;
+            gl_MeshPrimitivesEXT[2].gl_ViewportIndex = 0;
+            gl_MeshPrimitivesEXT[3].gl_ViewportIndex = 1;
 
-            gl_MeshPrimitivesNV[0].gl_PrimitiveID = 7;
-            gl_MeshPrimitivesNV[1].gl_PrimitiveID = 3;
-            gl_MeshPrimitivesNV[2].gl_PrimitiveID = 9;
-            gl_MeshPrimitivesNV[3].gl_PrimitiveID = 2;
+            gl_MeshPrimitivesEXT[0].gl_PrimitiveID = 7;
+            gl_MeshPrimitivesEXT[1].gl_PrimitiveID = 3;
+            gl_MeshPrimitivesEXT[2].gl_PrimitiveID = 9;
+            gl_MeshPrimitivesEXT[3].gl_PrimitiveID = 2;
 
             color[0] = vec4(1, 1, 1, 1);
             color[1] = vec4(1, 1, 1, 1);
@@ -323,7 +325,7 @@ viewport_index_primitive_id_fs(void)
 }
 
 test_define {
-    .name = "func.mesh.nv.viewport_index.primitive_id.fs",
+    .name = "func.mesh.ext.viewport_index.primitive_id.fs",
     .start = viewport_index_primitive_id_fs,
     .image_filename = "func.mesh.viewport_index.fs.ref.png",
 };
@@ -412,10 +414,11 @@ run_viewport_mesh(VkShaderModule mesh, VkPipelineShaderStageCreateInfo *mesh_cre
 static void
 viewport_index_wg_1(void)
 {
-    t_require_ext("VK_NV_mesh_shader");
+    t_require_ext("VK_EXT_mesh_shader");
 
     VkShaderModule mesh = qoCreateShaderModuleGLSL(t_device, MESH,
-        QO_EXTENSION GL_NV_mesh_shader : require
+        QO_EXTENSION GL_EXT_mesh_shader : require
+        QO_TARGET_ENV spirv1.4
         layout(local_size_x = 1) in;
         layout(max_vertices = 192) out;
         layout(max_primitives = 64) out;
@@ -430,15 +433,13 @@ viewport_index_wg_1(void)
             int y = prim / DIM;
             int x = prim % DIM;
 
-            gl_PrimitiveIndicesNV[prim * 3 + 0] = prim * 3 + 0;
-            gl_PrimitiveIndicesNV[prim * 3 + 1] = prim * 3 + 1;
-            gl_PrimitiveIndicesNV[prim * 3 + 2] = prim * 3 + 2;
+            gl_PrimitiveTriangleIndicesEXT[prim] = uvec3(prim * 3 + 0, prim * 3 + 1, prim * 3 + 2);
 
-            gl_MeshVerticesNV[prim * 3 + 0].gl_Position = vec4(-0.75f,  -0.75f, 0.0f, 1.0f) + vec4(x * 0.25, y * 0.25, 0, 0);
-            gl_MeshVerticesNV[prim * 3 + 1].gl_Position = vec4(-1.00f,  -0.75f, 0.0f, 1.0f) + vec4(x * 0.25, y * 0.25, 0, 0);
-            gl_MeshVerticesNV[prim * 3 + 2].gl_Position = vec4(-0.875f, -1.00f, 0.0f, 1.0f) + vec4(x * 0.25, y * 0.25, 0, 0);
+            gl_MeshVerticesEXT[prim * 3 + 0].gl_Position = vec4(-0.75f,  -0.75f, 0.0f, 1.0f) + vec4(x * 0.25, y * 0.25, 0, 0);
+            gl_MeshVerticesEXT[prim * 3 + 1].gl_Position = vec4(-1.00f,  -0.75f, 0.0f, 1.0f) + vec4(x * 0.25, y * 0.25, 0, 0);
+            gl_MeshVerticesEXT[prim * 3 + 2].gl_Position = vec4(-0.875f, -1.00f, 0.0f, 1.0f) + vec4(x * 0.25, y * 0.25, 0, 0);
 
-            gl_MeshPrimitivesNV[prim].gl_ViewportIndex = (prim % 7) % 4;
+            gl_MeshPrimitivesEXT[prim].gl_ViewportIndex = (prim % 7) % 4;
 
             vec4 col;
 
@@ -458,7 +459,7 @@ viewport_index_wg_1(void)
 
         void main()
         {
-            gl_PrimitiveCountNV = PRIMS;
+            SetMeshOutputsEXT(PRIMS * 3, PRIMS);
 
             for (int prim = 0; prim < PRIMS; ++prim)
                 gen_prim(prim);
@@ -469,7 +470,7 @@ viewport_index_wg_1(void)
 }
 
 test_define {
-    .name = "func.mesh.nv.viewport_index.wg.1",
+    .name = "func.mesh.ext.viewport_index.wg.1",
     .start = viewport_index_wg_1,
     .image_filename = "func.mesh.viewport_index.wg.ref.png",
 };
@@ -477,10 +478,11 @@ test_define {
 static void
 viewport_index_wg_32(void)
 {
-    t_require_ext("VK_NV_mesh_shader");
+    t_require_ext("VK_EXT_mesh_shader");
 
     VkShaderModule mesh = qoCreateShaderModuleGLSL(t_device, MESH,
-        QO_EXTENSION GL_NV_mesh_shader : require
+        QO_EXTENSION GL_EXT_mesh_shader : require
+        QO_TARGET_ENV spirv1.4
         layout(local_size_x = 32) in;
         layout(max_vertices = 192) out;
         layout(max_primitives = 64) out;
@@ -495,15 +497,13 @@ viewport_index_wg_32(void)
             int y = prim / DIM;
             int x = prim % DIM;
 
-            gl_PrimitiveIndicesNV[prim * 3 + 0] = prim * 3 + 0;
-            gl_PrimitiveIndicesNV[prim * 3 + 1] = prim * 3 + 1;
-            gl_PrimitiveIndicesNV[prim * 3 + 2] = prim * 3 + 2;
+            gl_PrimitiveTriangleIndicesEXT[prim] = uvec3(prim * 3 + 0, prim * 3 + 1, prim * 3 + 2);
 
-            gl_MeshVerticesNV[prim * 3 + 0].gl_Position = vec4(-0.75f,  -0.75f, 0.0f, 1.0f) + vec4(x * 0.25, y * 0.25, 0, 0);
-            gl_MeshVerticesNV[prim * 3 + 1].gl_Position = vec4(-1.00f,  -0.75f, 0.0f, 1.0f) + vec4(x * 0.25, y * 0.25, 0, 0);
-            gl_MeshVerticesNV[prim * 3 + 2].gl_Position = vec4(-0.875f, -1.00f, 0.0f, 1.0f) + vec4(x * 0.25, y * 0.25, 0, 0);
+            gl_MeshVerticesEXT[prim * 3 + 0].gl_Position = vec4(-0.75f,  -0.75f, 0.0f, 1.0f) + vec4(x * 0.25, y * 0.25, 0, 0);
+            gl_MeshVerticesEXT[prim * 3 + 1].gl_Position = vec4(-1.00f,  -0.75f, 0.0f, 1.0f) + vec4(x * 0.25, y * 0.25, 0, 0);
+            gl_MeshVerticesEXT[prim * 3 + 2].gl_Position = vec4(-0.875f, -1.00f, 0.0f, 1.0f) + vec4(x * 0.25, y * 0.25, 0, 0);
 
-            gl_MeshPrimitivesNV[prim].gl_ViewportIndex = (prim % 7) % 4;
+            gl_MeshPrimitivesEXT[prim].gl_ViewportIndex = (prim % 7) % 4;
 
             vec4 col;
 
@@ -526,7 +526,7 @@ viewport_index_wg_32(void)
             int local_x = int(gl_LocalInvocationID.x);
             int size_x = int(gl_WorkGroupSize.x);
 
-            gl_PrimitiveCountNV = PRIMS;
+            SetMeshOutputsEXT(PRIMS * 3, PRIMS);
 
             gen_prim(local_x);
             gen_prim(local_x + size_x);
@@ -537,7 +537,7 @@ viewport_index_wg_32(void)
 }
 
 test_define {
-    .name = "func.mesh.nv.viewport_index.wg.32",
+    .name = "func.mesh.ext.viewport_index.wg.32",
     .start = viewport_index_wg_32,
     .image_filename = "func.mesh.viewport_index.wg.ref.png",
 };
@@ -545,10 +545,11 @@ test_define {
 static void
 viewport_index_wg_gen(void)
 {
-    t_require_ext("VK_NV_mesh_shader");
+    t_require_ext("VK_EXT_mesh_shader");
 
     VkShaderModule mesh = qoCreateShaderModuleGLSL(t_device, MESH,
-        QO_EXTENSION GL_NV_mesh_shader : require
+        QO_EXTENSION GL_EXT_mesh_shader : require
+        QO_TARGET_ENV spirv1.4
         layout(local_size_x_id = 17) in;
         layout(max_vertices = 192) out;
         layout(max_primitives = 64) out;
@@ -563,15 +564,13 @@ viewport_index_wg_gen(void)
             int y = prim / DIM;
             int x = prim % DIM;
 
-            gl_PrimitiveIndicesNV[prim * 3 + 0] = prim * 3 + 0;
-            gl_PrimitiveIndicesNV[prim * 3 + 1] = prim * 3 + 1;
-            gl_PrimitiveIndicesNV[prim * 3 + 2] = prim * 3 + 2;
+            gl_PrimitiveTriangleIndicesEXT[prim] = uvec3(prim * 3 + 0, prim * 3 + 1, prim * 3 + 2);
 
-            gl_MeshVerticesNV[prim * 3 + 0].gl_Position = vec4(-0.75f,  -0.75f, 0.0f, 1.0f) + vec4(x * 0.25, y * 0.25, 0, 0);
-            gl_MeshVerticesNV[prim * 3 + 1].gl_Position = vec4(-1.00f,  -0.75f, 0.0f, 1.0f) + vec4(x * 0.25, y * 0.25, 0, 0);
-            gl_MeshVerticesNV[prim * 3 + 2].gl_Position = vec4(-0.875f, -1.00f, 0.0f, 1.0f) + vec4(x * 0.25, y * 0.25, 0, 0);
+            gl_MeshVerticesEXT[prim * 3 + 0].gl_Position = vec4(-0.75f,  -0.75f, 0.0f, 1.0f) + vec4(x * 0.25, y * 0.25, 0, 0);
+            gl_MeshVerticesEXT[prim * 3 + 1].gl_Position = vec4(-1.00f,  -0.75f, 0.0f, 1.0f) + vec4(x * 0.25, y * 0.25, 0, 0);
+            gl_MeshVerticesEXT[prim * 3 + 2].gl_Position = vec4(-0.875f, -1.00f, 0.0f, 1.0f) + vec4(x * 0.25, y * 0.25, 0, 0);
 
-            gl_MeshPrimitivesNV[prim].gl_ViewportIndex = (prim % 7) % 4;
+            gl_MeshPrimitivesEXT[prim].gl_ViewportIndex = (prim % 7) % 4;
 
             vec4 col;
 
@@ -594,7 +593,7 @@ viewport_index_wg_gen(void)
             int local_x = int(gl_LocalInvocationID.x);
             int size_x = int(gl_WorkGroupSize.x);
 
-            gl_PrimitiveCountNV = PRIMS;
+            SetMeshOutputsEXT(PRIMS * 3, PRIMS);
 
             while (local_x < PRIMS) {
                 gen_prim(local_x);
@@ -621,7 +620,7 @@ viewport_index_wg_gen(void)
     mesh_create_info.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
     mesh_create_info.pNext = NULL;
     mesh_create_info.flags = 0;
-    mesh_create_info.stage = VK_SHADER_STAGE_MESH_BIT_NV;
+    mesh_create_info.stage = VK_SHADER_STAGE_MESH_BIT_EXT;
     mesh_create_info.module = mesh;
     mesh_create_info.pName = "main";
     mesh_create_info.pSpecializationInfo = &spec_info;
@@ -630,21 +629,21 @@ viewport_index_wg_gen(void)
 }
 
 test_define {
-    .name = "func.mesh.nv.viewport_index.wg.gen.1",
+    .name = "func.mesh.ext.viewport_index.wg.gen.1",
     .start = viewport_index_wg_gen,
     .image_filename = "func.mesh.viewport_index.wg.ref.png",
     .user_data = &(uint32_t){ 1 },
 };
 
 test_define {
-    .name = "func.mesh.nv.viewport_index.wg.gen.2",
+    .name = "func.mesh.ext.viewport_index.wg.gen.2",
     .start = viewport_index_wg_gen,
     .image_filename = "func.mesh.viewport_index.wg.ref.png",
     .user_data = &(uint32_t){ 2 },
 };
 
 test_define {
-    .name = "func.mesh.nv.viewport_index.wg.gen.3",
+    .name = "func.mesh.ext.viewport_index.wg.gen.3",
     .start = viewport_index_wg_gen,
     .image_filename = "func.mesh.viewport_index.wg.ref.png",
     .user_data = &(uint32_t){ 3 },
@@ -652,91 +651,91 @@ test_define {
 
 
 test_define {
-    .name = "func.mesh.nv.viewport_index.wg.gen.7",
+    .name = "func.mesh.ext.viewport_index.wg.gen.7",
     .start = viewport_index_wg_gen,
     .image_filename = "func.mesh.viewport_index.wg.ref.png",
     .user_data = &(uint32_t){ 7 },
 };
 
 test_define {
-    .name = "func.mesh.nv.viewport_index.wg.gen.8",
+    .name = "func.mesh.ext.viewport_index.wg.gen.8",
     .start = viewport_index_wg_gen,
     .image_filename = "func.mesh.viewport_index.wg.ref.png",
     .user_data = &(uint32_t){ 8 },
 };
 
 test_define {
-    .name = "func.mesh.nv.viewport_index.wg.gen.11",
+    .name = "func.mesh.ext.viewport_index.wg.gen.11",
     .start = viewport_index_wg_gen,
     .image_filename = "func.mesh.viewport_index.wg.ref.png",
     .user_data = &(uint32_t){ 11 },
 };
 
 test_define {
-    .name = "func.mesh.nv.viewport_index.wg.gen.15",
+    .name = "func.mesh.ext.viewport_index.wg.gen.15",
     .start = viewport_index_wg_gen,
     .image_filename = "func.mesh.viewport_index.wg.ref.png",
     .user_data = &(uint32_t){ 15 },
 };
 
 test_define {
-    .name = "func.mesh.nv.viewport_index.wg.gen.16",
+    .name = "func.mesh.ext.viewport_index.wg.gen.16",
     .start = viewport_index_wg_gen,
     .image_filename = "func.mesh.viewport_index.wg.ref.png",
     .user_data = &(uint32_t){ 16 },
 };
 
 test_define {
-    .name = "func.mesh.nv.viewport_index.wg.gen.17",
+    .name = "func.mesh.ext.viewport_index.wg.gen.17",
     .start = viewport_index_wg_gen,
     .image_filename = "func.mesh.viewport_index.wg.ref.png",
     .user_data = &(uint32_t){ 17 },
 };
 
 test_define {
-    .name = "func.mesh.nv.viewport_index.wg.gen.27",
+    .name = "func.mesh.ext.viewport_index.wg.gen.27",
     .start = viewport_index_wg_gen,
     .image_filename = "func.mesh.viewport_index.wg.ref.png",
     .user_data = &(uint32_t){ 27 },
 };
 
 test_define {
-    .name = "func.mesh.nv.viewport_index.wg.gen.31",
+    .name = "func.mesh.ext.viewport_index.wg.gen.31",
     .start = viewport_index_wg_gen,
     .image_filename = "func.mesh.viewport_index.wg.ref.png",
     .user_data = &(uint32_t){ 31 },
 };
 
 test_define {
-    .name = "func.mesh.nv.viewport_index.wg.gen.32",
+    .name = "func.mesh.ext.viewport_index.wg.gen.32",
     .start = viewport_index_wg_gen,
     .image_filename = "func.mesh.viewport_index.wg.ref.png",
     .user_data = &(uint32_t){ 32 },
 };
 
 test_define {
-    .name = "func.mesh.nv.viewport_index.wg.gen.33",
+    .name = "func.mesh.ext.viewport_index.wg.gen.33",
     .start = viewport_index_wg_gen,
     .image_filename = "func.mesh.viewport_index.wg.ref.png",
     .user_data = &(uint32_t){ 33 },
 };
 
 test_define {
-    .name = "func.mesh.nv.viewport_index.wg.gen.63",
+    .name = "func.mesh.ext.viewport_index.wg.gen.63",
     .start = viewport_index_wg_gen,
     .image_filename = "func.mesh.viewport_index.wg.ref.png",
     .user_data = &(uint32_t){ 63 },
 };
 
 test_define {
-    .name = "func.mesh.nv.viewport_index.wg.gen.64",
+    .name = "func.mesh.ext.viewport_index.wg.gen.64",
     .start = viewport_index_wg_gen,
     .image_filename = "func.mesh.viewport_index.wg.ref.png",
     .user_data = &(uint32_t){ 64 },
 };
 
 test_define {
-    .name = "func.mesh.nv.viewport_index.wg.gen.65",
+    .name = "func.mesh.ext.viewport_index.wg.gen.65",
     .start = viewport_index_wg_gen,
     .image_filename = "func.mesh.viewport_index.wg.ref.png",
     .user_data = &(uint32_t){ 65 },

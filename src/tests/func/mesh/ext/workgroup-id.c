@@ -22,15 +22,16 @@
 #include "util/simple_pipeline.h"
 #include "tapi/t.h"
 
-#include "src/tests/func/mesh/nv/workgroup-id-spirv.h"
+#include "src/tests/func/mesh/ext/workgroup-id-spirv.h"
 
 static void
 workgroup_id_mesh(void)
 {
-    t_require_ext("VK_NV_mesh_shader");
+    t_require_ext("VK_EXT_mesh_shader");
 
     VkShaderModule mesh = qoCreateShaderModuleGLSL(t_device, MESH,
-        QO_EXTENSION GL_NV_mesh_shader : require
+        QO_EXTENSION GL_EXT_mesh_shader : require
+        QO_TARGET_ENV spirv1.4
         layout(local_size_x = 1) in;
         layout(max_vertices = 3) out;
         layout(max_primitives = 1) out;
@@ -41,19 +42,17 @@ workgroup_id_mesh(void)
         void main()
         {
             vec4 scale = vec4(0.5, 0.5, 0.5, 1.0);
+            int triangles = gl_WorkGroupID.x < 2 ? 1 : 0;
+            SetMeshOutputsEXT(triangles * 3, triangles);
 
             switch (gl_WorkGroupID.x) {
             case 0: {
-                gl_PrimitiveCountNV = 1;
-
-                gl_PrimitiveIndicesNV[0] = 0;
-                gl_PrimitiveIndicesNV[1] = 1;
-                gl_PrimitiveIndicesNV[2] = 2;
+                gl_PrimitiveTriangleIndicesEXT[0] = uvec3(0, 1, 2);
 
                 vec4 pos_a = vec4(-0.5f, -0.5f, 0, 0);
-                gl_MeshVerticesNV[0].gl_Position = scale * vec4(0.5f, 0.5f, 0.0f, 1.0f) + pos_a;
-                gl_MeshVerticesNV[1].gl_Position = scale * vec4(-0.5f, 0.5f, 0.0f, 1.0f) + pos_a;
-                gl_MeshVerticesNV[2].gl_Position = scale * vec4(0.0f, -0.5f, 0.0f, 1.0f) + pos_a;
+                gl_MeshVerticesEXT[0].gl_Position = scale * vec4(0.5f, 0.5f, 0.0f, 1.0f) + pos_a;
+                gl_MeshVerticesEXT[1].gl_Position = scale * vec4(-0.5f, 0.5f, 0.0f, 1.0f) + pos_a;
+                gl_MeshVerticesEXT[2].gl_Position = scale * vec4(0.0f, -0.5f, 0.0f, 1.0f) + pos_a;
 
                 color[0] = vec4(1, 0, 0, 1);
                 color[1] = vec4(0, 1, 0, 1);
@@ -63,16 +62,12 @@ workgroup_id_mesh(void)
             }
 
             case 1: {
-                gl_PrimitiveCountNV = 1;
-
-                gl_PrimitiveIndicesNV[0] = 0;
-                gl_PrimitiveIndicesNV[1] = 1;
-                gl_PrimitiveIndicesNV[2] = 2;
+                gl_PrimitiveTriangleIndicesEXT[0] = uvec3(0, 1, 2);
 
                 vec4 pos_b = vec4(0.5f, 0.5f, 0, 0);
-                gl_MeshVerticesNV[0].gl_Position = scale * vec4(0.5f, 0.5f, 0.0f, 1.0f) + pos_b;
-                gl_MeshVerticesNV[1].gl_Position = scale * vec4(-0.5f, 0.5f, 0.0f, 1.0f) + pos_b;
-                gl_MeshVerticesNV[2].gl_Position = scale * vec4(0.0f, -0.5f, 0.0f, 1.0f) + pos_b;
+                gl_MeshVerticesEXT[0].gl_Position = scale * vec4(0.5f, 0.5f, 0.0f, 1.0f) + pos_b;
+                gl_MeshVerticesEXT[1].gl_Position = scale * vec4(-0.5f, 0.5f, 0.0f, 1.0f) + pos_b;
+                gl_MeshVerticesEXT[2].gl_Position = scale * vec4(0.0f, -0.5f, 0.0f, 1.0f) + pos_b;
 
                 color[0] = vec4(0, 1, 1, 1);
                 color[1] = vec4(1, 0, 1, 1);
@@ -82,7 +77,6 @@ workgroup_id_mesh(void)
             }
 
             default:
-                gl_PrimitiveCountNV = 0;
                 break;
             }
         }
@@ -96,7 +90,7 @@ workgroup_id_mesh(void)
 }
 
 test_define {
-    .name = "func.mesh.nv.workgroup_id.mesh",
+    .name = "func.mesh.ext.workgroup_id.mesh",
     .start = workgroup_id_mesh,
     .image_filename = "func.mesh.basic.ref.png",
 };
@@ -105,30 +99,32 @@ test_define {
 static void
 workgroup_id_task(void)
 {
-    t_require_ext("VK_NV_mesh_shader");
+    t_require_ext("VK_EXT_mesh_shader");
 
     VkShaderModule task = qoCreateShaderModuleGLSL(t_device, TASK,
-        QO_EXTENSION GL_NV_mesh_shader : require
+        QO_EXTENSION GL_EXT_mesh_shader : require
+        QO_TARGET_ENV spirv1.4
         layout(local_size_x = 1) in;
 
-        taskNV out Task {
+        taskPayloadSharedEXT struct Task {
             uvec3 parentID;
         } taskOut;
 
         void main()
         {
-            gl_TaskCountNV = gl_WorkGroupID.x < 3 ? 1 : 0;
             taskOut.parentID = gl_WorkGroupID;
+            EmitMeshTasksEXT(gl_WorkGroupID.x < 3 ? 1 : 0, 1, 1);
         }
     );
     VkShaderModule mesh = qoCreateShaderModuleGLSL(t_device, MESH,
-        QO_EXTENSION GL_NV_mesh_shader : require
+        QO_EXTENSION GL_EXT_mesh_shader : require
+        QO_TARGET_ENV spirv1.4
         layout(local_size_x = 1) in;
         layout(max_vertices = 3) out;
         layout(max_primitives = 1) out;
         layout(triangles) out;
 
-        taskNV in Task {
+        taskPayloadSharedEXT struct Task {
             uvec3 parentID;
         } taskIn;
 
@@ -138,18 +134,17 @@ workgroup_id_task(void)
         {
             vec4 scale = vec4(0.5, 0.5, 0.5, 1.0);
 
+            int triangles = taskIn.parentID.x < 2 ? 1 : 0;
+            SetMeshOutputsEXT(triangles * 3, triangles);
+
             switch (taskIn.parentID.x) {
             case 0: {
-                gl_PrimitiveCountNV = 1;
-
-                gl_PrimitiveIndicesNV[0] = 0;
-                gl_PrimitiveIndicesNV[1] = 1;
-                gl_PrimitiveIndicesNV[2] = 2;
+                gl_PrimitiveTriangleIndicesEXT[0] = uvec3(0, 1, 2);
 
                 vec4 pos_a = vec4(-0.5f, -0.5f, 0, 0);
-                gl_MeshVerticesNV[0].gl_Position = scale * vec4(0.5f, 0.5f, 0.0f, 1.0f) + pos_a;
-                gl_MeshVerticesNV[1].gl_Position = scale * vec4(-0.5f, 0.5f, 0.0f, 1.0f) + pos_a;
-                gl_MeshVerticesNV[2].gl_Position = scale * vec4(0.0f, -0.5f, 0.0f, 1.0f) + pos_a;
+                gl_MeshVerticesEXT[0].gl_Position = scale * vec4(0.5f, 0.5f, 0.0f, 1.0f) + pos_a;
+                gl_MeshVerticesEXT[1].gl_Position = scale * vec4(-0.5f, 0.5f, 0.0f, 1.0f) + pos_a;
+                gl_MeshVerticesEXT[2].gl_Position = scale * vec4(0.0f, -0.5f, 0.0f, 1.0f) + pos_a;
 
                 color[0] = vec4(1, 0, 0, 1);
                 color[1] = vec4(0, 1, 0, 1);
@@ -159,16 +154,12 @@ workgroup_id_task(void)
             }
 
             case 1: {
-                gl_PrimitiveCountNV = 1;
-
-                gl_PrimitiveIndicesNV[0] = 0;
-                gl_PrimitiveIndicesNV[1] = 1;
-                gl_PrimitiveIndicesNV[2] = 2;
+                gl_PrimitiveTriangleIndicesEXT[0] = uvec3(0, 1, 2);
 
                 vec4 pos_b = vec4(0.5f, 0.5f, 0, 0);
-                gl_MeshVerticesNV[0].gl_Position = scale * vec4(0.5f, 0.5f, 0.0f, 1.0f) + pos_b;
-                gl_MeshVerticesNV[1].gl_Position = scale * vec4(-0.5f, 0.5f, 0.0f, 1.0f) + pos_b;
-                gl_MeshVerticesNV[2].gl_Position = scale * vec4(0.0f, -0.5f, 0.0f, 1.0f) + pos_b;
+                gl_MeshVerticesEXT[0].gl_Position = scale * vec4(0.5f, 0.5f, 0.0f, 1.0f) + pos_b;
+                gl_MeshVerticesEXT[1].gl_Position = scale * vec4(-0.5f, 0.5f, 0.0f, 1.0f) + pos_b;
+                gl_MeshVerticesEXT[2].gl_Position = scale * vec4(0.0f, -0.5f, 0.0f, 1.0f) + pos_b;
 
                 color[0] = vec4(0, 1, 1, 1);
                 color[1] = vec4(1, 0, 1, 1);
@@ -178,7 +169,6 @@ workgroup_id_task(void)
             }
 
             default:
-                gl_PrimitiveCountNV = 0;
                 break;
             }
         }
@@ -193,7 +183,7 @@ workgroup_id_task(void)
 }
 
 test_define {
-    .name = "func.mesh.nv.workgroup_id.task",
+    .name = "func.mesh.ext.workgroup_id.task",
     .start = workgroup_id_task,
     .image_filename = "func.mesh.basic.ref.png",
 };

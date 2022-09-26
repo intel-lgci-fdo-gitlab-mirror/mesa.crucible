@@ -22,15 +22,16 @@
 #include "util/simple_pipeline.h"
 #include "tapi/t.h"
 
-#include "src/tests/func/mesh/nv/primitiveid-spirv.h"
+#include "src/tests/func/mesh/ext/primitiveid-spirv.h"
 
 static void
 primitive_id_fs(void)
 {
-    t_require_ext("VK_NV_mesh_shader");
+    t_require_ext("VK_EXT_mesh_shader");
 
     VkShaderModule mesh = qoCreateShaderModuleGLSL(t_device, MESH,
-        QO_EXTENSION GL_NV_mesh_shader : require
+        QO_EXTENSION GL_EXT_mesh_shader : require
+        QO_TARGET_ENV spirv1.4
         layout(local_size_x = 1) in;
         layout(max_vertices = 12) out;
         layout(max_primitives = 4) out;
@@ -38,21 +39,21 @@ primitive_id_fs(void)
 
         void main()
         {
-            gl_PrimitiveCountNV = 4;
+            SetMeshOutputsEXT(12, 4);
 
-            for (int i = 0; i < 12; ++i)
-                gl_PrimitiveIndicesNV[i] = i;
+            for (int i = 0; i < 4; ++i)
+                gl_PrimitiveTriangleIndicesEXT[i] = uvec3(i * 3 + 0, i * 3 + 1, i * 3 + 2);
 
             for (int i = 0; i < 4; ++i) {
-                gl_MeshVerticesNV[i * 3 + 0].gl_Position = vec4(-0.5f,   0.25f, 0.0f, 1.0f) + i * vec4(0.5, 0, 0, 0);
-                gl_MeshVerticesNV[i * 3 + 1].gl_Position = vec4(-1.0f,   0.25f, 0.0f, 1.0f) + i * vec4(0.5, 0, 0, 0);
-                gl_MeshVerticesNV[i * 3 + 2].gl_Position = vec4(-0.75f, -0.25f, 0.0f, 1.0f) + i * vec4(0.5, 0, 0, 0);
+                gl_MeshVerticesEXT[i * 3 + 0].gl_Position = vec4(-0.5f,   0.25f, 0.0f, 1.0f) + i * vec4(0.5, 0, 0, 0);
+                gl_MeshVerticesEXT[i * 3 + 1].gl_Position = vec4(-1.0f,   0.25f, 0.0f, 1.0f) + i * vec4(0.5, 0, 0, 0);
+                gl_MeshVerticesEXT[i * 3 + 2].gl_Position = vec4(-0.75f, -0.25f, 0.0f, 1.0f) + i * vec4(0.5, 0, 0, 0);
             }
 
-            gl_MeshPrimitivesNV[0].gl_PrimitiveID = 7;
-            gl_MeshPrimitivesNV[1].gl_PrimitiveID = 3;
-            gl_MeshPrimitivesNV[2].gl_PrimitiveID = 9;
-            gl_MeshPrimitivesNV[3].gl_PrimitiveID = 2;
+            gl_MeshPrimitivesEXT[0].gl_PrimitiveID = 7;
+            gl_MeshPrimitivesEXT[1].gl_PrimitiveID = 3;
+            gl_MeshPrimitivesEXT[2].gl_PrimitiveID = 9;
+            gl_MeshPrimitivesEXT[3].gl_PrimitiveID = 2;
         }
     );
 
@@ -89,7 +90,7 @@ primitive_id_fs(void)
 }
 
 test_define {
-    .name = "func.mesh.nv.primitive_id.fs",
+    .name = "func.mesh.ext.primitive_id.fs",
     .start = primitive_id_fs,
     .image_filename = "func.mesh.primitive_id.fs.ref.png",
 };

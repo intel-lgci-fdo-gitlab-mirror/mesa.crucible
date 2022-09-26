@@ -22,7 +22,7 @@
 #include "tapi/t.h"
 #include "util/string.h"
 
-#include "src/tests/func/mesh/nv/layer-spirv.h"
+#include "src/tests/func/mesh/ext/layer-spirv.h"
 
 #define GET_DEVICE_FUNCTION_PTR(name) \
     PFN_##name name = (PFN_##name)vkGetDeviceProcAddr(t_device, #name); \
@@ -38,13 +38,13 @@ static test_result_t
 run_layer_mesh_pipeline(VkShaderModule mesh,
                         const struct layer_mesh_pipeline_options *_opts)
 {
-    t_require_ext("VK_NV_mesh_shader");
+    t_require_ext("VK_EXT_mesh_shader");
 
     const unsigned width = 128;
     const unsigned height = 128;
 
-    VkPhysicalDeviceMeshShaderFeaturesNV features = {
-        .sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_MESH_SHADER_FEATURES_NV,
+    VkPhysicalDeviceMeshShaderFeaturesEXT features = {
+        .sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_MESH_SHADER_FEATURES_EXT,
     };
     VkPhysicalDeviceFeatures2 pfeatures = {
         .sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_FEATURES_2,
@@ -57,7 +57,7 @@ run_layer_mesh_pipeline(VkShaderModule mesh,
     if (!features.meshShader)
         t_skipf("meshShader not supported");
 
-    GET_DEVICE_FUNCTION_PTR(vkCmdDrawMeshTasksNV);
+    GET_DEVICE_FUNCTION_PTR(vkCmdDrawMeshTasksEXT);
 
     VkRenderPass pass = qoCreateRenderPass(t_device,
         .attachmentCount = 1,
@@ -155,7 +155,7 @@ run_layer_mesh_pipeline(VkShaderModule mesh,
 
     vkCmdBindPipeline(t_cmd_buffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipeline);
 
-    vkCmdDrawMeshTasksNV(t_cmd_buffer, 1, 0);
+    vkCmdDrawMeshTasksEXT(t_cmd_buffer, 1, 1, 1);
 
     vkCmdEndRenderPass(t_cmd_buffer);
     qoEndCommandBuffer(t_cmd_buffer);
@@ -196,10 +196,11 @@ run_layer_mesh_pipeline(VkShaderModule mesh,
 static void
 layer(void)
 {
-    t_require_ext("VK_NV_mesh_shader");
+    t_require_ext("VK_EXT_mesh_shader");
 
     VkShaderModule mesh = qoCreateShaderModuleGLSL(t_device, MESH,
-        QO_EXTENSION GL_NV_mesh_shader : require
+        QO_EXTENSION GL_EXT_mesh_shader : require
+        QO_TARGET_ENV spirv1.4
         layout(local_size_x = 1) in;
         layout(max_vertices = 12) out;
         layout(max_primitives = 4) out;
@@ -207,21 +208,21 @@ layer(void)
 
         void main()
         {
-            gl_PrimitiveCountNV = 4;
+            SetMeshOutputsEXT(12, 4);
 
-            for (int i = 0; i < 12; ++i)
-                gl_PrimitiveIndicesNV[i] = i;
+            for (int i = 0; i < 4; ++i)
+                gl_PrimitiveTriangleIndicesEXT[i] = uvec3(i * 3 + 0, i * 3 + 1, i * 3 + 2);
 
             for (int i = 0; i < 4; ++i) {
-                gl_MeshVerticesNV[i * 3 + 0].gl_Position = vec4(-0.5f,   0.25f, 0.0f, 1.0f) + i * vec4(0.5, 0, 0, 0);
-                gl_MeshVerticesNV[i * 3 + 1].gl_Position = vec4(-1.0f,   0.25f, 0.0f, 1.0f) + i * vec4(0.5, 0, 0, 0);
-                gl_MeshVerticesNV[i * 3 + 2].gl_Position = vec4(-0.75f, -0.25f, 0.0f, 1.0f) + i * vec4(0.5, 0, 0, 0);
+                gl_MeshVerticesEXT[i * 3 + 0].gl_Position = vec4(-0.5f,   0.25f, 0.0f, 1.0f) + i * vec4(0.5, 0, 0, 0);
+                gl_MeshVerticesEXT[i * 3 + 1].gl_Position = vec4(-1.0f,   0.25f, 0.0f, 1.0f) + i * vec4(0.5, 0, 0, 0);
+                gl_MeshVerticesEXT[i * 3 + 2].gl_Position = vec4(-0.75f, -0.25f, 0.0f, 1.0f) + i * vec4(0.5, 0, 0, 0);
             }
 
-            gl_MeshPrimitivesNV[0].gl_Layer = 0;
-            gl_MeshPrimitivesNV[1].gl_Layer = 1;
-            gl_MeshPrimitivesNV[2].gl_Layer = 2;
-            gl_MeshPrimitivesNV[3].gl_Layer = 3;
+            gl_MeshPrimitivesEXT[0].gl_Layer = 0;
+            gl_MeshPrimitivesEXT[1].gl_Layer = 1;
+            gl_MeshPrimitivesEXT[2].gl_Layer = 2;
+            gl_MeshPrimitivesEXT[3].gl_Layer = 3;
         }
     );
 
@@ -261,7 +262,7 @@ layer(void)
 }
 
 test_define {
-    .name = "func.mesh.nv.layer",
+    .name = "func.mesh.ext.layer",
     .start = layer,
     .no_image = true,
 };
