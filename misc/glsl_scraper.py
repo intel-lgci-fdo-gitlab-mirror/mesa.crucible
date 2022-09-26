@@ -94,7 +94,7 @@ class Shader:
                 # Unfortunately, glslang dumps errors to standard out.
                 # However, since we don't really want to count on that,
                 # we'll grab the output of both
-                message = out.decode('utf-8') + '\n' + err.decode('utf-8')
+                message = out.decode('utf-8') + '\n' + err.decode('utf-8') + '\nGLSL:\n' + self.glsl
                 raise ShaderCompileError(message.strip())
 
             out_file.seek(0)
