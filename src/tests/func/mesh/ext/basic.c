@@ -112,7 +112,7 @@ test_define {
 };
 
 test_define {
-    .name = "func.mesh.nv.basic.mesh_require64",
+    .name = "func.mesh.ext.basic.mesh_require64",
     .start = basic_mesh,
     .image_filename = "func.mesh.basic.ref.png",
 };
