@@ -50,7 +50,7 @@ push_constants_mesh_read(void)
             SetMeshOutputsEXT(6, 2);
 
             for (int i = 0; i < 2; ++i)
-                gl_PrimitiveTriangleIndicesEXT[i] = uvec3(i * 3 + 0, i * 3 + 1, i * 3 + 2);
+                gl_PrimitiveTriangleIndicesEXT[i] = uvec3(indices[i * 3 + 0], indices[i * 3 + 1], indices[i * 3 + 2]);
 
             if (gl_LocalInvocationID.x == 0) {
                 vec4 scale = vec4(0.5, 0.5, 0.5, 1.0);
