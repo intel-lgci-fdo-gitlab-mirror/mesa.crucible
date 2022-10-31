@@ -192,6 +192,314 @@ test_define {
 };
 
 static void
+task_memory_uint8_single(void)
+{
+    t_require_ext("VK_EXT_mesh_shader");
+
+    VkShaderModule task = qoCreateShaderModuleGLSL(t_device, TASK,
+        QO_EXTENSION GL_EXT_mesh_shader : require
+        QO_EXTENSION GL_EXT_shader_explicit_arithmetic_types_int8: require
+        QO_TARGET_ENV spirv1.4
+        layout(local_size_x = 1) in;
+
+        taskPayloadSharedEXT struct Task {
+            uint8_t a;
+        } taskOut;
+
+        void main()
+        {
+            taskOut.a = uint8_t(0xA4);
+            EmitMeshTasksEXT(1, 1, 1);
+        }
+    );
+
+    VkShaderModule mesh = qoCreateShaderModuleGLSL(t_device, MESH,
+        QO_EXTENSION GL_EXT_mesh_shader : require
+        QO_EXTENSION GL_EXT_shader_explicit_arithmetic_types_int8: require
+        QO_TARGET_ENV spirv1.4
+        layout(local_size_x = 1) in;
+        layout(max_vertices = 6) out;
+        layout(max_primitives = 3) out;
+        layout(triangles) out;
+
+        taskPayloadSharedEXT struct Task {
+            uint8_t a;
+        } taskIn;
+
+        layout(set = 0, binding = 0) buffer Storage {
+            uint result;
+        };
+
+        void main()
+        {
+            result = uint(taskIn.a);
+
+            SetMeshOutputsEXT(0, 0);
+        }
+    );
+
+    uint32_t result[]   = { 0xCCCCCCCC };
+    uint32_t expected[] = { 0x000000A4 };
+
+    simple_mesh_pipeline_options_t opts = {
+        .task = task,
+        .storage = &result,
+        .storage_size = sizeof(result),
+    };
+
+    run_simple_mesh_pipeline(mesh, &opts);
+
+    for (unsigned i = 0; i < ARRAY_LENGTH(expected); i++) {
+        t_assertf(result[i] == expected[i],
+                  "buffer mismatch at uint %u: found 0x%02x, "
+                  "expected 0x%02x", i, result[i], expected[i]);
+    }
+}
+
+test_define {
+    .name = "func.mesh.ext.task_memory.uint8.single",
+    .start = task_memory_uint8_single,
+    .no_image = true,
+};
+
+static void
+task_memory_uint8_many(void)
+{
+    t_require_ext("VK_EXT_mesh_shader");
+
+    VkShaderModule task = qoCreateShaderModuleGLSL(t_device, TASK,
+        QO_EXTENSION GL_EXT_mesh_shader : require
+        QO_EXTENSION GL_EXT_shader_explicit_arithmetic_types_int8: require
+        QO_TARGET_ENV spirv1.4
+        layout(local_size_x = 1) in;
+
+        taskPayloadSharedEXT struct Task {
+            uint8_t a;
+            uint8_t b;
+            uint8_t c;
+            uint8_t d;
+        } taskOut;
+
+        void main()
+        {
+            taskOut.a = uint8_t(0);
+            taskOut.b = uint8_t(0xA4);
+            taskOut.c = uint8_t(0xD1);
+            taskOut.d = uint8_t(0x3F);
+            EmitMeshTasksEXT(1, 1, 1);
+        }
+    );
+
+    VkShaderModule mesh = qoCreateShaderModuleGLSL(t_device, MESH,
+        QO_EXTENSION GL_EXT_mesh_shader : require
+        QO_EXTENSION GL_EXT_shader_explicit_arithmetic_types_int8: require
+        QO_TARGET_ENV spirv1.4
+        layout(local_size_x = 1) in;
+        layout(max_vertices = 6) out;
+        layout(max_primitives = 3) out;
+        layout(triangles) out;
+
+        taskPayloadSharedEXT struct Task {
+            uint8_t a;
+            uint8_t b;
+            uint8_t c;
+            uint8_t d;
+        } taskIn;
+
+        layout(set = 0, binding = 0) buffer Storage {
+            uint result[4];
+        };
+
+        void main()
+        {
+            result[0] = uint(taskIn.a);
+            result[1] = uint(taskIn.b);
+            result[2] = uint(taskIn.c);
+            result[3] = uint(taskIn.d);
+
+            SetMeshOutputsEXT(0, 0);
+        }
+    );
+
+    uint32_t result[]   = { 0xCCCCCCCC, 0xCCCCCCCC, 0xCCCCCCCC, 0xCCCCCCCC };
+    uint32_t expected[] = { 0x00000000, 0x000000A4, 0x000000D1, 0x0000003F };
+
+    simple_mesh_pipeline_options_t opts = {
+        .task = task,
+        .storage = &result,
+        .storage_size = sizeof(result),
+    };
+
+    run_simple_mesh_pipeline(mesh, &opts);
+
+    for (unsigned i = 0; i < ARRAY_LENGTH(expected); i++) {
+        t_assertf(result[i] == expected[i],
+                  "buffer mismatch at uint %u: found 0x%02x, "
+                  "expected 0x%02x", i, result[i], expected[i]);
+    }
+}
+
+test_define {
+    .name = "func.mesh.ext.task_memory.uint8.many",
+    .start = task_memory_uint8_many,
+    .no_image = true,
+};
+
+static void
+task_memory_uint16_single(void)
+{
+    t_require_ext("VK_EXT_mesh_shader");
+
+    VkShaderModule task = qoCreateShaderModuleGLSL(t_device, TASK,
+        QO_EXTENSION GL_EXT_mesh_shader : require
+        QO_EXTENSION GL_EXT_shader_explicit_arithmetic_types_int16: require
+        QO_TARGET_ENV spirv1.4
+        layout(local_size_x = 1) in;
+
+        taskPayloadSharedEXT struct Task {
+            uint16_t a;
+        } taskOut;
+
+        void main()
+        {
+            taskOut.a = uint16_t(0xA4B9);
+            EmitMeshTasksEXT(1, 1, 1);
+        }
+    );
+
+    VkShaderModule mesh = qoCreateShaderModuleGLSL(t_device, MESH,
+        QO_EXTENSION GL_EXT_mesh_shader : require
+        QO_EXTENSION GL_EXT_shader_explicit_arithmetic_types_int16: require
+        QO_TARGET_ENV spirv1.4
+        layout(local_size_x = 1) in;
+        layout(max_vertices = 6) out;
+        layout(max_primitives = 3) out;
+        layout(triangles) out;
+
+        taskPayloadSharedEXT struct Task {
+            uint16_t a;
+        } taskIn;
+
+        layout(set = 0, binding = 0) buffer Storage {
+            uint result;
+        };
+
+        void main()
+        {
+            result = uint(taskIn.a);
+
+            SetMeshOutputsEXT(0, 0);
+        }
+    );
+
+    uint32_t result[]   = { 0xCCCCCCCC };
+    uint32_t expected[] = { 0x0000A4B9 };
+
+    simple_mesh_pipeline_options_t opts = {
+        .task = task,
+        .storage = &result,
+        .storage_size = sizeof(result),
+    };
+
+    run_simple_mesh_pipeline(mesh, &opts);
+
+    for (unsigned i = 0; i < ARRAY_LENGTH(expected); i++) {
+        t_assertf(result[i] == expected[i],
+                  "buffer mismatch at uint %u: found 0x%02x, "
+                  "expected 0x%02x", i, result[i], expected[i]);
+    }
+}
+
+test_define {
+    .name = "func.mesh.ext.task_memory.uint16.single",
+    .start = task_memory_uint16_single,
+    .no_image = true,
+};
+
+static void
+task_memory_uint16_many(void)
+{
+    t_require_ext("VK_EXT_mesh_shader");
+
+    VkShaderModule task = qoCreateShaderModuleGLSL(t_device, TASK,
+        QO_EXTENSION GL_EXT_mesh_shader : require
+        QO_EXTENSION GL_EXT_shader_explicit_arithmetic_types_int16: require
+        QO_TARGET_ENV spirv1.4
+        layout(local_size_x = 1) in;
+
+        taskPayloadSharedEXT struct Task {
+            uint16_t a;
+            uint16_t b;
+            uint16_t c;
+            uint16_t d;
+        } taskOut;
+
+        void main()
+        {
+            taskOut.a = uint16_t(0xA4B9);
+            taskOut.b = uint16_t(0);
+            taskOut.c = uint16_t(0x3F71);
+            taskOut.d = uint16_t(0x2266);
+            EmitMeshTasksEXT(1, 1, 1);
+        }
+    );
+
+    VkShaderModule mesh = qoCreateShaderModuleGLSL(t_device, MESH,
+        QO_EXTENSION GL_EXT_mesh_shader : require
+        QO_EXTENSION GL_EXT_shader_explicit_arithmetic_types_int16: require
+        QO_TARGET_ENV spirv1.4
+        layout(local_size_x = 1) in;
+        layout(max_vertices = 6) out;
+        layout(max_primitives = 3) out;
+        layout(triangles) out;
+
+        taskPayloadSharedEXT struct Task {
+            uint16_t a;
+            uint16_t b;
+            uint16_t c;
+            uint16_t d;
+        } taskIn;
+
+        layout(set = 0, binding = 0) buffer Storage {
+            uint result[4];
+        };
+
+        void main()
+        {
+            result[0] = uint(taskIn.a);
+            result[1] = uint(taskIn.b);
+            result[2] = uint(taskIn.c);
+            result[3] = uint(taskIn.d);
+
+            SetMeshOutputsEXT(0, 0);
+        }
+    );
+
+    uint32_t result[]   = { 0xCCCCCCCC, 0xCCCCCCCC, 0xCCCCCCCC, 0xCCCCCCCC };
+    uint32_t expected[] = { 0x0000A4B9, 0x00000000, 0x00003F71, 0x00002266 };
+
+    simple_mesh_pipeline_options_t opts = {
+        .task = task,
+        .storage = &result,
+        .storage_size = sizeof(result),
+    };
+
+    run_simple_mesh_pipeline(mesh, &opts);
+
+    for (unsigned i = 0; i < ARRAY_LENGTH(expected); i++) {
+        t_assertf(result[i] == expected[i],
+                  "buffer mismatch at uint %u: found 0x%02x, "
+                  "expected 0x%02x", i, result[i], expected[i]);
+    }
+}
+
+test_define {
+    .name = "func.mesh.ext.task_memory.uint16.many",
+    .start = task_memory_uint16_many,
+    .no_image = true,
+};
+
+static void
 task_memory_uvec4(void)
 {
     t_require_ext("VK_EXT_mesh_shader");
