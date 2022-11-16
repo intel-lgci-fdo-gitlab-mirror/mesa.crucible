@@ -383,3 +383,296 @@ test_define {
     .start = outputs_per_primitive_unused,
     .image_filename = "func.mesh.basic.ref.png",
 };
+
+static void
+outputs_per_vertex_block_compact_layout(void)
+{
+    t_require_ext("VK_EXT_mesh_shader");
+
+    VkShaderModule mesh = qoCreateShaderModuleGLSL(t_device, MESH,
+        QO_EXTENSION GL_EXT_mesh_shader : require
+        QO_TARGET_ENV spirv1.4
+        layout(local_size_x = 32) in;
+        layout(max_vertices = 6) out;
+        layout(max_primitives = 3) out;
+        layout(triangles) out;
+
+        layout(location = 0) out PerVertex {
+            float scale1;
+            float scale2;
+            vec3 color;
+        } per_vertex[];
+
+        void main()
+        {
+            uint local = gl_LocalInvocationID.x;
+            SetMeshOutputsEXT(6, 2);
+
+            if (local < 2)
+                gl_PrimitiveTriangleIndicesEXT[local] = uvec3(local * 3 + 0, local * 3 + 1, local * 3 + 2);
+
+            if (local == 31) {
+                vec4 scale = vec4(0.5, 0.5, 0.5, 1.0);
+                vec4 pos_a = vec4(-0.5f, -0.5f, 0, 0);
+                gl_MeshVerticesEXT[0].gl_Position = scale * vec4(0.5f, 0.5f, 0.0f, 1.0f) + pos_a;
+                gl_MeshVerticesEXT[1].gl_Position = scale * vec4(-0.5f, 0.5f, 0.0f, 1.0f) + pos_a;
+                gl_MeshVerticesEXT[2].gl_Position = scale * vec4(0.0f, -0.5f, 0.0f, 1.0f) + pos_a;
+
+                vec4 pos_b = vec4(0.5f, 0.5f, 0, 0);
+                gl_MeshVerticesEXT[3].gl_Position = scale * vec4(0.5f, 0.5f, 0.0f, 1.0f) + pos_b;
+                gl_MeshVerticesEXT[4].gl_Position = scale * vec4(-0.5f, 0.5f, 0.0f, 1.0f) + pos_b;
+                gl_MeshVerticesEXT[5].gl_Position = scale * vec4(0.0f, -0.5f, 0.0f, 1.0f) + pos_b;
+
+                per_vertex[0].scale1 = 0.5;
+                per_vertex[0].scale2 = 0.5;
+
+                per_vertex[1].scale1 = 0.4;
+                per_vertex[1].scale2 = 0.6;
+
+                per_vertex[2].scale1 = 0.3;
+                per_vertex[2].scale2 = 0.7;
+
+                per_vertex[3].scale1 = 0.2;
+                per_vertex[3].scale2 = 0.8;
+
+                per_vertex[4].scale1 = 0.1;
+                per_vertex[4].scale2 = 0.9;
+
+                per_vertex[5].scale1 = 0.5;
+                per_vertex[5].scale2 = 0.5;
+
+                per_vertex[0].color = vec3(1, 0, 0);
+                per_vertex[1].color = vec3(0, 1, 0);
+                per_vertex[2].color = vec3(0, 0, 1);
+                per_vertex[3].color = vec3(0, 1, 1);
+                per_vertex[4].color = vec3(1, 0, 1);
+                per_vertex[5].color = vec3(1, 1, 0);
+            }
+        }
+    );
+
+    VkShaderModule fs = qoCreateShaderModuleGLSL(t_device, FRAGMENT,
+        QO_EXTENSION GL_EXT_mesh_shader : require
+        QO_TARGET_ENV spirv1.4
+
+        layout(location = 0) in per_vertex_interp {
+            float scale1;
+            float scale2;
+            vec3 color;
+        } in_data;
+
+        layout(location = 0) out vec4 out_color;
+        void main()
+        {
+            out_color = vec4(in_data.color, 1.0) * (in_data.scale1 + in_data.scale2);
+        }
+    );
+
+    simple_mesh_pipeline_options_t opts = {
+        .fs = fs,
+    };
+
+    run_simple_mesh_pipeline(mesh, &opts);
+}
+
+test_define {
+    .name = "func.mesh.ext.outputs.per_vertex.block_compact_layout",
+    .start = outputs_per_vertex_block_compact_layout,
+    .image_filename = "func.mesh.basic.ref.png",
+};
+
+static void
+outputs_per_vertex_block_compact_layout_flat(void)
+{
+    t_require_ext("VK_EXT_mesh_shader");
+
+    VkShaderModule mesh = qoCreateShaderModuleGLSL(t_device, MESH,
+        QO_EXTENSION GL_EXT_mesh_shader : require
+        QO_TARGET_ENV spirv1.4
+        layout(local_size_x = 32) in;
+        layout(max_vertices = 6) out;
+        layout(max_primitives = 3) out;
+        layout(triangles) out;
+
+        layout(location = 0) out PerVertex {
+            flat float scale1;
+            float scale2;
+            vec3 color;
+        } per_vertex[];
+
+        void main()
+        {
+            uint local = gl_LocalInvocationID.x;
+            SetMeshOutputsEXT(6, 2);
+
+            if (local < 2)
+                gl_PrimitiveTriangleIndicesEXT[local] = uvec3(local * 3 + 0, local * 3 + 1, local * 3 + 2);
+
+            if (local == 31) {
+                vec4 scale = vec4(0.5, 0.5, 0.5, 1.0);
+                vec4 pos_a = vec4(-0.5f, -0.5f, 0, 0);
+                gl_MeshVerticesEXT[0].gl_Position = scale * vec4(0.5f, 0.5f, 0.0f, 1.0f) + pos_a;
+                gl_MeshVerticesEXT[1].gl_Position = scale * vec4(-0.5f, 0.5f, 0.0f, 1.0f) + pos_a;
+                gl_MeshVerticesEXT[2].gl_Position = scale * vec4(0.0f, -0.5f, 0.0f, 1.0f) + pos_a;
+
+                vec4 pos_b = vec4(0.5f, 0.5f, 0, 0);
+                gl_MeshVerticesEXT[3].gl_Position = scale * vec4(0.5f, 0.5f, 0.0f, 1.0f) + pos_b;
+                gl_MeshVerticesEXT[4].gl_Position = scale * vec4(-0.5f, 0.5f, 0.0f, 1.0f) + pos_b;
+                gl_MeshVerticesEXT[5].gl_Position = scale * vec4(0.0f, -0.5f, 0.0f, 1.0f) + pos_b;
+
+                /* scale1 is flat, so an uninterpolated value from the first
+                 * vertex will be propagated to the fragment shader, where it
+                 * will be summed with interpolated scale2, giving us a value
+                 * of 1.0
+                 */
+                per_vertex[0].scale1 = 0.5;
+                per_vertex[0].scale2 = 0.5;
+
+                per_vertex[1].scale1 = 0.4;
+                per_vertex[1].scale2 = 0.5;
+
+                per_vertex[2].scale1 = 0.3;
+                per_vertex[2].scale2 = 0.5;
+
+                per_vertex[3].scale1 = 0.2;
+                per_vertex[3].scale2 = 0.8;
+
+                per_vertex[4].scale1 = 0.1;
+                per_vertex[4].scale2 = 0.8;
+
+                per_vertex[5].scale1 = 0.5;
+                per_vertex[5].scale2 = 0.8;
+
+                per_vertex[0].color = vec3(1, 0, 0);
+                per_vertex[1].color = vec3(0, 1, 0);
+                per_vertex[2].color = vec3(0, 0, 1);
+                per_vertex[3].color = vec3(0, 1, 1);
+                per_vertex[4].color = vec3(1, 0, 1);
+                per_vertex[5].color = vec3(1, 1, 0);
+            }
+        }
+    );
+
+    VkShaderModule fs = qoCreateShaderModuleGLSL(t_device, FRAGMENT,
+        QO_EXTENSION GL_EXT_mesh_shader : require
+        QO_TARGET_ENV spirv1.4
+
+        layout(location = 0) in per_vertex_interp {
+            flat float scale1;
+            float scale2;
+            vec3 color;
+        } in_data;
+
+        layout(location = 0) out vec4 out_color;
+        void main()
+        {
+            out_color = vec4(in_data.color, 1.0) * (in_data.scale1 + in_data.scale2);
+        }
+    );
+
+    simple_mesh_pipeline_options_t opts = {
+        .fs = fs,
+    };
+
+    run_simple_mesh_pipeline(mesh, &opts);
+}
+
+test_define {
+    .name = "func.mesh.ext.outputs.per_vertex.block_compact_layout_flat",
+    .start = outputs_per_vertex_block_compact_layout_flat,
+    .image_filename = "func.mesh.basic.ref.png",
+};
+
+static void
+outputs_per_primitive_block_compact_layout(void)
+{
+    t_require_ext("VK_EXT_mesh_shader");
+
+    VkShaderModule mesh = qoCreateShaderModuleGLSL(t_device, MESH,
+        QO_EXTENSION GL_EXT_mesh_shader : require
+        QO_TARGET_ENV spirv1.4
+        layout(local_size_x = 32) in;
+        layout(max_vertices = 6) out;
+        layout(max_primitives = 3) out;
+        layout(triangles) out;
+
+        layout(location = 0) out PerVertex {
+            vec4 color;
+        } per_vertex[];
+
+        perprimitiveEXT layout(location = 1) out PerPrimitive {
+            float scale1;
+            float scale2;
+            vec4 offset;
+        } per_primitive[];
+
+        void main()
+        {
+            uint local = gl_LocalInvocationID.x;
+            SetMeshOutputsEXT(6, 2);
+
+            if (local < 2)
+                gl_PrimitiveTriangleIndicesEXT[local] = uvec3(local * 3 + 0, local * 3 + 1, local * 3 + 2);
+
+            if (local == 31) {
+                vec4 scale = vec4(0.5, 0.5, 0.5, 1.0);
+                vec4 pos_a = vec4(-0.5f, -0.5f, 0, 0);
+                gl_MeshVerticesEXT[0].gl_Position = scale * vec4(0.5f, 0.5f, 0.0f, 1.0f) + pos_a;
+                gl_MeshVerticesEXT[1].gl_Position = scale * vec4(-0.5f, 0.5f, 0.0f, 1.0f) + pos_a;
+                gl_MeshVerticesEXT[2].gl_Position = scale * vec4(0.0f, -0.5f, 0.0f, 1.0f) + pos_a;
+
+                vec4 pos_b = vec4(0.5f, 0.5f, 0, 0);
+                gl_MeshVerticesEXT[3].gl_Position = scale * vec4(0.5f, 0.5f, 0.0f, 1.0f) + pos_b;
+                gl_MeshVerticesEXT[4].gl_Position = scale * vec4(-0.5f, 0.5f, 0.0f, 1.0f) + pos_b;
+                gl_MeshVerticesEXT[5].gl_Position = scale * vec4(0.0f, -0.5f, 0.0f, 1.0f) + pos_b;
+
+                per_primitive[0].scale1 = 0.5;
+                per_primitive[0].scale2 = 0.5;
+                per_primitive[0].offset = vec4(0, 0, 0, 0.2);
+
+                per_primitive[1].scale1 = 0.4;
+                per_primitive[1].scale2 = 0.6;
+                per_primitive[1].offset = vec4(0, 0, 0, 0.2);
+
+                per_vertex[0].color = vec4(1, 0, 0, 0.8);
+                per_vertex[1].color = vec4(0, 1, 0, 0.8);
+                per_vertex[2].color = vec4(0, 0, 1, 0.8);
+                per_vertex[3].color = vec4(0, 1, 1, 0.8);
+                per_vertex[4].color = vec4(1, 0, 1, 0.8);
+                per_vertex[5].color = vec4(1, 1, 0, 0.8);
+            }
+        }
+    );
+
+    VkShaderModule fs = qoCreateShaderModuleGLSL(t_device, FRAGMENT,
+        QO_EXTENSION GL_EXT_mesh_shader : require
+        QO_TARGET_ENV spirv1.4
+
+        layout(location = 0) in vec4 v_color;
+
+        perprimitiveEXT layout(location = 1) in per_prim {
+            float scale1;
+            float scale2;
+            vec4 offset;
+        } in_per_prim;
+
+        layout(location = 0) out vec4 out_color;
+
+        void main()
+        {
+            out_color = v_color * (in_per_prim.scale1 + in_per_prim.scale2) + in_per_prim.offset;
+        }
+    );
+
+    simple_mesh_pipeline_options_t opts = {
+        .fs = fs,
+    };
+
+    run_simple_mesh_pipeline(mesh, &opts);
+}
+
+test_define {
+    .name = "func.mesh.ext.outputs.per_primitive.block_compact_layout",
+    .start = outputs_per_primitive_block_compact_layout,
+    .image_filename = "func.mesh.basic.ref.png",
+};
