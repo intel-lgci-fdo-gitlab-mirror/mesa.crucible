@@ -25,7 +25,7 @@
 #include "src/tests/func/mesh/ext/outputs-spirv.h"
 
 static void
-outputs_per_vertex(void)
+outputs_per_vertex_basic(void)
 {
     t_require_ext("VK_EXT_mesh_shader");
 
@@ -73,8 +73,8 @@ outputs_per_vertex(void)
 }
 
 test_define {
-    .name = "func.mesh.ext.outputs.per_vertex",
-    .start = outputs_per_vertex,
+    .name = "func.mesh.ext.outputs.per_vertex.basic",
+    .start = outputs_per_vertex_basic,
     .image_filename = "func.mesh.basic.ref.png",
 };
 
@@ -130,14 +130,14 @@ outputs_per_vertex_block(void)
 }
 
 test_define {
-    .name = "func.mesh.ext.outputs.per_vertex_block",
+    .name = "func.mesh.ext.outputs.per_vertex.block",
     .start = outputs_per_vertex_block,
     .image_filename = "func.mesh.basic.ref.png",
 };
 
 
 static void
-outputs_per_primitive(void)
+outputs_per_primitive_basic(void)
 {
     t_require_ext("VK_EXT_mesh_shader");
 
@@ -210,8 +210,8 @@ outputs_per_primitive(void)
 }
 
 test_define {
-    .name = "func.mesh.ext.outputs.per_primitive",
-    .start = outputs_per_primitive,
+    .name = "func.mesh.ext.outputs.per_primitive.basic",
+    .start = outputs_per_primitive_basic,
     .image_filename = "func.mesh.basic.ref.png",
 };
 
@@ -292,7 +292,7 @@ outputs_per_primitive_block(void)
 }
 
 test_define {
-    .name = "func.mesh.ext.outputs.per_primitive_block",
+    .name = "func.mesh.ext.outputs.per_primitive.block",
     .start = outputs_per_primitive_block,
     .image_filename = "func.mesh.basic.ref.png",
 };
