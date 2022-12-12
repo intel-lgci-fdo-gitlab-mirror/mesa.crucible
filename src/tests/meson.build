@@ -51,6 +51,7 @@ test_sources_with_spirv = [
   'bench/multiview.c',
   'bench/ssbo-atomic.c',
   'bug/104809.c',
+  'bug/gitlab-5711.c',
   'bug/gitlab-6680.c',
   'func/4-vertex-buffers.c',
   'func/depthstencil/basic.c',
