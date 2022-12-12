@@ -91,6 +91,8 @@ struct test_def {
 
     const bool robust_buffer_access;
 
+    const bool robust_image_access;
+
     /// \brief Private data for the test framework.
     ///
     /// Test authors shouldn't touch this struct.

@@ -558,6 +558,22 @@ t_setup_vulkan(void)
     vkGetPhysicalDeviceFeatures(t->vk.physical_dev, &pdf);
     pdf.robustBufferAccess = t->def->robust_buffer_access;
 
+    VkPhysicalDeviceRobustness2FeaturesEXT pdr2f = {
+      .sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_ROBUSTNESS_2_FEATURES_EXT,
+    };
+    VkPhysicalDeviceFeatures2 pdf2 = {
+      .sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_FEATURES_2,
+      .pNext = &pdr2f,
+    };
+    vkGetPhysicalDeviceFeatures2(t->vk.physical_dev, &pdf2);
+
+    if (t->def->robust_image_access && !pdr2f.robustImageAccess2)
+      t_skipf("Test requested robust image access, "
+              "but implementation does not support robustImageAccess2");
+
+    pdr2f.robustImageAccess2 = pdr2f.robustImageAccess2 &&
+                               t->def->robust_image_access;
+
     res = vkCreateDevice(t->vk.physical_dev,
         &(VkDeviceCreateInfo) {
             .sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO,
@@ -566,6 +582,7 @@ t_setup_vulkan(void)
             .enabledExtensionCount = t->vk.device_extension_count,
             .ppEnabledExtensionNames = ext_names,
             .pEnabledFeatures = &pdf,
+            .pNext = t->def->robust_image_access ? &pdr2f : NULL,
         }, NULL, &t->vk.device);
     free(qci);
     free(ext_names);
