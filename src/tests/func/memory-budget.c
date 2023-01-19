@@ -71,6 +71,12 @@ test_memory_budget(void)
         print_memory_budget(heap_index, "at the start", usage_before, budget_before);
 
         VkBuffer buffer = qoCreateBuffer(t_device, .size = BUFFER_SIZE);
+
+        /* If the buffer doesn't support this particular memory type, skip */
+        VkMemoryRequirements buffer_reqs = qoGetBufferMemoryRequirements(t_device, buffer);
+        if ((buffer_reqs.memoryTypeBits & (1u << type_index)) == 0)
+            continue;
+
         VkDeviceMemory mem = qoAllocBufferMemory(t_device, buffer,
                                                  .memoryTypeIndex = type_index);
 
