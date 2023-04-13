@@ -25,13 +25,3 @@ option(
   choices : ['auto', 'disabled', 'enabled'],
   description : 'enable support for man pages'
 )
-
-# TODO: Remove this once there's a GLSLang release with
-# VK_EXT_mesh_shader support.
-option(
-  'VK_EXT_mesh_shader',
-  type : 'combo',
-  value : 'auto',
-  choices : ['auto', 'disabled', 'enabled'],
-  description : 'enable support for VK_EXT_mesh_shader tests'
-)

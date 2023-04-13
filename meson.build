@@ -61,16 +61,11 @@ prog_glslang = find_program('glslangValidator')
 glslang_version = run_command(prog_glslang, '--version', capture: true, check: true).stdout().split()[2].split(':')[1]
 message('glslangValidator version: ' + glslang_version)
 
-_ext_mesh = get_option('VK_EXT_mesh_shader')
-if _ext_mesh == 'auto'
-  if glslang_version.version_compare('>11.11.0')
-    with_VK_EXT_mesh_shader = true
-  else
-    with_VK_EXT_mesh_shader = false
-    warning('Disabling VK_EXT_mesh_shader because GLSLang version ' + glslang_version + ' is too old')
-  endif
+if glslang_version.version_compare('>=11.12.0')
+  with_VK_EXT_mesh_shader = true
 else
-  with_VK_EXT_mesh_shader = _ext_mesh == 'enabled'
+  with_VK_EXT_mesh_shader = false
+  warning('Disabling VK_EXT_mesh_shader because GLSLang version ' + glslang_version + ' is too old')
 endif
 
 c_to_spirv_h = generator(
