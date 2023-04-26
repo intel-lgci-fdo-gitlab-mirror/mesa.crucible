@@ -28,24 +28,35 @@ struct params {
     VkDescriptorType descriptor_type;
 };
 
-
 static void
 test_max_buffer()
 {
     const struct params *params = t_user_data;
 
-    const uint32_t buffer_size = (params->descriptor_type ==
-                                  VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER) ?
+    uint32_t buffer_size = (params->descriptor_type ==
+                            VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER) ?
 			t_physical_dev_props->limits.maxUniformBufferRange :
 			t_physical_dev_props->limits.maxStorageBufferRange;
+    VkBuffer buffer;
+    VkDeviceMemory mem = {0};
+    VkResult result;
 
+create_buffer:
     /* Create a uniform buffer with-out memory-backing */
-    VkBuffer buffer = qoCreateBuffer(t_device,
-                                     .usage = VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT |
-                                              VK_BUFFER_USAGE_STORAGE_BUFFER_BIT,
-                                     .size = buffer_size);
+    buffer = qoCreateBuffer(t_device,
+                            .usage = VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT |
+                                     VK_BUFFER_USAGE_STORAGE_BUFFER_BIT,
+                            .size = buffer_size);
 
-    VkDeviceMemory mem = qoAllocBufferMemory(t_device, buffer);
+    result = qoAllocBufferMemoryCanFail(t_device, buffer, &mem);
+    if (result == VK_ERROR_OUT_OF_DEVICE_MEMORY) {
+        buffer_size = (buffer_size / 100) * 90;
+        /* buffer will be destroyed by __qoCreateBuffer()->t_cleanup_push_vk_buffer() */
+        goto create_buffer;
+    }
+
+    t_assert(result == VK_SUCCESS);
+
     qoBindBufferMemory(t_device, buffer, mem, 0);
     /* Allocate a descriptor set consisting of one binding */
     VkDescriptorSetLayout set_layout = qoCreateDescriptorSetLayout(t_device,
