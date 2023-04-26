@@ -310,6 +310,12 @@ qoAllocMemoryFromRequirements(VkDevice dev,
         })
 #endif
 
+VkResult
+__qoAllocMemoryFromRequirementsCanFail(VkDevice dev,
+                                       const VkMemoryRequirements *mem_reqs,
+                                       const QoMemoryAllocateFromRequirementsInfo *info,
+                                       VkDeviceMemory *mem);
+
 #ifdef DOXYGEN
 VkDeviceMemory
 qoAllocBufferMemory(VkDevice dev, VkBuffer buffer,
@@ -322,6 +328,9 @@ qoAllocBufferMemory(VkDevice dev, VkBuffer buffer,
             ##__VA_ARGS__ , \
         })
 #endif
+
+VkResult
+qoAllocBufferMemoryCanFail(VkDevice dev, VkBuffer buffer, VkDeviceMemory *memory);
 
 #ifdef DOXYGEN
 VkDeviceMemory
@@ -517,6 +526,7 @@ void qoGetPhysicalDeviceProperties(VkPhysicalDevice physical_dev, VkPhysicalDevi
 void qoGetPhysicalDeviceMemoryProperties(VkPhysicalDevice physical_dev, VkPhysicalDeviceMemoryProperties *mem_props);
 VkResult qoQueueSubmit(VkQueue queue, uint32_t cmdBufferCount, const VkCommandBuffer *cmdBuffers, VkFence fence);
 VkResult qoQueueWaitIdle(VkQueue queue);
+VkResult __qoAllocMemoryCanFail(VkDevice dev, const VkMemoryAllocateInfo *info, VkDeviceMemory *memory);
 VkDeviceMemory __qoAllocMemory(VkDevice dev, const VkMemoryAllocateInfo *info);
 VkDeviceMemory __qoAllocMemoryFromRequirements(VkDevice dev, const VkMemoryRequirements *mem_reqs, const QoMemoryAllocateFromRequirementsInfo *info);
 VkDeviceMemory __qoAllocBufferMemory(VkDevice dev, VkBuffer buffer, const QoMemoryAllocateFromRequirementsInfo *info);

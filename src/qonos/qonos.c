@@ -128,21 +128,37 @@ qoQueueWaitIdle(VkQueue queue)
     return result;
 }
 
+VkResult
+__qoAllocMemoryCanFail(VkDevice dev, const VkMemoryAllocateInfo *info,
+                       VkDeviceMemory *memory)
+{
+    t_assert(info->memoryTypeIndex != QO_MEMORY_TYPE_INDEX_INVALID);
+
+    return vkAllocateMemory(dev, info, NULL, memory);
+}
+
 VkDeviceMemory
 __qoAllocMemory(VkDevice dev, const VkMemoryAllocateInfo *info)
 {
     VkDeviceMemory memory = {0};
-    VkResult result;
-
-    t_assert(info->memoryTypeIndex != QO_MEMORY_TYPE_INDEX_INVALID);
-
-    result = vkAllocateMemory(dev, info, NULL, &memory);
+    VkResult result = __qoAllocMemoryCanFail(dev, info, &memory);
 
     t_assert(result == VK_SUCCESS);
     t_assert(memory != VK_NULL_HANDLE);
     t_cleanup_push_vk_device_memory(dev, memory);
 
     return memory;
+}
+
+VkResult
+qoAllocBufferMemoryCanFail(VkDevice dev, VkBuffer buffer, VkDeviceMemory *memory)
+{
+    VkMemoryRequirements mem_reqs = qoGetBufferMemoryRequirements(dev, buffer);
+    const QoMemoryAllocateFromRequirementsInfo info = {
+        QO_MEMORY_ALLOCATE_FROM_REQUIREMENTS_INFO_DEFAULTS
+    };
+
+    return __qoAllocMemoryFromRequirementsCanFail(dev, &mem_reqs, &info, memory);
 }
 
 uint32_t
@@ -162,10 +178,11 @@ qoFindMemoryTypeWithProperties(uint32_t memoryTypeBits,
     return QO_MEMORY_TYPE_INDEX_INVALID;
 }
 
-VkDeviceMemory
-__qoAllocMemoryFromRequirements(VkDevice dev,
-                                const VkMemoryRequirements *mem_reqs,
-                                const QoMemoryAllocateFromRequirementsInfo *info)
+VkResult
+__qoAllocMemoryFromRequirementsCanFail(VkDevice dev,
+                                       const VkMemoryRequirements *mem_reqs,
+                                       const QoMemoryAllocateFromRequirementsInfo *info,
+                                       VkDeviceMemory *mem)
 {
     VkMemoryAllocateInfo alloc_info = {
         .sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO,
@@ -188,7 +205,18 @@ __qoAllocMemoryFromRequirements(VkDevice dev,
     t_assert(alloc_info.memoryTypeIndex != QO_MEMORY_TYPE_INDEX_INVALID);
     t_assert((1 << alloc_info.memoryTypeIndex) & mem_reqs->memoryTypeBits);
 
-    return __qoAllocMemory(dev, &alloc_info);
+    return __qoAllocMemoryCanFail(dev, &alloc_info, mem);
+}
+
+VkDeviceMemory
+__qoAllocMemoryFromRequirements(VkDevice dev,
+                                const VkMemoryRequirements *mem_reqs,
+                                const QoMemoryAllocateFromRequirementsInfo *info)
+{
+    VkDeviceMemory memory = {0};
+
+    __qoAllocMemoryFromRequirementsCanFail(dev, mem_reqs, info, &memory);
+    return memory;
 }
 
 VkDeviceMemory
