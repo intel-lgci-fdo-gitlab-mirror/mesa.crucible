@@ -243,7 +243,11 @@ test_shift_int16_t(void)
 	if (signed_src & 0x8000)
 	    signed_src |= 0xffff0000;
 
-	unsigned shift_count = (i & 15) | 0xaaa0;
+        /* On Intel GPUs, the int16_t shift count is implicitly masked with
+         * 0x1f (instead of 0x0f). Munge the shift count with a value that has
+         * 0x10 set.
+         */
+        unsigned shift_count = (i & 15) | 0x5550;
 
 	data[(i * 8) + 0] = src[i];
 	data[(i * 8) + 1] = shift_count;
@@ -366,7 +370,11 @@ test_shift_int8_t(void)
 	if (signed_src & 0x80)
 	    signed_src |= 0xffffff00;
 
-	unsigned shift_count = (i & 7) | 0xa8;
+        /* On Intel GPUs, the int8_t shift count is implicitly masked with
+         * 0x1f (instead of 0x07). Munge the shift count with a value that has
+         * 0x18 set.
+         */
+        unsigned shift_count = (i & 7) | 0x58;
 
 	data[(i * 8) + 0] = src[i];
 	data[(i * 8) + 1] = shift_count;
