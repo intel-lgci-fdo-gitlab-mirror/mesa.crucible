@@ -385,6 +385,34 @@ t_setup_vulkan(void)
         &t->vk.instance_extension_count, t->vk.instance_extension_props);
     t_assert(res == VK_SUCCESS);
 
+    static const char *skipped_extensions[] = {
+        /* Avoid warning that extension was enabled but VkInstanceCreateInfo did not
+         * contain the corresponding struct.
+         */
+        "VK_LUNARG_direct_driver_loading",
+    };
+
+    {
+        uint32_t i = 0;
+        while (i < t->vk.instance_extension_count) {
+            VkExtensionProperties *ep = &t->vk.instance_extension_props[i];
+
+            bool skip = false;
+            for (uint32_t j = 0; j < ARRAY_LENGTH(skipped_extensions); j++) {
+                if (strcmp(ep->extensionName, skipped_extensions[j]) == 0) {
+                    skip = true;
+                    break;
+                }
+            }
+
+            /* Remove it from the list by swapping it with the last. */
+            if (skip)
+                *ep = t->vk.instance_extension_props[t->vk.instance_extension_count--];
+            else
+                i++;
+        }
+    }
+
     ext_names = malloc(t->vk.instance_extension_count * sizeof(*ext_names));
     t_assert(ext_names);
 
