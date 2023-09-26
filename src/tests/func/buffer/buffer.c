@@ -355,7 +355,7 @@ update_buffer(struct copy_buffer_test *buf_test, int buffer_size, uint32_t offse
     qoBeginCommandBuffer(cmdBuffer);
 
     vkCmdPipelineBarrier(cmdBuffer, 0, VK_PIPELINE_STAGE_TRANSFER_BIT, false,
-                         0, NULL, 2,
+                         0, NULL, 1,
         (VkBufferMemoryBarrier[]) {
             {
                 .sType = VK_STRUCTURE_TYPE_BUFFER_MEMORY_BARRIER,
