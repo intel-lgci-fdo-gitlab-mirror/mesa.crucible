@@ -123,6 +123,8 @@ static struct dispatcher {
 
     uint32_t num_vulkan_queues;
 
+    uint64_t test_case_timeout_ns;
+
     struct {
         char *filepath;
         FILE *file;
@@ -364,6 +366,7 @@ dispatcher_run(uint32_t num_tests)
     dispatcher.num_tests = num_tests;
     dispatcher.max_dispatched_tests =
         CLAMP(runner_opts.jobs, 1, ARRAY_LENGTH(dispatcher.workers));
+    dispatcher.test_case_timeout_ns = 1000000000ull * runner_opts.timeout_s;
 
     dispatcher_gather_vulkan_info();
     if (dispatcher.goto_next_phase)
@@ -830,7 +833,7 @@ dispatcher_check_timeout()
 {
     worker_t *worker = NULL;
 
-    if (dispatcher.goto_next_phase)
+    if (dispatcher.goto_next_phase || runner_opts.timeout_s == 0)
         return;
 
     int err;
@@ -1160,7 +1163,10 @@ worker_insert_test(worker_t *worker, const test_def_t *def)
 
     size_t test_idx = worker->tests.len++;
     worker->tests.data[test_idx] = def;
-    worker->tests.timeout[test_idx] = UINT64_MAX;
+    worker->tests.timeout[test_idx] =
+        dispatcher.test_case_timeout_ns ?
+        gettime_ns() + dispatcher.test_case_timeout_ns :
+        UINT64_MAX;
     ++dispatcher.cur_dispatched_tests;
 
     return true;
