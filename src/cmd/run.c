@@ -259,6 +259,13 @@ get_num_jobs(void)
     return jobs;
 }
 
+static uint32_t
+get_timeout_s(void)
+{
+    // Timeout is only supported in fork mode
+    return get_fork_mode() ? opt_timeout : 0;
+}
+
 static bool
 get_fork_mode(void)
 {
@@ -285,6 +292,7 @@ cmd_start(const cru_command_t *cmd, int argc, char **argv)
 
     ok = runner_init(&(runner_opts_t) {
         .jobs = get_num_jobs(),
+        .timeout_s = get_timeout_s(),
         .isolation_mode = opt_isolation,
         .no_fork = !get_fork_mode(),
         .no_cleanup_phase = opt_no_cleanup,

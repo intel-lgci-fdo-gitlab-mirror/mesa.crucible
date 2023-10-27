@@ -42,6 +42,8 @@ struct runner_opts {
     /// option.
     uint32_t jobs;
 
+    uint32_t timeout_s;
+
     runner_isolation_mode_t isolation_mode;
     bool no_fork;
     bool no_cleanup_phase;
