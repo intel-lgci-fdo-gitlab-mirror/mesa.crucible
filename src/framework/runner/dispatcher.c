@@ -80,6 +80,7 @@ struct worker {
     struct {
         uint32_t len;
         const test_def_t *data[256];
+        uint64_t timeout[256];
     } tests;
 
     worker_pipe_t dispatch_pipe;
@@ -596,6 +597,18 @@ dispatcher_dispatch_loop_with_fork(void)
     }
 }
 
+static uint64_t
+gettime_ns()
+{
+    struct timespec current;
+    int ret = clock_gettime(CLOCK_MONOTONIC, &current);
+    assert(ret >= 0);
+    if (ret < 0)
+        return 0;
+
+    return (uint64_t) current.tv_sec * 1000000000ULL + current.tv_nsec;
+}
+
 static void
 dispatcher_dispatch_test(const test_def_t *def, uint32_t queue_num)
 {
@@ -813,6 +826,29 @@ dispatcher_find_unborn_worker(void)
 }
 
 static void
+dispatcher_check_timeout()
+{
+    worker_t *worker = NULL;
+
+    if (dispatcher.goto_next_phase)
+        return;
+
+    int err;
+    uint64_t timenow = gettime_ns();
+    dispatcher_for_each_worker_slot(worker) {
+        for (int i = 0; i < worker->tests.len; i++) {
+            if (timenow > worker->tests.timeout[i]) {
+                err = kill(worker->pid, SIGINT);
+                if (err) {
+                    loge("runner failed to kill child process %d", worker->pid);
+                    abort();
+                }
+            }
+        }
+    }
+}
+
+static void
 dispatcher_collect_result(int timeout_ms)
 {
     struct epoll_event event;
@@ -820,6 +856,8 @@ dispatcher_collect_result(int timeout_ms)
     dispatcher_yield_to_sigint();
     if (dispatcher.goto_next_phase)
         return;
+
+    dispatcher_check_timeout();
 
     if (epoll_wait(dispatcher.epoll_fd, &event, 1, timeout_ms) <= 0)
         return;
@@ -1120,7 +1158,9 @@ worker_insert_test(worker_t *worker, const test_def_t *def)
     if (worker->tests.len >= ARRAY_LENGTH(worker->tests.data))
         return false;
 
-    worker->tests.data[worker->tests.len++] = def;
+    size_t test_idx = worker->tests.len++;
+    worker->tests.data[test_idx] = def;
+    worker->tests.timeout[test_idx] = UINT64_MAX;
     ++dispatcher.cur_dispatched_tests;
 
     return true;
