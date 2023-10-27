@@ -30,6 +30,7 @@ __crucible_run()
       --no-separate-cleanup-threads
       -I --isolation
       -j --jobs
+      -t --timeout
       --dump
       --no-dump
       --no-cleanup

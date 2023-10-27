@@ -32,6 +32,7 @@ static bool get_fork_mode(void);
 
 static runner_isolation_mode_t opt_isolation = RUNNER_ISOLATION_MODE_PROCESS;
 static int opt_jobs = 0;
+static int opt_timeout = 0;
 static int opt_fork = -1; // -1 => unset on cmdline
 static int opt_log_pids = 0;
 static int opt_no_cleanup = 0;
@@ -59,6 +60,7 @@ static const char *shortopts = "+:hj:I:d:";
 enum opt_name {
     OPT_NAME_HELP = 'h',
     OPT_NAME_JOBS = 'j',
+    OPT_NAME_TIMEOUT = 't',
     OPT_NAME_ISLOATION = 'I',
     OPT_NAME_DEVICE_ID = 'd',
 
@@ -70,6 +72,7 @@ enum opt_name {
 static const struct option longopts[] = {
     {"help",          no_argument,       NULL,            OPT_NAME_HELP},
     {"jobs",          required_argument, NULL,            OPT_NAME_JOBS},
+    {"timeout",       required_argument, NULL,            OPT_NAME_TIMEOUT},
     {"isolation",     required_argument, NULL,            OPT_NAME_ISLOATION},
     {"fork",          no_argument,       &opt_fork,       true},
     {"log-pids",      no_argument,       &opt_log_pids,   true},
@@ -144,6 +147,14 @@ parse_args(const cru_command_t *cmd, int argc, char **argv)
                 cru_usage_error(cmd, "--jobs must be positive");
             }
             break;
+        case OPT_NAME_TIMEOUT:
+            if (!parse_i32(optarg, &opt_timeout)) {
+                cru_usage_error(cmd, "invalid value for --timeout");
+            }
+            if (opt_timeout <= 0) {
+                cru_usage_error(cmd, "--timeout must be positive");
+            }
+            break;
         case OPT_NAME_ISLOATION:
             if (cru_streq(optarg, "p") || cru_streq(optarg, "process")) {
                 opt_isolation = RUNNER_ISOLATION_MODE_PROCESS;
@@ -183,6 +194,10 @@ done_getopt:
         }
 
         *cru_vec_push(&test_patterns, 1) = arg;
+    }
+
+    if (!get_fork_mode() && opt_timeout > 0) {
+        cru_usage_error(cmd, "--timeout requires enabling fork");
     }
 }
 
