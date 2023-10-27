@@ -124,6 +124,7 @@ static struct dispatcher {
     uint32_t num_vulkan_queues;
 
     uint64_t test_case_timeout_ns;
+    int epoll_timeout_ms;
 
     struct {
         char *filepath;
@@ -367,6 +368,10 @@ dispatcher_run(uint32_t num_tests)
     dispatcher.max_dispatched_tests =
         CLAMP(runner_opts.jobs, 1, ARRAY_LENGTH(dispatcher.workers));
     dispatcher.test_case_timeout_ns = 1000000000ull * runner_opts.timeout_s;
+    dispatcher.epoll_timeout_ms =
+        runner_opts.timeout_s ?
+        runner_opts.timeout_s * 100 /* 1/10th the timeout time */ :
+        -1 /* no timeout, so wait forever */;
 
     dispatcher_gather_vulkan_info();
     if (dispatcher.goto_next_phase)
@@ -512,7 +517,7 @@ dispatcher_enter_cleanup_phase(void)
     }
 
     while (dispatcher.num_workers > 0) {
-        dispatcher_collect_result(-1);
+        dispatcher_collect_result(dispatcher.epoll_timeout_ms);
         if (dispatcher.goto_next_phase)
             return;
     }
@@ -671,7 +676,7 @@ dispatcher_get_open_worker(void)
         }
 
         // All workers are busy. Wait for a test to finish, then try again.
-        dispatcher_collect_result(-1);
+        dispatcher_collect_result(dispatcher.epoll_timeout_ms);
     }
 }
 
