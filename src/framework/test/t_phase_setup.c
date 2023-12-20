@@ -25,7 +25,7 @@
 #include "t_phase_setup.h"
 
 /* Maximum supported physical devs. */
-#define MAX_PHYSICAL_DEVS 4
+#define MAX_PHYSICAL_DEVS 32
 
 static void *
 test_vk_alloc(void *pUserData, size_t size, size_t alignment,
