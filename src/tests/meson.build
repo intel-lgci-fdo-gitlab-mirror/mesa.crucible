@@ -90,6 +90,7 @@ test_sources_with_spirv = [
   'func/mesh/nv/viewportmask.c',
   'func/miptree/miptree.c',
   'func/multiview.c',
+  'func/nv/shader-sm-builtins.c',
   'func/push-constants/basic.c',
   'func/push-constants/dynamic-indirect.c',
   'func/amd/gcn_shader.c',
