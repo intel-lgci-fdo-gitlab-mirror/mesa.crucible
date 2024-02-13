@@ -208,13 +208,13 @@ test_device(void)
 
 
     /* Pick a monotonic domain to test against. Prefer MONOTONIC_RAW */
-    VkTimeDomainEXT     monotonicDomain = VK_TIME_DOMAIN_MAX_ENUM_EXT;
+    VkTimeDomainEXT     monotonicDomain = VK_TIME_DOMAIN_MAX_ENUM_KHR;
     bool                foundDeviceDomain = false;
 
     for (uint32_t d = 0; d < timeDomainCount; d++) {
         switch (timeDomains[d]) {
         case VK_TIME_DOMAIN_CLOCK_MONOTONIC_EXT:
-            if (monotonicDomain == VK_TIME_DOMAIN_MAX_ENUM_EXT)
+            if (monotonicDomain == VK_TIME_DOMAIN_MAX_ENUM_KHR)
                 monotonicDomain = timeDomains[d];
             break;
         case VK_TIME_DOMAIN_CLOCK_MONOTONIC_RAW_EXT:
@@ -229,7 +229,7 @@ test_device(void)
     }
 
     t_assert(foundDeviceDomain);
-    t_assert(monotonicDomain != VK_TIME_DOMAIN_MAX_ENUM_EXT);
+    t_assert(monotonicDomain != VK_TIME_DOMAIN_MAX_ENUM_KHR);
 
     VkCalibratedTimestampInfoEXT        timestampInfo[2] = {
         {
