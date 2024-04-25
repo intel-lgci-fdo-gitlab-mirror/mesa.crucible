@@ -407,7 +407,7 @@ t_setup_vulkan(void)
 
             /* Remove it from the list by swapping it with the last. */
             if (skip)
-                *ep = t->vk.instance_extension_props[t->vk.instance_extension_count--];
+                *ep = t->vk.instance_extension_props[--t->vk.instance_extension_count];
             else
                 i++;
         }
