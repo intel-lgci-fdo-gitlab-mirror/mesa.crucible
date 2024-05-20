@@ -1334,26 +1334,26 @@ miptree_intermediate_copy_image(const test_data_t *data)
     VkCommandBuffer cmd = qoAllocateCommandBuffer(t_device, t_cmd_pool);
     qoBeginCommandBuffer(cmd);
 
-    cru_vec_foreach(slice, &mt->mipslices) {
-        vkCmdPipelineBarrier(cmd, VK_PIPELINE_STAGE_HOST_BIT,
-                             VK_PIPELINE_STAGE_TRANSFER_BIT,
-                             0, 0, NULL, 0, NULL, 1,
-                             &(VkImageMemoryBarrier) {
-                                 .sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER,
-                                 .srcAccessMask = 0,
-                                 .dstAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT,
-                                 .oldLayout = VK_IMAGE_LAYOUT_UNDEFINED,
-                                 .newLayout = VK_IMAGE_LAYOUT_GENERAL,
-                                 .image = mt->intermediate_image,
-                                 .subresourceRange = {
-                                     .aspectMask = params->aspect,
-                                     .baseMipLevel = slice->level,
-                                     .levelCount = 1,
-                                     .baseArrayLayer = slice->array_slice,
-                                     .layerCount = 1,
-                                  }
-                             });
+    vkCmdPipelineBarrier(cmd, VK_PIPELINE_STAGE_HOST_BIT,
+                         VK_PIPELINE_STAGE_TRANSFER_BIT,
+                         0, 0, NULL, 0, NULL, 1,
+                         &(VkImageMemoryBarrier) {
+                             .sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER,
+                             .srcAccessMask = 0,
+                             .dstAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT,
+                             .oldLayout = VK_IMAGE_LAYOUT_UNDEFINED,
+                             .newLayout = VK_IMAGE_LAYOUT_GENERAL,
+                             .image = mt->intermediate_image,
+                             .subresourceRange = {
+                                 .aspectMask = params->aspect,
+                                 .baseMipLevel = 0,
+                                 .levelCount = params->levels,
+                                 .baseArrayLayer = 0,
+                                 .layerCount = params->array_length,
+                              }
+                         });
 
+    cru_vec_foreach(slice, &mt->mipslices) {
         VkImageCopy copy = {
            .srcSubresource = {
                .aspectMask = params->aspect,
