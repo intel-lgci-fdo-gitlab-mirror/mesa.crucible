@@ -140,6 +140,7 @@ data_ref_files = [
   'func.first.ref.png',
   'func.gs.basic.ref.png',
   'func.interleaved-cmd-buffers.ref.png',
+  'func.issue-11617.ref.png',
   'func.mesh.basic.ref.png',
   'func.mesh.clipdistance.ref.png',
   'func.mesh.clipdistance_culldistance.ref.png',
