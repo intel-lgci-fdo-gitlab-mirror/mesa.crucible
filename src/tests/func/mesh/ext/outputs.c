@@ -353,8 +353,8 @@ outputs_per_primitive_unused(void)
             groupMemoryBarrier();
             barrier();
 
-            alpha[0] = alphaprim[0];
-            alpha[3] = alphaprim[1];
+            alpha[0] = 1.0;
+            alpha[3] = 1.0;
         }
     );
 
