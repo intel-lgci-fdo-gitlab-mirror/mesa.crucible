@@ -240,6 +240,18 @@ void run_simple_compute_pipeline(VkShaderModule cs,
         memcpy(storage_ptr, opts->storage, opts->storage_size);
         vkUnmapMemory(t_device, storage_mem);
 
+        vkCmdPipelineBarrier(t_cmd_buffer, VK_PIPELINE_STAGE_HOST_BIT,
+                             VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT, 0,
+                             0, NULL, 1,
+            &(VkBufferMemoryBarrier) {
+                .sType = VK_STRUCTURE_TYPE_BUFFER_MEMORY_BARRIER,
+                .srcAccessMask = VK_ACCESS_HOST_WRITE_BIT,
+                .dstAccessMask = VK_ACCESS_SHADER_READ_BIT,
+                .buffer = storage_buf,
+                .offset = 0,
+                .size = opts->storage_size,
+            }, 0, NULL);
+
         vkUpdateDescriptorSets(t_device,
             /*writeCount*/ 1,
             (VkWriteDescriptorSet[]) {
@@ -276,6 +288,19 @@ void run_simple_compute_pipeline(VkShaderModule cs,
 
     vkCmdDispatch(t_cmd_buffer, MAX(1, opts->x_count),
                   MAX(1, opts->y_count), MAX(1, opts->z_count));
+
+    if (has_storage) {
+        vkCmdPipelineBarrier(t_cmd_buffer, VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT,
+                             VK_PIPELINE_STAGE_HOST_BIT, 0, 0, NULL, 1,
+            &(VkBufferMemoryBarrier) {
+                .sType = VK_STRUCTURE_TYPE_BUFFER_MEMORY_BARRIER,
+                .srcAccessMask = VK_ACCESS_SHADER_WRITE_BIT,
+                .dstAccessMask = VK_ACCESS_HOST_READ_BIT,
+                .buffer = storage_buf,
+                .offset = 0,
+                .size = opts->storage_size,
+            }, 0, NULL);
+    }
 
     qoEndCommandBuffer(t_cmd_buffer);
     qoQueueSubmit(t_queue, 1, &t_cmd_buffer, VK_NULL_HANDLE);
@@ -436,6 +461,7 @@ run_simple_mesh_pipeline(VkShaderModule mesh,
     VkDescriptorBufferInfo vkDescriptorBufferInfo[2];
 
     uint32_t descSetCount = 0;
+    VkBuffer storage_buf;
     if (has_storage) {
         vkDescriptorSetLayoutBinding[descSetCount] =
         (VkDescriptorSetLayoutBinding) {
@@ -457,7 +483,7 @@ run_simple_mesh_pipeline(VkShaderModule mesh,
             .descriptorPool = t_descriptor_pool,
             .pSetLayouts = &set_layouts[descSetCount]);
 
-        VkBuffer storage_buf = qoCreateBuffer(t_device,
+        storage_buf = qoCreateBuffer(t_device,
             .size = opts.storage_size,
             .usage = VK_BUFFER_USAGE_STORAGE_BUFFER_BIT);
 
@@ -473,6 +499,18 @@ run_simple_mesh_pipeline(VkShaderModule mesh,
         t_assert(result == VK_SUCCESS);
         memcpy(storage_ptr, opts.storage, opts.storage_size);
         vkUnmapMemory(t_device, storage_mem);
+
+        vkCmdPipelineBarrier(t_cmd_buffer, VK_PIPELINE_STAGE_HOST_BIT,
+                             VK_PIPELINE_STAGE_ALL_GRAPHICS_BIT, 0,
+                             0, NULL, 1,
+            &(VkBufferMemoryBarrier) {
+                .sType = VK_STRUCTURE_TYPE_BUFFER_MEMORY_BARRIER,
+                .srcAccessMask = VK_ACCESS_HOST_WRITE_BIT,
+                .dstAccessMask = VK_ACCESS_SHADER_READ_BIT,
+                .buffer = storage_buf,
+                .offset = 0,
+                .size = opts.storage_size,
+            }, 0, NULL);
 
         vkDescriptorBufferInfo[descSetCount] = (VkDescriptorBufferInfo) {
             .buffer = storage_buf,
@@ -530,6 +568,18 @@ run_simple_mesh_pipeline(VkShaderModule mesh,
         t_assert(result == VK_SUCCESS);
         memcpy(uniform_ptr, opts.uniform_data, opts.uniform_data_size);
         vkUnmapMemory(t_device, uniform_mem);
+
+        vkCmdPipelineBarrier(t_cmd_buffer, VK_PIPELINE_STAGE_HOST_BIT,
+                             VK_PIPELINE_STAGE_ALL_GRAPHICS_BIT, 0,
+                             0, NULL, 1,
+            &(VkBufferMemoryBarrier) {
+                .sType = VK_STRUCTURE_TYPE_BUFFER_MEMORY_BARRIER,
+                .srcAccessMask = VK_ACCESS_HOST_WRITE_BIT,
+                .dstAccessMask = VK_ACCESS_SHADER_READ_BIT,
+                .buffer = uniform_buf,
+                .offset = 0,
+                .size = opts.uniform_data_size,
+            }, 0, NULL);
 
         vkDescriptorBufferInfo[descSetCount] = (VkDescriptorBufferInfo) {
             .buffer = uniform_buf,
@@ -644,6 +694,20 @@ run_simple_mesh_pipeline(VkShaderModule mesh,
     }
 
     vkCmdEndRenderPass(t_cmd_buffer);
+
+    if (has_storage) {
+        vkCmdPipelineBarrier(t_cmd_buffer, VK_PIPELINE_STAGE_ALL_GRAPHICS_BIT,
+                             VK_PIPELINE_STAGE_HOST_BIT, 0, 0, NULL, 1,
+            &(VkBufferMemoryBarrier) {
+                .sType = VK_STRUCTURE_TYPE_BUFFER_MEMORY_BARRIER,
+                .srcAccessMask = VK_ACCESS_SHADER_WRITE_BIT,
+                .dstAccessMask = VK_ACCESS_HOST_READ_BIT,
+                .buffer = storage_buf,
+                .offset = 0,
+                .size = opts.storage_size,
+            }, 0, NULL);
+    }
+
     qoEndCommandBuffer(t_cmd_buffer);
     qoQueueSubmit(t_queue, 1, &t_cmd_buffer, VK_NULL_HANDLE);
     qoQueueWaitIdle(t_queue);
