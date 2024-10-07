@@ -126,6 +126,7 @@ data_ref_files = [
   '64x64-green.ref.png',
   '128x128-green.ref.png',
   '32x32-smile.ref.png',
+  'bug.gitlab-11800.ref.png',
   'example.image.copy-ref-image.ref.png',
   'example.image.map-ref-image.ref.png',
   'func.4-vertex-buffers.ref.png',
