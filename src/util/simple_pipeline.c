@@ -314,6 +314,8 @@ void run_simple_compute_pipeline(VkShaderModule cs,
         t_assert(result == VK_SUCCESS);
         memcpy(opts->storage, storage_ptr, opts->storage_size);
         vkUnmapMemory(t_device, storage_mem);
+
+        vkFreeMemory(t_device, storage_mem, NULL);
     }
 }
 
@@ -531,6 +533,7 @@ run_simple_mesh_pipeline(VkShaderModule mesh,
         descSetCount++;
     }
 
+    VkDeviceMemory uniform_mem;
     if (has_uniform) {
         vkDescriptorSetLayoutBinding[descSetCount] =
         (VkDescriptorSetLayoutBinding) {
@@ -556,7 +559,7 @@ run_simple_mesh_pipeline(VkShaderModule mesh,
             .size = opts.uniform_data_size,
             .usage = VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT);
 
-        VkDeviceMemory uniform_mem = qoAllocBufferMemory(t_device, uniform_buf,
+        uniform_mem = qoAllocBufferMemory(t_device, uniform_buf,
             .properties = VK_MEMORY_PROPERTY_HOST_COHERENT_BIT |
                           VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT);
         qoBindBufferMemory(t_device, uniform_buf, uniform_mem, 0);
@@ -720,5 +723,11 @@ run_simple_mesh_pipeline(VkShaderModule mesh,
         t_assert(result == VK_SUCCESS);
         memcpy(opts.storage, storage_ptr, opts.storage_size);
         vkUnmapMemory(t_device, storage_mem);
+
+        vkFreeMemory(t_device, storage_mem, NULL);
+    }
+
+    if (has_uniform) {
+        vkFreeMemory(t_device, uniform_mem, NULL);
     }
 }
