@@ -54,6 +54,7 @@ test_sources_with_spirv = [
   'bug/gitlab-5711.c',
   'bug/gitlab-6680.c',
   'bug/gitlab-9013.c',
+  'bug/gitlab-11607.c',
   'bug/gitlab-11787.c',
   'bug/gitlab-11800.c',
   'func/4-vertex-buffers.c',
