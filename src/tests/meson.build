@@ -58,6 +58,7 @@ test_sources_with_spirv = [
   'bug/gitlab-11787.c',
   'bug/gitlab-11800.c',
   'bug/gitlab-12477.c',
+  'bug/gitlab-12794.c',
   'bug/gitlab-12888.c',
   'bug/gitlab-12927.c',
   'bug/gitlab-14054.c',
