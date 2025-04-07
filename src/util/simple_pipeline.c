@@ -31,6 +31,51 @@
     PFN_##name name = (PFN_##name)vkGetDeviceProcAddr(t_device, #name); \
     t_assert(name != NULL);
 
+static void
+ensure_subgroup_size_require(uint32_t required_subgroup_size,
+                             VkShaderStageFlagBits stages)
+{
+    if (required_subgroup_size == 0)
+        return;
+
+    t_require_ext("VK_EXT_subgroup_size_control");
+
+    VkPhysicalDeviceSubgroupSizeControlFeaturesEXT ssc_features = {
+        .sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SUBGROUP_SIZE_CONTROL_FEATURES_EXT,
+    };
+    VkPhysicalDeviceFeatures2 features = {
+        .sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_FEATURES_2,
+        .pNext = &ssc_features,
+    };
+    vkGetPhysicalDeviceFeatures2(t_physical_dev, &features);
+
+    if (!ssc_features.subgroupSizeControl)
+        t_skipf("subgroupSizeControl not supported, needed to require a subgroup size");
+
+    VkPhysicalDeviceSubgroupSizeControlPropertiesEXT ssc_props = {
+        .sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SUBGROUP_SIZE_CONTROL_PROPERTIES_EXT,
+    };
+    VkPhysicalDeviceProperties2 props = {
+        .sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_PROPERTIES_2,
+        .pNext = &ssc_props,
+    };
+    vkGetPhysicalDeviceProperties2(t_physical_dev, &props);
+
+    if ((ssc_props.requiredSubgroupSizeStages & stages) != stages)
+        t_skipf("subgroupSizeControl not supported for Mesh shader stage");
+    if ((ssc_props.requiredSubgroupSizeStages & stages) != stages)
+        t_skipf("subgroupSizeControl not supported for Task shader stage");
+
+    if (required_subgroup_size < ssc_props.minSubgroupSize) {
+        t_skipf("requiredSubgroupSize (%u) smaller than minSubgroupSize (%u) supported",
+                required_subgroup_size, ssc_props.minSubgroupSize);
+    }
+    if (required_subgroup_size > ssc_props.maxSubgroupSize) {
+        t_skipf("requiredSubgroupSize (%u) larger than maxSubgroupSize (%u) supported",
+                required_subgroup_size, ssc_props.maxSubgroupSize);
+    }
+}
+
 void
 run_simple_pipeline(VkShaderModule fs, void *push_constants,
                     size_t push_constants_size)
@@ -173,6 +218,11 @@ run_simple_pipeline(VkShaderModule fs, void *push_constants,
 void run_simple_compute_pipeline(VkShaderModule cs,
                                  const simple_compute_pipeline_options_t *opts)
 {
+    if (opts->required_subgroup_size) {
+        ensure_subgroup_size_require(opts->required_subgroup_size,
+                                     VK_SHADER_STAGE_COMPUTE_BIT);
+    }
+
     bool has_push_constants = opts->push_constants_size > 0;
     bool has_storage = opts->storage_size > 0;
 
@@ -200,12 +250,19 @@ void run_simple_compute_pipeline(VkShaderModule cs,
         .pushConstantRangeCount = has_push_constants ? 1 : 0,
         .pPushConstantRanges = has_push_constants ? &constant_range : NULL);
 
+
+    VkPipelineShaderStageRequiredSubgroupSizeCreateInfoEXT sgs_info = {
+        .sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_REQUIRED_SUBGROUP_SIZE_CREATE_INFO_EXT,
+        .requiredSubgroupSize = opts->required_subgroup_size,
+    };
+
     VkPipeline pipeline;
     VkResult result = vkCreateComputePipelines(t_device, t_pipeline_cache, 1,
         &(VkComputePipelineCreateInfo) {
             .sType = VK_STRUCTURE_TYPE_COMPUTE_PIPELINE_CREATE_INFO,
             .stage = {
                 .sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO,
+                .pNext = opts->required_subgroup_size ? &sgs_info : NULL,
                 .stage = VK_SHADER_STAGE_COMPUTE_BIT,
                 .module = cs,
                 .pName = "main",
@@ -396,32 +453,10 @@ run_simple_mesh_pipeline(VkShaderModule mesh,
         t_skipf("taskShader not supported");
 
     if (opts.required_subgroup_size) {
-        if (!ssc_features.subgroupSizeControl)
-            t_skipf("subgroupSizeControl not supported, needed to require a subgroup size");
-
-        VkPhysicalDeviceSubgroupSizeControlPropertiesEXT ssc_props = {
-            .sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SUBGROUP_SIZE_CONTROL_PROPERTIES_EXT,
-        };
-        VkPhysicalDeviceProperties2 props = {
-            .sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_PROPERTIES_2,
-            .pNext = &ssc_props,
-        };
-        vkGetPhysicalDeviceProperties2(t_physical_dev, &props);
-
-        if ((ssc_props.requiredSubgroupSizeStages & vk_shader_stage_mesh_bit) == 0)
-            t_skipf("subgroupSizeControl not supported for Mesh shader stage");
-        if (opts.task != VK_NULL_HANDLE &&
-            (ssc_props.requiredSubgroupSizeStages & vk_shader_stage_task_bit) == 0)
-            t_skipf("subgroupSizeControl not supported for Task shader stage");
-
-        if (opts.required_subgroup_size < ssc_props.minSubgroupSize) {
-            t_skipf("requiredSubgroupSize (%u) smaller than minSubgroupSize (%u) supported",
-                opts.required_subgroup_size, ssc_props.minSubgroupSize);
-        }
-        if (opts.required_subgroup_size > ssc_props.maxSubgroupSize) {
-            t_skipf("requiredSubgroupSize (%u) larger than maxSubgroupSize (%u) supported",
-                opts.required_subgroup_size, ssc_props.maxSubgroupSize);
-        }
+        ensure_subgroup_size_require(
+            opts.required_subgroup_size,
+            vk_shader_stage_mesh_bit |
+            (opts.task != VK_NULL_HANDLE ? vk_shader_stage_task_bit : 0));
     }
 
     const bool no_image = t_no_image;

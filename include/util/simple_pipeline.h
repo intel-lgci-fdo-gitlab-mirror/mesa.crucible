@@ -31,6 +31,9 @@ struct simple_compute_pipeline_options {
     void *push_constants;
     size_t push_constants_size;
 
+    // See VK_EXT_subgroup_size_control.
+    uint32_t required_subgroup_size;
+
     // Bound to set 0, descriptor 0.
     void *storage;
     size_t storage_size;
