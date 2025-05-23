@@ -140,7 +140,7 @@ test_create_s(const test_create_info_t *info)
 
     t->name = STRING_INIT;
     string_printf(&t->name, "%s.q%d", info->def->name, info->queue_num);
-    t->phase = ATOMIC_VAR_INIT(TEST_PHASE_PRESTART);
+    t->phase = TEST_PHASE_PRESTART;
     t->result = TEST_RESULT_PASS;
     t->ref.filename = STRING_INIT;
     t->ref.stencil_filename = STRING_INIT;
