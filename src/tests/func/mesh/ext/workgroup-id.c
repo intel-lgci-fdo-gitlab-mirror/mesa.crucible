@@ -93,6 +93,7 @@ test_define {
     .name = "func.mesh.ext.workgroup_id.mesh",
     .start = workgroup_id_mesh,
     .image_filename = "func.mesh.basic.ref.png",
+    .mesh_shader = true,
 };
 
 
@@ -186,4 +187,5 @@ test_define {
     .name = "func.mesh.ext.workgroup_id.task",
     .start = workgroup_id_task,
     .image_filename = "func.mesh.basic.ref.png",
+    .mesh_shader = true,
 };

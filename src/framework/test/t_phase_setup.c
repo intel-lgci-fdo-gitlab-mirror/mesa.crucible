@@ -27,6 +27,18 @@
 /* Maximum supported physical devs. */
 #define MAX_PHYSICAL_DEVS 32
 
+static void
+add_pnext(void *_head, void *_elem)
+{
+    VkBaseOutStructure *head = _head;
+    while (head->pNext != NULL)
+        head = head->pNext;
+
+    VkBaseOutStructure *elem = _elem;
+    head->pNext = elem;
+    elem->pNext = NULL;
+}
+
 static void *
 test_vk_alloc(void *pUserData, size_t size, size_t alignment,
               VkSystemAllocationScope scope)
@@ -587,31 +599,44 @@ t_setup_vulkan(void)
     pdf.robustBufferAccess = t->def->robust_buffer_access;
 
     VkPhysicalDeviceRobustness2FeaturesEXT pdr2f = {
-      .sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_ROBUSTNESS_2_FEATURES_EXT,
+        .sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_ROBUSTNESS_2_FEATURES_EXT,
+    };
+    VkPhysicalDeviceMeshShaderFeaturesEXT pdmsf = {
+        .sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_MESH_SHADER_FEATURES_EXT,
     };
     VkPhysicalDeviceFeatures2 pdf2 = {
       .sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_FEATURES_2,
-      .pNext = &pdr2f,
     };
+    add_pnext(&pdf2, &pdr2f);
+    add_pnext(&pdf2, &pdmsf);
     vkGetPhysicalDeviceFeatures2(t->vk.physical_dev, &pdf2);
 
     if (t->def->robust_image_access && !pdr2f.robustImageAccess2)
       t_skipf("Test requested robust image access, "
               "but implementation does not support robustImageAccess2");
 
+    if (t->def->mesh_shader && !pdmsf.meshShader) {
+        t_skipf("Test requested mesh shader, "
+                "but implementation does not support meshShader");
+    }
+
     pdr2f.robustImageAccess2 = pdr2f.robustImageAccess2 &&
                                t->def->robust_image_access;
 
-    res = vkCreateDevice(t->vk.physical_dev,
-        &(VkDeviceCreateInfo) {
-            .sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO,
-            .queueCreateInfoCount = t->vk.queue_family_count,
-            .pQueueCreateInfos = qci,
-            .enabledExtensionCount = t->vk.device_extension_count,
-            .ppEnabledExtensionNames = ext_names,
-            .pEnabledFeatures = &pdf,
-            .pNext = t->def->robust_image_access ? &pdr2f : NULL,
-        }, NULL, &t->vk.device);
+    VkDeviceCreateInfo device_info = {
+        .sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO,
+        .queueCreateInfoCount = t->vk.queue_family_count,
+        .pQueueCreateInfos = qci,
+        .enabledExtensionCount = t->vk.device_extension_count,
+        .ppEnabledExtensionNames = ext_names,
+        .pEnabledFeatures = &pdf,
+    };
+    if (t->def->robust_image_access)
+        add_pnext(&device_info, &pdr2f);
+    if (t->def->mesh_shader)
+        add_pnext(&device_info, &pdmsf);
+
+    res = vkCreateDevice(t->vk.physical_dev, &device_info, NULL, &t->vk.device);
     free(qci);
     free(ext_names);
     free(priorities);

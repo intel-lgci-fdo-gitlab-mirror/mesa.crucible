@@ -76,6 +76,7 @@ test_define {
     .name = "func.mesh.ext.outputs.per_vertex.basic",
     .start = outputs_per_vertex_basic,
     .image_filename = "func.mesh.basic.ref.png",
+    .mesh_shader = true,
 };
 
 
@@ -133,6 +134,7 @@ test_define {
     .name = "func.mesh.ext.outputs.per_vertex.block",
     .start = outputs_per_vertex_block,
     .image_filename = "func.mesh.basic.ref.png",
+    .mesh_shader = true,
 };
 
 
@@ -213,6 +215,7 @@ test_define {
     .name = "func.mesh.ext.outputs.per_primitive.basic",
     .start = outputs_per_primitive_basic,
     .image_filename = "func.mesh.basic.ref.png",
+    .mesh_shader = true,
 };
 
 
@@ -295,6 +298,7 @@ test_define {
     .name = "func.mesh.ext.outputs.per_primitive.block",
     .start = outputs_per_primitive_block,
     .image_filename = "func.mesh.basic.ref.png",
+    .mesh_shader = true,
 };
 
 
@@ -382,6 +386,7 @@ test_define {
     .name = "func.mesh.ext.outputs.per_primitive.unused",
     .start = outputs_per_primitive_unused,
     .image_filename = "func.mesh.basic.ref.png",
+    .mesh_shader = true,
 };
 
 static void
@@ -465,6 +470,7 @@ test_define {
     .name = "func.mesh.ext.outputs.per_primitive.some_unused",
     .start = outputs_per_primitive_some_unused,
     .image_filename = "func.mesh.basic.ref.png",
+    .mesh_shader = true,
 };
 
 static void
@@ -562,6 +568,7 @@ test_define {
     .name = "func.mesh.ext.outputs.per_vertex.block_compact_layout",
     .start = outputs_per_vertex_block_compact_layout,
     .image_filename = "func.mesh.basic.ref.png",
+    .mesh_shader = true,
 };
 
 static void
@@ -664,6 +671,7 @@ test_define {
     .name = "func.mesh.ext.outputs.per_vertex.block_compact_layout_flat",
     .start = outputs_per_vertex_block_compact_layout_flat,
     .image_filename = "func.mesh.basic.ref.png",
+    .mesh_shader = true,
 };
 
 static void
@@ -758,6 +766,7 @@ test_define {
     .name = "func.mesh.ext.outputs.per_primitive.block_compact_layout",
     .start = outputs_per_primitive_block_compact_layout,
     .image_filename = "func.mesh.basic.ref.png",
+    .mesh_shader = true,
 };
 
 static void
@@ -874,6 +883,7 @@ test_define {
     .name = "func.mesh.ext.outputs.per_primitive.indirect_array",
     .start = outputs_per_primitive_indirect_array,
     .image_filename = "func.mesh.basic.ref.png",
+    .mesh_shader = true,
 };
 
 static void
@@ -990,4 +1000,5 @@ test_define {
     .name = "func.mesh.ext.outputs.per_vertex.indirect_array",
     .start = outputs_per_vertex_indirect_array,
     .image_filename = "func.mesh.basic.ref.png",
+    .mesh_shader = true,
 };

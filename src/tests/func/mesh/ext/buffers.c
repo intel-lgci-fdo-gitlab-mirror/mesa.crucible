@@ -93,6 +93,7 @@ test_define {
     .name = "func.mesh.ext.buffers.mesh_ssbo_read",
     .start = buffers_mesh_ssbo_read,
     .image_filename = "func.mesh.basic.ref.png",
+    .mesh_shader = true,
 };
 
 
@@ -169,6 +170,7 @@ test_define {
     .name = "func.mesh.ext.buffers.mesh_ssbo_write",
     .start = buffers_mesh_ssbo_write,
     .image_filename = "func.mesh.basic.ref.png",
+    .mesh_shader = true,
 };
 
 
@@ -242,6 +244,7 @@ test_define {
     .name = "func.mesh.ext.buffers.mesh_ubo_read",
     .start = buffers_mesh_ubo_read,
     .image_filename = "func.mesh.basic.ref.png",
+    .mesh_shader = true,
 };
 
 
@@ -338,6 +341,7 @@ test_define {
     .name = "func.mesh.ext.buffers.task_ssbo_read",
     .start = buffers_task_ssbo_read,
     .image_filename = "func.mesh.basic.ref.png",
+    .mesh_shader = true,
 };
 
 
@@ -434,6 +438,7 @@ test_define {
     .name = "func.mesh.ext.buffers.task_ubo_read",
     .start = buffers_task_ubo_read,
     .image_filename = "func.mesh.basic.ref.png",
+    .mesh_shader = true,
 };
 
 
@@ -544,5 +549,5 @@ test_define {
     .name = "func.mesh.ext.buffers.task_ubo_read_ssbo_write",
     .start = buffers_task_ubo_read_ssbo_write,
     .image_filename = "func.mesh.basic.ref.png",
+    .mesh_shader = true,
 };
-

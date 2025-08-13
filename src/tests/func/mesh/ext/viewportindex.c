@@ -133,6 +133,7 @@ test_define {
     .name = "func.mesh.ext.viewport_index",
     .start = viewport_index,
     .image_filename = "func.mesh.viewport_index.ref.png",
+    .mesh_shader = true,
 };
 
 static void
@@ -206,6 +207,7 @@ test_define {
     .name = "func.mesh.ext.viewport_index.fs",
     .start = viewport_index_fs,
     .image_filename = "func.mesh.viewport_index.fs.ref.png",
+    .mesh_shader = true,
 };
 
 static void
@@ -328,6 +330,7 @@ test_define {
     .name = "func.mesh.ext.viewport_index.primitive_id.fs",
     .start = viewport_index_primitive_id_fs,
     .image_filename = "func.mesh.viewport_index.fs.ref.png",
+    .mesh_shader = true,
 };
 
 static void
@@ -473,6 +476,7 @@ test_define {
     .name = "func.mesh.ext.viewport_index.wg.1",
     .start = viewport_index_wg_1,
     .image_filename = "func.mesh.viewport_index.wg.ref.png",
+    .mesh_shader = true,
 };
 
 static void
@@ -540,6 +544,7 @@ test_define {
     .name = "func.mesh.ext.viewport_index.wg.32",
     .start = viewport_index_wg_32,
     .image_filename = "func.mesh.viewport_index.wg.ref.png",
+    .mesh_shader = true,
 };
 
 static void
@@ -633,6 +638,7 @@ test_define {
     .start = viewport_index_wg_gen,
     .image_filename = "func.mesh.viewport_index.wg.ref.png",
     .user_data = &(uint32_t){ 1 },
+    .mesh_shader = true,
 };
 
 test_define {
@@ -640,6 +646,7 @@ test_define {
     .start = viewport_index_wg_gen,
     .image_filename = "func.mesh.viewport_index.wg.ref.png",
     .user_data = &(uint32_t){ 2 },
+    .mesh_shader = true,
 };
 
 test_define {
@@ -647,6 +654,7 @@ test_define {
     .start = viewport_index_wg_gen,
     .image_filename = "func.mesh.viewport_index.wg.ref.png",
     .user_data = &(uint32_t){ 3 },
+    .mesh_shader = true,
 };
 
 
@@ -655,6 +663,7 @@ test_define {
     .start = viewport_index_wg_gen,
     .image_filename = "func.mesh.viewport_index.wg.ref.png",
     .user_data = &(uint32_t){ 7 },
+    .mesh_shader = true,
 };
 
 test_define {
@@ -662,6 +671,7 @@ test_define {
     .start = viewport_index_wg_gen,
     .image_filename = "func.mesh.viewport_index.wg.ref.png",
     .user_data = &(uint32_t){ 8 },
+    .mesh_shader = true,
 };
 
 test_define {
@@ -669,6 +679,7 @@ test_define {
     .start = viewport_index_wg_gen,
     .image_filename = "func.mesh.viewport_index.wg.ref.png",
     .user_data = &(uint32_t){ 11 },
+    .mesh_shader = true,
 };
 
 test_define {
@@ -676,6 +687,7 @@ test_define {
     .start = viewport_index_wg_gen,
     .image_filename = "func.mesh.viewport_index.wg.ref.png",
     .user_data = &(uint32_t){ 15 },
+    .mesh_shader = true,
 };
 
 test_define {
@@ -683,6 +695,7 @@ test_define {
     .start = viewport_index_wg_gen,
     .image_filename = "func.mesh.viewport_index.wg.ref.png",
     .user_data = &(uint32_t){ 16 },
+    .mesh_shader = true,
 };
 
 test_define {
@@ -690,6 +703,7 @@ test_define {
     .start = viewport_index_wg_gen,
     .image_filename = "func.mesh.viewport_index.wg.ref.png",
     .user_data = &(uint32_t){ 17 },
+    .mesh_shader = true,
 };
 
 test_define {
@@ -697,6 +711,7 @@ test_define {
     .start = viewport_index_wg_gen,
     .image_filename = "func.mesh.viewport_index.wg.ref.png",
     .user_data = &(uint32_t){ 27 },
+    .mesh_shader = true,
 };
 
 test_define {
@@ -704,6 +719,7 @@ test_define {
     .start = viewport_index_wg_gen,
     .image_filename = "func.mesh.viewport_index.wg.ref.png",
     .user_data = &(uint32_t){ 31 },
+    .mesh_shader = true,
 };
 
 test_define {
@@ -711,6 +727,7 @@ test_define {
     .start = viewport_index_wg_gen,
     .image_filename = "func.mesh.viewport_index.wg.ref.png",
     .user_data = &(uint32_t){ 32 },
+    .mesh_shader = true,
 };
 
 test_define {
@@ -718,6 +735,7 @@ test_define {
     .start = viewport_index_wg_gen,
     .image_filename = "func.mesh.viewport_index.wg.ref.png",
     .user_data = &(uint32_t){ 33 },
+    .mesh_shader = true,
 };
 
 test_define {
@@ -725,6 +743,7 @@ test_define {
     .start = viewport_index_wg_gen,
     .image_filename = "func.mesh.viewport_index.wg.ref.png",
     .user_data = &(uint32_t){ 63 },
+    .mesh_shader = true,
 };
 
 test_define {
@@ -732,6 +751,7 @@ test_define {
     .start = viewport_index_wg_gen,
     .image_filename = "func.mesh.viewport_index.wg.ref.png",
     .user_data = &(uint32_t){ 64 },
+    .mesh_shader = true,
 };
 
 test_define {
@@ -739,4 +759,5 @@ test_define {
     .start = viewport_index_wg_gen,
     .image_filename = "func.mesh.viewport_index.wg.ref.png",
     .user_data = &(uint32_t){ 65 },
+    .mesh_shader = true,
 };

@@ -93,6 +93,8 @@ struct test_def {
 
     const bool robust_image_access;
 
+    const bool mesh_shader;
+
     /// \brief Private data for the test framework.
     ///
     /// Test authors shouldn't touch this struct.

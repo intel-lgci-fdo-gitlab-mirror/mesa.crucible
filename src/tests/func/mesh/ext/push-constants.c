@@ -91,4 +91,5 @@ test_define {
     .name = "func.mesh.ext.push_constants.mesh_read",
     .start = push_constants_mesh_read,
     .image_filename = "func.mesh.basic.ref.png",
+    .mesh_shader = true,
 };
