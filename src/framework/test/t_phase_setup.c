@@ -306,31 +306,38 @@ t_setup_descriptor_pool(void)
     ASSERT_TEST_IN_SETUP_PHASE;
     GET_CURRENT_TEST(t);
 
-    VkDescriptorType desc_types[] = {
-        VK_DESCRIPTOR_TYPE_SAMPLER,
-        VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
-        VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE,
-        VK_DESCRIPTOR_TYPE_STORAGE_IMAGE,
-        VK_DESCRIPTOR_TYPE_UNIFORM_TEXEL_BUFFER,
-        VK_DESCRIPTOR_TYPE_STORAGE_TEXEL_BUFFER,
-        VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
-        VK_DESCRIPTOR_TYPE_STORAGE_BUFFER,
-        VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC,
-        VK_DESCRIPTOR_TYPE_STORAGE_BUFFER_DYNAMIC,
-        VK_DESCRIPTOR_TYPE_INPUT_ATTACHMENT,
-    };
+    VkDescriptorPoolSize pool_sizes[NUM_DESCRIPTOR_TYPES] = { 0 };
 
-    VkDescriptorPoolSize pool_sizes[ARRAY_LENGTH(desc_types)];
-    for (uint32_t i = 0; i < ARRAY_LENGTH(pool_sizes); i++) {
-        pool_sizes[i].type = desc_types[i];
-        pool_sizes[i].descriptorCount = 5;
+    bool is_default = true;
+    for (uint32_t i = 0; i < NUM_DESCRIPTOR_TYPES; i++) {
+        pool_sizes[i].type = i;
+        uint32_t num = t->def->descriptor_count[i];
+        if (num) {
+            pool_sizes[i].descriptorCount = num;
+            is_default = false;
+        }
     }
+
+    /* Tests that don't define the descriptor_count array expect a
+     * pool with 5 descriptors of each type
+     */
+    if (is_default) {
+        for (uint32_t i = 0; i < NUM_DESCRIPTOR_TYPES; i++) {
+            pool_sizes[i].descriptorCount = 5;
+        }
+    }
+
+    /* Tests that don't define descriptor_sets expect a pool with
+     * 8 descriptor sets
+     */
+    uint32_t max_sets =
+        t->def->descriptor_sets ? t->def->descriptor_sets : 8;
 
     const VkDescriptorPoolCreateInfo create_info = {
         .sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO,
         .pNext = NULL,
         .flags = VK_DESCRIPTOR_POOL_CREATE_FREE_DESCRIPTOR_SET_BIT,
-        .maxSets = 8,
+        .maxSets = max_sets,
         .poolSizeCount = ARRAY_LENGTH(pool_sizes),
         .pPoolSizes = pool_sizes
     };

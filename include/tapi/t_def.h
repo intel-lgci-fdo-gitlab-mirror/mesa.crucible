@@ -27,6 +27,8 @@
 #include "util/macros.h"
 #include "util/vk_wrapper.h"
 
+#define NUM_DESCRIPTOR_TYPES 11
+
 enum test_queue_setup {
     QUEUE_SETUP_GFX_AND_COMPUTE = 0, /* default if test does not specify */
     QUEUE_SETUP_GRAPHICS,
@@ -94,6 +96,18 @@ struct test_def {
     const bool robust_image_access;
 
     const bool mesh_shader;
+
+    /// \brief Number of each descriptor type required
+    ///
+    /// If the elements of this array are all zero, the default descriptor
+    /// pool size will be used (5 descriptors of each type)
+    const uint32_t descriptor_count[NUM_DESCRIPTOR_TYPES];
+
+    /// \brief Number of descriptor sets required
+    ///
+    /// If zero, the default number of descriptor sets will be used
+    /// (8 descriptor sets)
+    const uint32_t descriptor_sets;
 
     /// \brief Private data for the test framework.
     ///
