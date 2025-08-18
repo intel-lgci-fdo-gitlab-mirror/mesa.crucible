@@ -117,6 +117,7 @@ test_sources_with_spirv = [
   'func/ubo/robust-push-ubo.c',
   'stress/lots-of-surface-state.c',
   'func/uniform-subgroup.c',
+  'func/ubo/robust-push-ubo-full-range.c',
 ]
 
 if with_VK_EXT_mesh_shader

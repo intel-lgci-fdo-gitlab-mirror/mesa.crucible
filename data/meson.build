@@ -187,6 +187,7 @@ data_ref_files = [
   'func.push-constants.basic.ref.png',
   'func.renderpass.clear.color-render-area.ref.png',
   'func.tessellation.basic.ref.png',
+  'func.ubo.robust-push-ubo-full-range.ref.png',
   'grass-2014x1536.jpg',
   'mandrill-128x128.png',
   'mandrill-16384x32.png',
