@@ -49,6 +49,31 @@ test(void)
         .setLayoutCount = 1,
         .pSetLayouts = &set_layout);
 
+    VkRenderPass pass = qoCreateRenderPass(
+        t_device,
+        .attachmentCount = 1,
+        .pAttachments = (VkAttachmentDescription[]) {
+            {
+                QO_ATTACHMENT_DESCRIPTION_DEFAULTS,
+                .format = VK_FORMAT_R8G8B8A8_UNORM,
+                .loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR,
+            },
+        },
+        .subpassCount = 1,
+        .pSubpasses = (VkSubpassDescription[]) {
+            {
+                QO_SUBPASS_DESCRIPTION_DEFAULTS,
+                .colorAttachmentCount = 1,
+                .pColorAttachments = (VkAttachmentReference[]) {
+                    {
+                        .attachment = 0,
+                        .layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
+                    },
+                },
+                .preserveAttachmentCount = 0,
+            }
+        });
+
     VkPipeline pipeline;
     VkResult result = vkCreateGraphicsPipelines(t_device, t_pipeline_cache, 1,
         &(VkGraphicsPipelineCreateInfo) {
@@ -121,7 +146,7 @@ test(void)
                     .pName = "main",
                 },
             },
-            .renderPass = t_render_pass,
+            .renderPass = pass,
             .layout = pipeline_layout,
         }, NULL, &pipeline);
     t_assert(result == VK_SUCCESS);
