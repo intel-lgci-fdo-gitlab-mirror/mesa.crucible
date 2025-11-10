@@ -138,6 +138,8 @@ data_ref_files = [
   'func.draw-index16-restart.ref.png',
   'func.draw-index16.ref.png',
   'func.draw-index32-restart.ref.png',
+  'func.draw-indirect-aligned.ref.png',
+  'func.draw-indirect-unaligned.ref.png',
   'func.first.ref.png',
   'func.gs.basic.ref.png',
   'func.interleaved-cmd-buffers.ref.png',

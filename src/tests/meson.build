@@ -68,6 +68,7 @@ test_sources_with_spirv = [
   'func/depthstencil/stencil_triangles.c',
   'func/desc/dynamic.c',
   'func/draw-indexed.c',
+  'func/draw-indirect.c',
   'func/gs/basic.c',
   'func/first.c',
   'func/bind-points.c',
