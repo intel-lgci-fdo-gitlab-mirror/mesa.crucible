@@ -61,6 +61,7 @@ test_sources_with_spirv = [
   'bug/gitlab-12794.c',
   'bug/gitlab-12888.c',
   'bug/gitlab-12927.c',
+  'bug/gitlab-13149.c',
   'bug/gitlab-14054.c',
   'func/4-vertex-buffers.c',
   'func/depthstencil/basic.c',
