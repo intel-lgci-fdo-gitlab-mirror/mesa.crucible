@@ -300,12 +300,12 @@ test(void)
     );
 
     uint32_t spec[3] = {params->reduce, params->bit_size, params->func};
-    VkDeviceMemory mem = common_init(cs, 64 * 16, 3, spec);
+    VkDeviceMemory mem = common_init(cs, 64 * 4, 3, spec);
     dispatch_and_wait(1, 1, 1);
 
-    uint32_t *map = qoMapMemory(t_device, mem, 0, 64 * 16, 0);
+    uint32_t *map = qoMapMemory(t_device, mem, 0, 64 * 4, 0);
     for (unsigned i = 0; i < 64; i++)
-        t_assertf(map[i * 4] == 0, "invocation %u failed", i);
+        t_assertf(map[i] == 0, "invocation %u failed", i);
     t_pass();
 }
 
