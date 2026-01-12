@@ -360,24 +360,6 @@ create_command_buffer(struct test_context *ctx, int parity)
     qoBeginCommandBuffer(cmd_buffer,
         .flags = VK_COMMAND_BUFFER_USAGE_SIMULTANEOUS_USE_BIT);
 
-    vkCmdPipelineBarrier(cmd_buffer,
-                         VK_PIPELINE_STAGE_ALL_GRAPHICS_BIT,
-                         VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT,
-                         VK_DEPENDENCY_BY_REGION_BIT,
-                         0, NULL,
-                         1, &(VkBufferMemoryBarrier) {
-                            .sType = VK_STRUCTURE_TYPE_BUFFER_MEMORY_BARRIER,
-                            .srcAccessMask = 0,
-                            .dstAccessMask = VK_ACCESS_SHADER_READ_BIT |
-                                             VK_ACCESS_SHADER_WRITE_BIT,
-                            .srcQueueFamilyIndex = VK_QUEUE_FAMILY_EXTERNAL_KHR,
-                            .dstQueueFamilyIndex = 0,
-                            .buffer = ctx->buffer,
-                            .offset = 0,
-                            .size = VK_WHOLE_SIZE,
-                         },
-                         0, NULL);
-
     vkCmdBindPipeline(cmd_buffer, VK_PIPELINE_BIND_POINT_COMPUTE,
                       atom_pipeline);
 
@@ -399,7 +381,7 @@ create_command_buffer(struct test_context *ctx, int parity)
         vkCmdDispatch(cmd_buffer, 1, 1, 1);
 
         vkCmdPipelineBarrier(cmd_buffer,
-                             VK_PIPELINE_STAGE_ALL_GRAPHICS_BIT,
+                             VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT,
                              VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT,
                              VK_DEPENDENCY_BY_REGION_BIT,
                              0, NULL,
@@ -417,24 +399,6 @@ create_command_buffer(struct test_context *ctx, int parity)
                              },
                              0, NULL);
     }
-
-    vkCmdPipelineBarrier(cmd_buffer,
-                         VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT,
-                         VK_PIPELINE_STAGE_ALL_GRAPHICS_BIT,
-                         VK_DEPENDENCY_BY_REGION_BIT,
-                         0, NULL,
-                         1, &(VkBufferMemoryBarrier) {
-                            .sType = VK_STRUCTURE_TYPE_BUFFER_MEMORY_BARRIER,
-                            .srcAccessMask = VK_ACCESS_SHADER_READ_BIT |
-                                             VK_ACCESS_SHADER_WRITE_BIT,
-                            .dstAccessMask = 0,
-                            .srcQueueFamilyIndex = 0,
-                            .dstQueueFamilyIndex = VK_QUEUE_FAMILY_EXTERNAL_KHR,
-                            .buffer = ctx->buffer,
-                            .offset = 0,
-                            .size = VK_WHOLE_SIZE,
-                         },
-                         0, NULL);
 
     qoEndCommandBuffer(cmd_buffer);
 
