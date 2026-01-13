@@ -92,7 +92,7 @@ init_context(struct test_context *ctx, float priority,
                                  .usage = VK_BUFFER_USAGE_STORAGE_BUFFER_BIT);
 
     VkMemoryRequirements atomic_buffer_reqs =
-      qoGetBufferMemoryRequirements(t_device, ctx->atomic);
+      qoGetBufferMemoryRequirements(ctx->device, ctx->atomic);
 
     VkDeviceMemory atomic_mem =
       qoAllocMemoryFromRequirements(ctx->device, &atomic_buffer_reqs,
@@ -524,7 +524,7 @@ init_memory_contents(struct test_context *ctx,
                      });
 
     VkMemoryRequirements tmp_buffer_reqs =
-      qoGetBufferMemoryRequirements(t_device, tmp_buf);
+      qoGetBufferMemoryRequirements(ctx->device, tmp_buf);
 
     VkDeviceMemory tmp_mem =
       qoAllocMemoryFromRequirements(ctx->device, &tmp_buffer_reqs,
@@ -568,7 +568,7 @@ check_memory_contents(struct test_context *ctx,
                      });
 
     VkMemoryRequirements tmp_buffer_reqs =
-      qoGetBufferMemoryRequirements(t_device, tmp_buf);
+      qoGetBufferMemoryRequirements(ctx->device, tmp_buf);
 
     VkDeviceMemory tmp_mem =
       qoAllocMemoryFromRequirements(ctx->device, &tmp_buffer_reqs,
