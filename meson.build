@@ -57,6 +57,7 @@ prog_cp = find_program('cp')
 # Generator to create *-spirv.h.
 
 prog_glslang = find_program('glslangValidator')
+prog_spirv_as = find_program('spirv-as')
 
 glslang_version = run_command(prog_glslang, '--version', capture: true, check: true).stdout().split()[2].split(':')[1]
 message('glslangValidator version: ' + glslang_version)
@@ -71,8 +72,18 @@ endif
 c_to_spirv_h = generator(
   prog_python,
   output : '@BASENAME@-spirv.h',
-  arguments : [meson.project_source_root() + '/misc/glsl_scraper.py',
+  arguments : [meson.project_source_root() / 'misc/shader_scraper.py',
+               '--mode=glsl',
                '--with-glslang=' + prog_glslang.full_path(),
+               '-o', '@OUTPUT@', '@INPUT@'],
+)
+
+c_to_spvasm_h = generator(
+  prog_python,
+  output : '@BASENAME@-spvasm.h',
+  arguments : [meson.project_source_root() / 'misc/shader_scraper.py',
+               '--mode=spvasm',
+               '--with-spirv-as=' + prog_spirv_as.full_path(),
                '-o', '@OUTPUT@', '@INPUT@'],
 )
 

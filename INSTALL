@@ -4,6 +4,7 @@ How to Build
 External Dependencies
 ---------------------
 - glslang, from Khronos's glslang project (https://github.com/KhronosGroup/glslang)
+- SPIRV-Tools, for spirv-as (https://github.com/KhronosGroup/SPIRV-Tools)
 - AsciiDoc (http://asciidoc.org)
 - libxml2 (http://www.xmlsoft.org)
 - Python3

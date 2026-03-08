@@ -143,12 +143,15 @@ if with_VK_EXT_mesh_shader
   ]
 endif
 
+test_sources_with_spirv_asm = [
+]
+
 test_sources_with_gen = [
   'func/depthstencil/stencil_triangles.c',
   'func/miptree/miptree.c',
 ]
 
-# Check that with & without spirv sources don't intersect
+# Check that source lists don't intersect
 
 in_both_lists = false
 foreach a : test_sources_without_spirv
@@ -156,11 +159,28 @@ foreach a : test_sources_without_spirv
     if a == b
       warning('Test @0@ in both lists!'.format(a))
       in_both_lists = true
+      break
+    endif
+  endforeach
+  foreach b : test_sources_with_spirv_asm
+    if a == b
+      warning('Test @0@ in both lists!'.format(a))
+      in_both_lists = true
+      break
+    endif
+  endforeach
+endforeach
+foreach a : test_sources_with_glsl
+  foreach b : test_sources_with_spirv_asm
+    if a == b
+      warning('Test @0@ in both lists!'.format(a))
+      in_both_lists = true
+      break
     endif
   endforeach
 endforeach
 if in_both_lists
-  error('Found file in both with and without spirv lists!')
+  error('Found file in multiple test source lists!')
 endif
 
 # Process tests with generator. *_gen.py
@@ -178,5 +198,13 @@ test_sources += files(test_sources_with_gen)
 test_spirv_headers_from_glsl = c_to_spirv_h.process(test_sources_with_glsl, preserve_path_from : src_root)
 test_sources += test_spirv_headers_from_glsl
 
+# Process tests with SPIR-V assembly. Create *-spvasm.h.
+
+if test_sources_with_spirv_asm.length() > 0
+  test_spirv_headers_from_spirv_asm = c_to_spvasm_h.process(test_sources_with_spirv_asm, preserve_path_from : src_root)
+  test_sources += test_spirv_headers_from_spirv_asm
+endif
+
 test_sources += files(test_sources_with_glsl)
+test_sources += files(test_sources_with_spirv_asm)
 test_sources += files(test_sources_without_spirv)
