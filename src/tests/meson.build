@@ -63,6 +63,7 @@ test_sources_with_spirv = [
   'bug/gitlab-12927.c',
   'bug/gitlab-13149.c',
   'bug/gitlab-14054.c',
+  'bug/gitlab-15029.c',
   'func/4-vertex-buffers.c',
   'func/depthstencil/basic.c',
   'func/depthstencil/arrayed-clear.c',
