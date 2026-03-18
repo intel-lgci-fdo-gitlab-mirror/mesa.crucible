@@ -2,9 +2,7 @@
 
 import argparse
 import io
-import os
 import re
-import shutil
 import struct
 import subprocess
 import sys
@@ -16,7 +14,6 @@ class ShaderCompileError(RuntimeError):
         super(ShaderCompileError, self).__init__(*args)
 
 target_env_re = re.compile(r'QO_TARGET_ENV\s+(\S+)')
-version_re = re.compile(r'QO_VERSION\s+(\S+)')
 
 stage_to_glslang_stage = {
     'VERTEX': 'vert',
@@ -37,7 +34,7 @@ stage_to_glslang_stage = {
 
 class Shader:
     def __init__(self, stage):
-        self.glsl = None
+        self.source = None
         self.stream = io.StringIO()
         self.stage = stage
         self.dwords = None
@@ -47,34 +44,34 @@ class Shader:
         self.stream.write(s)
 
     def finish_text(self, start_line, end_line):
-        self.glsl = self.stream.getvalue()
+        self.source = self.stream.getvalue()
         self.stream = None
 
         # Handle the QO_EXTENSION macro
-        self.glsl = self.glsl.replace('QO_EXTENSION', '#extension')
+        self.source = self.source.replace('QO_EXTENSION', '#extension')
 
         # Handle the QO_DEFINE macro
-        self.glsl = self.glsl.replace('QO_DEFINE', '#define')
+        self.source = self.source.replace('QO_DEFINE', '#define')
 
-        m = target_env_re.search(self.glsl)
+        m = target_env_re.search(self.source)
         if m:
             self.target_env = m.group(1)
-        self.glsl = self.glsl.replace('QO_TARGET_ENV', '// --target-env')
+        self.source = self.source.replace('QO_TARGET_ENV', '// --target-env')
 
-        if self.glsl.find('QO_VERSION') != -1:
-            self.glsl = self.glsl.replace('QO_VERSION', '#version')
+        if self.source.find('QO_VERSION') != -1:
+            self.source = self.source.replace('QO_VERSION', '#version')
         else:
-            self.glsl = "#version 450\n" + self.glsl
+            self.source = "#version 450\n" + self.source
 
         self.start_line = start_line
         self.end_line = end_line
 
-    def __run_glslang(self, extra_args=[]):
+    def _run_glslang(self, extra_args=[]):
         stage = stage_to_glslang_stage[self.stage]
         stage_flags = ['-S', stage]
 
         in_file = tempfile.NamedTemporaryFile(suffix='.'+stage)
-        src = self.glsl.encode('utf-8')
+        src = self.source.encode('utf-8')
         in_file.write(src)
         in_file.flush()
         out_file = tempfile.NamedTemporaryFile(suffix='.spirv')
@@ -93,7 +90,7 @@ class Shader:
                 # Unfortunately, glslang dumps errors to standard out.
                 # However, since we don't really want to count on that,
                 # we'll grab the output of both
-                message = out.decode('utf-8') + '\n' + err.decode('utf-8') + '\nGLSL:\n' + self.glsl
+                message = out.decode('utf-8') + '\n' + err.decode('utf-8') + '\nGLSL:\n' + self.source
                 raise ShaderCompileError(message.strip())
 
             out_file.seek(0)
@@ -110,20 +107,20 @@ class Shader:
                 assert len(dword_str) == 4
                 yield struct.unpack('I', dword_str)[0]
 
-        (spirv, assembly) = self.__run_glslang()
+        (spirv, assembly) = self._run_glslang()
         self.dwords = list(dwords(io.BytesIO(spirv)))
         self.assembly = str(assembly, 'utf-8')
 
-    def _dump_glsl_code(self, f):
-        # Dump GLSL code for reference.  Use // instead of /* */
-        # comments so we don't need to escape the GLSL code.
+    def _dump_source_code(self, f):
+        # Dump shader source for reference.  Use // instead of /* */
+        # comments so we don't need to escape the shader source.
         # We also ask the compiler to not complain about multi-line comments
-        # that are created if a line of the GLSL ends in "\"
+        # that are created if a line of the source ends in "\"
         f.write('#pragma GCC diagnostic push //"warning: multi-line comment"\n')
         f.write('#pragma GCC diagnostic ignored "-Wcomment"\n')
-        f.write('// GLSL code:\n')
+        f.write('// Source code:\n')
         f.write('//')
-        for line in self.glsl.splitlines():
+        for line in self.source.splitlines():
             f.write('\n// {0}'.format(line))
         f.write('\n\n')
         f.write('#pragma GCC diagnostic pop\n')
@@ -148,7 +145,7 @@ class Shader:
         f.write('\n\n')
         var_prefix = '__qonos_shader{0}'.format(self.end_line)
 
-        self._dump_glsl_code(f)
+        self._dump_source_code(f)
         self._dump_spirv_code(f, var_prefix + '_spir_v_src')
 
         f.write(dedent("""\
@@ -175,8 +172,6 @@ token_exp = re.compile(r'(qoShaderModuleCreateInfoGLSL|qoCreateShaderModuleGLSL|
 class Parser:
     def __init__(self, f):
         self.infile = f
-        self.paren_depth = 0
-        self.shader = None
         self.line_number = 1
         self.shaders = []
 

@@ -49,7 +49,7 @@ test_sources_without_spirv = [
   'func/sync/semaphore.c',
 ]
 
-test_sources_with_spirv = [
+test_sources_with_glsl = [
   'bench/multiview.c',
   'bench/ssbo-atomic.c',
   'bug/104809.c',
@@ -128,7 +128,7 @@ test_sources_with_spirv = [
 ]
 
 if with_VK_EXT_mesh_shader
-  test_sources_with_spirv += [
+  test_sources_with_glsl += [
     'func/mesh/ext/basic.c',
     'func/mesh/ext/buffers.c',
     'func/mesh/ext/clipculldistance.c',
@@ -152,7 +152,7 @@ test_sources_with_gen = [
 
 in_both_lists = false
 foreach a : test_sources_without_spirv
-  foreach b : test_sources_with_spirv
+  foreach b : test_sources_with_glsl
     if a == b
       warning('Test @0@ in both lists!'.format(a))
       in_both_lists = true
@@ -175,9 +175,8 @@ test_sources += files(test_sources_with_gen)
 
 # Process tests with spirv. Create *-spirv.h.
 
-foreach a : test_sources_with_spirv
-  test_sources += c_to_spirv_h.process(a, preserve_path_from : src_root)
-endforeach
+test_spirv_headers_from_glsl = c_to_spirv_h.process(test_sources_with_glsl, preserve_path_from : src_root)
+test_sources += test_spirv_headers_from_glsl
 
-test_sources += files(test_sources_with_spirv)
+test_sources += files(test_sources_with_glsl)
 test_sources += files(test_sources_without_spirv)
