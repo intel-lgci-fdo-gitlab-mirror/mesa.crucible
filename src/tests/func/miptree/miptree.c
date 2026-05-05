@@ -384,6 +384,7 @@ miptree_calc_buffer_size(void)
     }
 
     if (p->upload_method == MIPTREE_UPLOAD_METHOD_COPY_FROM_LINEAR_IMAGE ||
+        p->upload_method == MIPTREE_UPLOAD_METHOD_COPY_WITH_DRAW ||
         p->download_method == MIPTREE_DOWNLOAD_METHOD_COPY_TO_LINEAR_IMAGE) {
         need_img_size = true;
     }
@@ -406,7 +407,8 @@ miptree_calc_buffer_size(void)
                 .samples = 1,
                 .tiling = VK_IMAGE_TILING_LINEAR,
                 .initialLayout = VK_IMAGE_LAYOUT_PREINITIALIZED,
-                .usage = VK_IMAGE_USAGE_TRANSFER_SRC_BIT
+                .usage = VK_IMAGE_USAGE_TRANSFER_SRC_BIT |
+                         VK_IMAGE_USAGE_SAMPLED_BIT
             };
 
             can_create_image(VK_IMAGE_TYPE_2D, VK_IMAGE_TILING_LINEAR,
