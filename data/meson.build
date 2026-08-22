@@ -33,9 +33,7 @@ grass_2048x1024 = custom_target(
 data_outputs += grass_2048x1024
 
 gen_sizes = [
-  '2048x1024', '1024x1024', '1024x512', '512x512', '512x256', '256x256',
-  '256x128', '128x128', '128x64', '64x64', '64x32', '32x32', '32x16', '16x16',
-  '16x8', '8x8', '8x4', '4x4', '4x2', '2x2', '2x1', '1x1',
+  '1024x1024', '1024x512', '512x512', '512x256',
 ]
 
 foreach s : gen_sizes
@@ -142,20 +140,14 @@ data_ref_files = [
   'func.tessellation.basic.ref.png',
   'func.ubo.robust-push-ubo-full-range.ref.png',
   'grass-2014x1536.jpg',
-  'mandrill-128x128.png',
   'mandrill-16384x32.png',
   'mandrill-16x16.png',
   'mandrill-16x8192.png',
-  'mandrill-1x1.png',
   'mandrill-256x256.png',
-  'mandrill-2x2.png',
   'mandrill-32x16384.png',
   'mandrill-32x32.png',
-  'mandrill-4x4.png',
   'mandrill-512x512.png',
-  'mandrill-64x64.png',
   'mandrill-8192x16.png',
-  'mandrill-8x8.png',
   'mandrill-dxt5-512x512.ktx',
   'pink-leaves-3264x2448.jpg',
 ]
