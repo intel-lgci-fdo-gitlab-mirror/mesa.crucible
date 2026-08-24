@@ -18,57 +18,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-gen_image = [prog_python, src_root + '/misc/gen_image']
-
 data_outputs = []
-
-dst = 'grass-2048x1024.jpg'
-grass_2048x1024 = custom_target(
-  dst,
-  input : 'grass-2014x1536.jpg',
-  output : dst,
-  command : gen_image + ['crop', '@INPUT@', '@OUTPUT@'],
-)
-
-data_outputs += grass_2048x1024
-
-gen_sizes = [
-  '1024x1024', '1024x512', '512x512', '512x256',
-]
-
-foreach s : gen_sizes
-  dst = 'grass-grayscale-' + s + '.png'
-  img = custom_target(
-    dst,
-    input : grass_2048x1024,
-    output : dst,
-    command : gen_image + ['scale', '@INPUT@', '@OUTPUT@'],
-  )
-
-  data_outputs += img
-endforeach
-
-dst = 'pink-leaves-2048x1024.jpg'
-pink_leaves_2048x1024 = custom_target(
-  dst,
-  input : 'pink-leaves-3264x2448.jpg',
-  output : dst,
-  command : gen_image + ['crop', '@INPUT@', '@OUTPUT@'],
-)
-
-data_outputs += pink_leaves_2048x1024
-
-foreach s : gen_sizes
-  dst = 'pink-leaves-grayscale-' + s + '.png'
-  img = custom_target(
-    dst,
-    input : pink_leaves_2048x1024,
-    output : dst,
-    command : gen_image + ['scale', '@INPUT@', '@OUTPUT@'],
-  )
-
-  data_outputs += img
-endforeach
 
 data_ref_files = [
   '32x32-green.ref.png',
@@ -139,7 +89,10 @@ data_ref_files = [
   'func.renderpass.clear.color-render-area.ref.png',
   'func.tessellation.basic.ref.png',
   'func.ubo.robust-push-ubo-full-range.ref.png',
-  'grass-2014x1536.jpg',
+  'grass-grayscale-1024x1024.png',
+  'grass-grayscale-1024x512.png',
+  'grass-grayscale-512x256.png',
+  'grass-grayscale-512x512.png',
   'mandrill-16384x32.png',
   'mandrill-16x16.png',
   'mandrill-16x8192.png',
@@ -149,7 +102,10 @@ data_ref_files = [
   'mandrill-512x512.png',
   'mandrill-8192x16.png',
   'mandrill-dxt5-512x512.ktx',
-  'pink-leaves-3264x2448.jpg',
+  'pink-leaves-grayscale-1024x1024.png',
+  'pink-leaves-grayscale-1024x512.png',
+  'pink-leaves-grayscale-512x256.png',
+  'pink-leaves-grayscale-512x512.png',
 ]
 
 foreach a : data_ref_files
