@@ -24,6 +24,7 @@ test_sources_without_spirv = [
   'bug/gitlab-4037.c',
   'bug/gitlab-7471.c',
   'bug/gitlab-15578.c',
+  'bug/regression-f33b98ff.c',
   'bench/copy-buffer.c',
   'bench/descriptor-pool-reset.c',
   'bench/fill-buffer.c',
