@@ -66,6 +66,7 @@ test_sources_with_glsl = [
   'bug/gitlab-13149.c',
   'bug/gitlab-14054.c',
   'bug/gitlab-15029.c',
+  'bug/gitlab-16722.c',
   'func/4-vertex-buffers.c',
   'func/depthstencil/basic.c',
   'func/depthstencil/arrayed-clear.c',
