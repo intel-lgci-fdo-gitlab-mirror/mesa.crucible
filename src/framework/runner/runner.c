@@ -44,7 +44,6 @@
 #include "dispatcher.h"
 #include "runner.h"
 
-static uint32_t runner_num_tests;
 static bool runner_is_init = false;
 runner_opts_t runner_opts = {0};
 
@@ -122,7 +121,7 @@ runner_run_tests(void)
 {
     ASSERT_RUNNER_IS_INIT;
 
-    return dispatcher_run(runner_num_tests);
+    return dispatcher_run();
 }
 
 static bool
@@ -230,10 +229,8 @@ runner_enable_matching_tests(const cru_cstr_vec_t *testname_globs)
             }
         }
 
-        if (enable) {
+        if (enable)
             def->priv.enable = true;
-            ++runner_num_tests;
-        }
     }
 
     cru_vec_foreach(split_glob, &split_globs) {

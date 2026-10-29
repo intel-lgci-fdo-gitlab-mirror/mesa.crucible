@@ -374,9 +374,8 @@ dispatcher_get_queue_range(const test_def_t *def, uint32_t *start, uint32_t *end
 }
 
 bool
-dispatcher_run(uint32_t num_tests)
+dispatcher_run(void)
 {
-    dispatcher.num_tests = num_tests;
     dispatcher.max_dispatched_tests =
         CLAMP(runner_opts.jobs, 1, ARRAY_LENGTH(dispatcher.workers));
     dispatcher.test_case_timeout_ns = 1000000000ull * runner_opts.timeout_s;
@@ -388,6 +387,18 @@ dispatcher_run(uint32_t num_tests)
     dispatcher_gather_vulkan_info();
     if (dispatcher.goto_next_phase)
         return false;
+
+    // Count expected results, including each queue used by unpinned tests.
+    dispatcher.num_tests = 0;
+    const test_def_t *def;
+    cru_foreach_test_def(def) {
+        if (!def->priv.enable)
+            continue;
+
+        uint32_t queue_start, queue_end;
+        dispatcher_get_queue_range(def, &queue_start, &queue_end);
+        dispatcher.num_tests += queue_end - queue_start;
+    }
 
     if (!junit_init())
         return false;
