@@ -361,6 +361,18 @@ junit_finish(void)
     return rc;
 }
 
+static void
+dispatcher_get_queue_range(const test_def_t *def, uint32_t *start, uint32_t *end)
+{
+    if (def->priv.queue_num == NO_QUEUE_NUM_PREF) {
+        *start = 0;
+        *end = dispatcher.num_vulkan_queues;
+    } else {
+        *start = def->priv.queue_num;
+        *end = def->priv.queue_num + 1;
+    }
+}
+
 bool
 dispatcher_run(uint32_t num_tests)
 {
@@ -531,13 +543,7 @@ dispatcher_dispatch_loop_no_fork(void)
 
     cru_foreach_test_def(def) {
         uint32_t queue_start, queue_end;
-        if (def->priv.queue_num == NO_QUEUE_NUM_PREF) {
-            queue_start = 0;
-            queue_end = dispatcher.num_vulkan_queues;
-        } else {
-            queue_start = def->priv.queue_num;
-            queue_end = def->priv.queue_num + 1;
-        }
+        dispatcher_get_queue_range(def, &queue_start, &queue_end);
 
         for (uint32_t qi = queue_start; qi < queue_end; qi++) {
             test_result_t result;
@@ -571,13 +577,7 @@ dispatcher_dispatch_loop_with_fork(void)
 
     cru_foreach_test_def(def) {
         uint32_t queue_start, queue_end;
-        if (def->priv.queue_num == NO_QUEUE_NUM_PREF) {
-            queue_start = 0;
-            queue_end = dispatcher.num_vulkan_queues;
-        } else {
-            queue_start = def->priv.queue_num;
-            queue_end = def->priv.queue_num + 1;
-        }
+        dispatcher_get_queue_range(def, &queue_start, &queue_end);
 
         for (uint32_t qi = queue_start; qi < queue_end; qi++) {
             if (!def->priv.enable)
