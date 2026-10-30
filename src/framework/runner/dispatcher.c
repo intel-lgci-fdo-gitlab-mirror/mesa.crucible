@@ -79,8 +79,11 @@ struct worker {
 
     struct {
         uint32_t len;
-        const test_def_t *data[256];
-        uint64_t timeout[256];
+        struct {
+            const test_def_t *def;
+            uint32_t queue_num;
+            uint64_t timeout;
+        } data[256];
     } tests;
 
     worker_pipe_t dispatch_pipe;
@@ -176,9 +179,12 @@ static void dispatcher_handle_sigint(int sig);
 static void dispatcher_yield_to_sigint(void);
 
 static bool worker_is_open(const worker_t *worker);
-static int32_t worker_find_test(worker_t *worker, const test_def_t *def);
-static bool worker_insert_test(worker_t *worker, const test_def_t *def);
-static void worker_rm_test(worker_t *worker, const test_def_t *def);
+static int32_t worker_find_test(worker_t *worker, const test_def_t *def,
+                                uint32_t queue_num);
+static bool worker_insert_test(worker_t *worker, const test_def_t *def,
+                               uint32_t queue_num);
+static void worker_rm_test(worker_t *worker, const test_def_t *def,
+                           uint32_t queue_num);
 
 static bool worker_start_test(worker_t *worker, const test_def_t *def,
                               uint32_t queue_num);
@@ -805,8 +811,9 @@ dispatcher_cleanup_dead_worker(worker_t *worker)
 
     // Any remaining tests owned by the worker are lost.
     for (uint32_t i = 0; i < worker->tests.len; ++i) {
-        const test_def_t *def = worker->tests.data[i];
-        dispatcher_report_result(def, 0, worker->pid, TEST_RESULT_LOST);
+        dispatcher_report_result(worker->tests.data[i].def,
+                                 worker->tests.data[i].queue_num,
+                                 worker->pid, TEST_RESULT_LOST);
     }
 
     assert(dispatcher.cur_dispatched_tests >= worker->tests.len);
@@ -856,7 +863,7 @@ dispatcher_check_timeout()
     uint64_t timenow = gettime_ns();
     dispatcher_for_each_worker_slot(worker) {
         for (int i = 0; i < worker->tests.len; i++) {
-            if (timenow > worker->tests.timeout[i]) {
+            if (timenow > worker->tests.data[i].timeout) {
                 err = kill(worker->pid, SIGINT);
                 if (err) {
                     loge("runner failed to kill child process %d", worker->pid);
@@ -1157,10 +1164,11 @@ worker_is_open(const worker_t *worker)
 }
 
 static int32_t
-worker_find_test(worker_t *worker, const test_def_t *def)
+worker_find_test(worker_t *worker, const test_def_t *def, uint32_t queue_num)
 {
     for (uint32_t i = 0; i < worker->tests.len; ++i) {
-        if (worker->tests.data[i] == def) {
+        if (worker->tests.data[i].def == def &&
+            worker->tests.data[i].queue_num == queue_num) {
             return i;
         }
     }
@@ -1169,7 +1177,7 @@ worker_find_test(worker_t *worker, const test_def_t *def)
 }
 
 static bool
-worker_insert_test(worker_t *worker, const test_def_t *def)
+worker_insert_test(worker_t *worker, const test_def_t *def, uint32_t queue_num)
 {
     if (worker->is_dead)
         return false;
@@ -1178,8 +1186,9 @@ worker_insert_test(worker_t *worker, const test_def_t *def)
         return false;
 
     size_t test_idx = worker->tests.len++;
-    worker->tests.data[test_idx] = def;
-    worker->tests.timeout[test_idx] =
+    worker->tests.data[test_idx].def = def;
+    worker->tests.data[test_idx].queue_num = queue_num;
+    worker->tests.data[test_idx].timeout =
         dispatcher.test_case_timeout_ns ?
         gettime_ns() + dispatcher.test_case_timeout_ns :
         UINT64_MAX;
@@ -1189,11 +1198,11 @@ worker_insert_test(worker_t *worker, const test_def_t *def)
 }
 
 static void
-worker_rm_test(worker_t *worker, const test_def_t *def)
+worker_rm_test(worker_t *worker, const test_def_t *def, uint32_t queue_num)
 {
     int32_t i;
 
-    i = worker_find_test(worker, def);
+    i = worker_find_test(worker, def, queue_num);
     if (i < 0) {
         loge("worker cannot remove test it doesn't own");
         return;
@@ -1227,13 +1236,13 @@ worker_start_test(worker_t *worker, const test_def_t *def,
     if (dispatcher.cur_dispatched_tests >= dispatcher.max_dispatched_tests)
         return false;
 
-    if (!worker_insert_test(worker, def))
+    if (!worker_insert_test(worker, def, queue_num))
         return false;
 
-    log_tag("start", worker->pid, "%s.q%d", def->name, 0);
+    log_tag("start", worker->pid, "%s.q%d", def->name, queue_num);
 
     if (!dispatcher_send_packet(worker, &pk)) {
-        worker_rm_test(worker, def);
+        worker_rm_test(worker, def, queue_num);
         return false;
     }
 
@@ -1280,7 +1289,7 @@ worker_drain_result_pipe(worker_t *worker)
         if (read(worker->result_pipe.read_fd, &pk, sizeof(pk)) != sizeof(pk))
             return;
 
-        worker_rm_test(worker, pk.test_def);
+        worker_rm_test(worker, pk.test_def, pk.queue_num);
         dispatcher_report_result(pk.test_def, pk.queue_num, worker->pid,
                                  pk.result);
     }
