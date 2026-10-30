@@ -463,7 +463,8 @@ dispatcher_gather_vulkan_info(void)
     uint32_t num_vulkan_queues;
 
     if (runner_opts.no_fork) {
-        if (!runner_get_vulkan_queue_count(&dispatcher.num_vulkan_queues))
+        if (!runner_get_vulkan_queue_count(runner_opts.device_id,
+                                          &dispatcher.num_vulkan_queues))
             dispatcher.goto_next_phase = true;
         return;
     }
@@ -485,7 +486,8 @@ dispatcher_gather_vulkan_info(void)
 
         // Read the number of queues and send it through the pipe
         worker_pipe_become_writer(&pipe);
-        if (!runner_get_vulkan_queue_count(&num_vulkan_queues)) {
+        if (!runner_get_vulkan_queue_count(runner_opts.device_id,
+                                          &num_vulkan_queues)) {
             exit(EXIT_FAILURE);
         } else {
             if (write(pipe.write_fd, &num_vulkan_queues,

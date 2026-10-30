@@ -29,9 +29,9 @@
 #include "util/vk_wrapper.h"
 
 bool
-runner_get_vulkan_queue_count(uint32_t *count)
+runner_get_vulkan_queue_count(uint32_t device_id, uint32_t *count)
 {
-    if (count == NULL)
+    if (device_id == 0 || count == NULL)
         return false;
 
     VkResult res;
@@ -84,18 +84,28 @@ runner_get_vulkan_queue_count(uint32_t *count)
 
     uint32_t phy_dev_count = 0;
     res = vkEnumeratePhysicalDevices(instance, &phy_dev_count, NULL);
-    if (res != VK_SUCCESS || phy_dev_count == 0) {
+    if (res != VK_SUCCESS || device_id > phy_dev_count) {
         vkDestroyInstance(instance, NULL);
         return false;
     }
 
-    VkPhysicalDevice phy_dev;
-    phy_dev_count = 1;
-    res = vkEnumeratePhysicalDevices(instance, &phy_dev_count, &phy_dev);
-    if ((res != VK_SUCCESS && res != VK_INCOMPLETE) || phy_dev_count != 1) {
+    VkPhysicalDevice *phy_devs = malloc(phy_dev_count * sizeof(*phy_devs));
+    if (phy_devs == NULL) {
         vkDestroyInstance(instance, NULL);
         return false;
     }
+
+    res = vkEnumeratePhysicalDevices(instance, &phy_dev_count, phy_devs);
+    if ((res != VK_SUCCESS && res != VK_INCOMPLETE) ||
+        device_id > phy_dev_count) {
+        free(phy_devs);
+        vkDestroyInstance(instance, NULL);
+        return false;
+    }
+
+    // Device IDs are 1-based, as in test setup.
+    VkPhysicalDevice phy_dev = phy_devs[device_id - 1];
+    free(phy_devs);
 
     uint32_t queue_family_count;
     vkGetPhysicalDeviceQueueFamilyProperties(phy_dev,

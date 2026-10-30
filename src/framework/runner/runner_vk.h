@@ -24,4 +24,4 @@
 #include <stdbool.h>
 #include <stdint.h>
 
-bool runner_get_vulkan_queue_count(uint32_t *count);
+bool runner_get_vulkan_queue_count(uint32_t device_id, uint32_t *count);
