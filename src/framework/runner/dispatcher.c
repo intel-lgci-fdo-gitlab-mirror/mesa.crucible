@@ -1206,7 +1206,7 @@ worker_rm_test(worker_t *worker, const test_def_t *def)
     --dispatcher.cur_dispatched_tests;
 
     memmove(worker->tests.data + i, worker->tests.data + i + 1,
-            worker->tests.len);
+            (worker->tests.len - i) * sizeof(worker->tests.data[0]));
 }
 
 static bool
