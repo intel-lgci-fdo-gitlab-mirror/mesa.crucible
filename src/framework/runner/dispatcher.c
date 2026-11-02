@@ -254,7 +254,7 @@ junit_init(void)
     }
 
     xmlDocPtr doc = xmlNewDoc(u("1.0"));
-    doc->encoding = u(strdup("UTF-8"));
+    doc->encoding = xmlStrdup(u("UTF-8"));
 
     xmlNodePtr root_node = xmlNewNode(NULL, u("testsuites"));
     xmlDocSetRootElement(doc, root_node);
