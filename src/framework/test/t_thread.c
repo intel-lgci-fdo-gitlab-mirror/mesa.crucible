@@ -19,6 +19,8 @@
 // FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
 // IN THE SOFTWARE.
 
+#include <sched.h>
+
 #include "test.h"
 #include "t_phases.h"
 #include "t_thread.h"
@@ -161,7 +163,7 @@ t_thread_yield(void)
         t_thread_release();
     }
 
-    pthread_yield();
+    sched_yield();
 }
 
 void
