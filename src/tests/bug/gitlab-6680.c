@@ -209,7 +209,6 @@ test_gitlab_6680(void)
 
     {
         float *t_mapf = qoMapMemory(t_device, t_mem, 0, buffer_size, 0);
-        uint32_t *t_map32 = (uint32_t *)t_mapf;
         for (uint32_t i = 0; i < buffer_size / sizeof(float); i++)
             t_assert(t_mapf[i] == i);
     }
