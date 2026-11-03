@@ -425,6 +425,10 @@ VULKAN_HPP_EXPORT namespace VULKAN_HPP_NAMESPACE
             PFN_vkGetPhysicalDeviceUbmPresentationSupportSEC( vkGetInstanceProcAddr( instance, "vkGetPhysicalDeviceUbmPresentationSupportSEC" ) );
 #  endif /*VK_USE_PLATFORM_UBM_SEC*/
 
+          //=== VK_NV_internal_handle ===
+          vkGetPhysicalDeviceInternalHandleNV =
+            PFN_vkGetPhysicalDeviceInternalHandleNV( vkGetInstanceProcAddr( instance, "vkGetPhysicalDeviceInternalHandleNV" ) );
+
           vkGetDeviceProcAddr = PFN_vkGetDeviceProcAddr( vkGetInstanceProcAddr( instance, "vkGetDeviceProcAddr" ) );
         }
 
@@ -748,6 +752,9 @@ VULKAN_HPP_EXPORT namespace VULKAN_HPP_NAMESPACE
         PFN_dummy vkCreateUbmSurfaceSEC_placeholder                        = 0;
         PFN_dummy vkGetPhysicalDeviceUbmPresentationSupportSEC_placeholder = 0;
 #  endif /*VK_USE_PLATFORM_UBM_SEC*/
+
+        //=== VK_NV_internal_handle ===
+        PFN_vkGetPhysicalDeviceInternalHandleNV vkGetPhysicalDeviceInternalHandleNV = 0;
 
         PFN_vkGetDeviceProcAddr vkGetDeviceProcAddr = 0;
       };
@@ -2089,6 +2096,11 @@ VULKAN_HPP_EXPORT namespace VULKAN_HPP_NAMESPACE
           //=== VK_NV_compute_occupancy_priority ===
           vkCmdSetComputeOccupancyPriorityNV = PFN_vkCmdSetComputeOccupancyPriorityNV( vkGetDeviceProcAddr( device, "vkCmdSetComputeOccupancyPriorityNV" ) );
 
+          //=== VK_NV_internal_handle ===
+          vkGetDeviceInternalHandleNV        = PFN_vkGetDeviceInternalHandleNV( vkGetDeviceProcAddr( device, "vkGetDeviceInternalHandleNV" ) );
+          vkGetQueueInternalHandleNV         = PFN_vkGetQueueInternalHandleNV( vkGetDeviceProcAddr( device, "vkGetQueueInternalHandleNV" ) );
+          vkGetCommandBufferInternalHandleNV = PFN_vkGetCommandBufferInternalHandleNV( vkGetDeviceProcAddr( device, "vkGetCommandBufferInternalHandleNV" ) );
+
           //=== VK_EXT_primitive_restart_index ===
           vkCmdSetPrimitiveRestartIndexEXT = PFN_vkCmdSetPrimitiveRestartIndexEXT( vkGetDeviceProcAddr( device, "vkCmdSetPrimitiveRestartIndexEXT" ) );
         }
@@ -3192,6 +3204,11 @@ VULKAN_HPP_EXPORT namespace VULKAN_HPP_NAMESPACE
 
         //=== VK_NV_compute_occupancy_priority ===
         PFN_vkCmdSetComputeOccupancyPriorityNV vkCmdSetComputeOccupancyPriorityNV = 0;
+
+        //=== VK_NV_internal_handle ===
+        PFN_vkGetDeviceInternalHandleNV        vkGetDeviceInternalHandleNV        = 0;
+        PFN_vkGetQueueInternalHandleNV         vkGetQueueInternalHandleNV         = 0;
+        PFN_vkGetCommandBufferInternalHandleNV vkGetCommandBufferInternalHandleNV = 0;
 
         //=== VK_EXT_primitive_restart_index ===
         PFN_vkCmdSetPrimitiveRestartIndexEXT vkCmdSetPrimitiveRestartIndexEXT = 0;
@@ -4438,6 +4455,12 @@ VULKAN_HPP_EXPORT namespace VULKAN_HPP_NAMESPACE
       // https://registry.khronos.org/vulkan/specs/latest/man/html/vkGetPhysicalDeviceUbmPresentationSupportSEC.html
       VULKAN_HPP_NODISCARD std::pair<Bool32, struct ubm_device> getUbmPresentationSupportSEC( uint32_t queueFamilyIndex ) const VULKAN_HPP_NOEXCEPT;
 #  endif /*VK_USE_PLATFORM_UBM_SEC*/
+
+      //=== VK_NV_internal_handle ===
+
+      // wrapper function for command vkGetPhysicalDeviceInternalHandleNV, see
+      // https://registry.khronos.org/vulkan/specs/latest/man/html/vkGetPhysicalDeviceInternalHandleNV.html
+      VULKAN_HPP_NODISCARD InternalHandleNV getInternalHandleNV() const VULKAN_HPP_NOEXCEPT;
 
     private:
       VULKAN_HPP_NAMESPACE::PhysicalDevice m_physicalDevice = {};
@@ -6121,6 +6144,12 @@ VULKAN_HPP_EXPORT namespace VULKAN_HPP_NAMESPACE
         createShaderInstrumentationARM( ShaderInstrumentationCreateInfoARM const & createInfo,
                                         Optional<AllocationCallbacks const>        allocator = nullptr ) const VULKAN_HPP_NOEXCEPT_WHEN_NO_EXCEPTIONS;
 
+      //=== VK_NV_internal_handle ===
+
+      // wrapper function for command vkGetDeviceInternalHandleNV, see
+      // https://registry.khronos.org/vulkan/specs/latest/man/html/vkGetDeviceInternalHandleNV.html
+      VULKAN_HPP_NODISCARD InternalHandleNV getInternalHandleNV() const VULKAN_HPP_NOEXCEPT;
+
     private:
       VULKAN_HPP_NAMESPACE::Device              m_device    = {};
       AllocationCallbacks const *               m_allocator = {};
@@ -6145,20 +6174,20 @@ VULKAN_HPP_EXPORT namespace VULKAN_HPP_NAMESPACE
 
     public:
 #  if !defined( VULKAN_HPP_NO_EXCEPTIONS )
-      AccelerationStructureKHR( Device const &                              device,
-                                AccelerationStructureCreateInfo2KHR const & createInfo,
-                                Optional<AllocationCallbacks const>         allocator = nullptr )
-      {
-        *this = device.createAccelerationStructure2KHR( createInfo, allocator );
-      }
-#  endif
-
-#  if !defined( VULKAN_HPP_NO_EXCEPTIONS )
       AccelerationStructureKHR( Device const &                             device,
                                 AccelerationStructureCreateInfoKHR const & createInfo,
                                 Optional<AllocationCallbacks const>        allocator = nullptr )
       {
         *this = device.createAccelerationStructureKHR( createInfo, allocator );
+      }
+#  endif
+
+#  if !defined( VULKAN_HPP_NO_EXCEPTIONS )
+      AccelerationStructureKHR( Device const &                              device,
+                                AccelerationStructureCreateInfo2KHR const & createInfo,
+                                Optional<AllocationCallbacks const>         allocator = nullptr )
+      {
+        *this = device.createAccelerationStructure2KHR( createInfo, allocator );
       }
 #  endif
 
@@ -8584,6 +8613,12 @@ VULKAN_HPP_EXPORT namespace VULKAN_HPP_NAMESPACE
       // https://registry.khronos.org/vulkan/specs/latest/man/html/vkCmdSetComputeOccupancyPriorityNV.html
       void setComputeOccupancyPriorityNV( ComputeOccupancyPriorityParametersNV const & parameters ) const VULKAN_HPP_NOEXCEPT;
 
+      //=== VK_NV_internal_handle ===
+
+      // wrapper function for command vkGetCommandBufferInternalHandleNV, see
+      // https://registry.khronos.org/vulkan/specs/latest/man/html/vkGetCommandBufferInternalHandleNV.html
+      VULKAN_HPP_NODISCARD InternalHandleNV getInternalHandleNV() const VULKAN_HPP_NOEXCEPT;
+
       //=== VK_EXT_primitive_restart_index ===
 
       // wrapper function for command vkCmdSetPrimitiveRestartIndexEXT, see
@@ -10397,13 +10432,6 @@ VULKAN_HPP_EXPORT namespace VULKAN_HPP_NAMESPACE
 
     public:
 #  if !defined( VULKAN_HPP_NO_EXCEPTIONS )
-      DisplayKHR( PhysicalDevice const & physicalDevice, int32_t drmFd, uint32_t connectorId )
-      {
-        *this = physicalDevice.getDrmDisplayEXT( drmFd, connectorId );
-      }
-#  endif
-
-#  if !defined( VULKAN_HPP_NO_EXCEPTIONS )
 #    if defined( VK_USE_PLATFORM_XLIB_XRANDR_EXT )
       DisplayKHR( PhysicalDevice const & physicalDevice, Display & dpy, RROutput rrOutput )
       {
@@ -10419,6 +10447,13 @@ VULKAN_HPP_EXPORT namespace VULKAN_HPP_NAMESPACE
         *this = physicalDevice.getWinrtDisplayNV( deviceRelativeId );
       }
 #    endif /*VK_USE_PLATFORM_WIN32_KHR*/
+#  endif
+
+#  if !defined( VULKAN_HPP_NO_EXCEPTIONS )
+      DisplayKHR( PhysicalDevice const & physicalDevice, int32_t drmFd, uint32_t connectorId )
+      {
+        *this = physicalDevice.getDrmDisplayEXT( drmFd, connectorId );
+      }
 #  endif
 
       DisplayKHR( PhysicalDevice const & physicalDevice, VkDisplayKHR display )
@@ -12626,6 +12661,16 @@ VULKAN_HPP_EXPORT namespace VULKAN_HPP_NAMESPACE
 #  if !defined( VULKAN_HPP_NO_EXCEPTIONS )
       Pipeline( Device const &                        device,
                 Optional<PipelineCache const> const & pipelineCache,
+                GraphicsPipelineCreateInfo const &    createInfo,
+                Optional<AllocationCallbacks const>   allocator = nullptr )
+      {
+        *this = device.createGraphicsPipeline( pipelineCache, createInfo, allocator );
+      }
+#  endif
+
+#  if !defined( VULKAN_HPP_NO_EXCEPTIONS )
+      Pipeline( Device const &                        device,
+                Optional<PipelineCache const> const & pipelineCache,
                 ComputePipelineCreateInfo const &     createInfo,
                 Optional<AllocationCallbacks const>   allocator = nullptr )
       {
@@ -12634,13 +12679,23 @@ VULKAN_HPP_EXPORT namespace VULKAN_HPP_NAMESPACE
 #  endif
 
 #  if !defined( VULKAN_HPP_NO_EXCEPTIONS )
+      Pipeline( Device const &                         device,
+                Optional<PipelineCache const> const &  pipelineCache,
+                RayTracingPipelineCreateInfoNV const & createInfo,
+                Optional<AllocationCallbacks const>    allocator = nullptr )
+      {
+        *this = device.createRayTracingPipelineNV( pipelineCache, createInfo, allocator );
+      }
+#  endif
+
+#  if !defined( VULKAN_HPP_NO_EXCEPTIONS )
       Pipeline( Device const &                               device,
                 Optional<DeferredOperationKHR const> const & deferredOperation,
                 Optional<PipelineCache const> const &        pipelineCache,
-                DataGraphPipelineCreateInfoARM const &       createInfo,
+                RayTracingPipelineCreateInfoKHR const &      createInfo,
                 Optional<AllocationCallbacks const>          allocator = nullptr )
       {
-        *this = device.createDataGraphPipelineARM( deferredOperation, pipelineCache, createInfo, allocator );
+        *this = device.createRayTracingPipelineKHR( deferredOperation, pipelineCache, createInfo, allocator );
       }
 #  endif
 
@@ -12657,33 +12712,13 @@ VULKAN_HPP_EXPORT namespace VULKAN_HPP_NAMESPACE
 #  endif
 
 #  if !defined( VULKAN_HPP_NO_EXCEPTIONS )
-      Pipeline( Device const &                        device,
-                Optional<PipelineCache const> const & pipelineCache,
-                GraphicsPipelineCreateInfo const &    createInfo,
-                Optional<AllocationCallbacks const>   allocator = nullptr )
-      {
-        *this = device.createGraphicsPipeline( pipelineCache, createInfo, allocator );
-      }
-#  endif
-
-#  if !defined( VULKAN_HPP_NO_EXCEPTIONS )
       Pipeline( Device const &                               device,
                 Optional<DeferredOperationKHR const> const & deferredOperation,
                 Optional<PipelineCache const> const &        pipelineCache,
-                RayTracingPipelineCreateInfoKHR const &      createInfo,
+                DataGraphPipelineCreateInfoARM const &       createInfo,
                 Optional<AllocationCallbacks const>          allocator = nullptr )
       {
-        *this = device.createRayTracingPipelineKHR( deferredOperation, pipelineCache, createInfo, allocator );
-      }
-#  endif
-
-#  if !defined( VULKAN_HPP_NO_EXCEPTIONS )
-      Pipeline( Device const &                         device,
-                Optional<PipelineCache const> const &  pipelineCache,
-                RayTracingPipelineCreateInfoNV const & createInfo,
-                Optional<AllocationCallbacks const>    allocator = nullptr )
-      {
-        *this = device.createRayTracingPipelineNV( pipelineCache, createInfo, allocator );
+        *this = device.createDataGraphPipelineARM( deferredOperation, pipelineCache, createInfo, allocator );
       }
 #  endif
 
@@ -12896,6 +12931,16 @@ VULKAN_HPP_EXPORT namespace VULKAN_HPP_NAMESPACE
     {
     public:
 #  if !defined( VULKAN_HPP_NO_EXCEPTIONS )
+      Pipelines( Device const &                                 device,
+                 Optional<PipelineCache const> const &          pipelineCache,
+                 ArrayProxy<GraphicsPipelineCreateInfo> const & createInfos,
+                 Optional<AllocationCallbacks const>            allocator = nullptr )
+      {
+        *this = device.createGraphicsPipelines( pipelineCache, createInfos, allocator );
+      }
+#  endif
+
+#  if !defined( VULKAN_HPP_NO_EXCEPTIONS )
       Pipelines( Device const &                                device,
                  Optional<PipelineCache const> const &         pipelineCache,
                  ArrayProxy<ComputePipelineCreateInfo> const & createInfos,
@@ -12907,12 +12952,22 @@ VULKAN_HPP_EXPORT namespace VULKAN_HPP_NAMESPACE
 
 #  if !defined( VULKAN_HPP_NO_EXCEPTIONS )
       Pipelines( Device const &                                     device,
-                 Optional<DeferredOperationKHR const> const &       deferredOperation,
                  Optional<PipelineCache const> const &              pipelineCache,
-                 ArrayProxy<DataGraphPipelineCreateInfoARM> const & createInfos,
+                 ArrayProxy<RayTracingPipelineCreateInfoNV> const & createInfos,
                  Optional<AllocationCallbacks const>                allocator = nullptr )
       {
-        *this = device.createDataGraphPipelinesARM( deferredOperation, pipelineCache, createInfos, allocator );
+        *this = device.createRayTracingPipelinesNV( pipelineCache, createInfos, allocator );
+      }
+#  endif
+
+#  if !defined( VULKAN_HPP_NO_EXCEPTIONS )
+      Pipelines( Device const &                                      device,
+                 Optional<DeferredOperationKHR const> const &        deferredOperation,
+                 Optional<PipelineCache const> const &               pipelineCache,
+                 ArrayProxy<RayTracingPipelineCreateInfoKHR> const & createInfos,
+                 Optional<AllocationCallbacks const>                 allocator = nullptr )
+      {
+        *this = device.createRayTracingPipelinesKHR( deferredOperation, pipelineCache, createInfos, allocator );
       }
 #  endif
 
@@ -12929,33 +12984,13 @@ VULKAN_HPP_EXPORT namespace VULKAN_HPP_NAMESPACE
 #  endif
 
 #  if !defined( VULKAN_HPP_NO_EXCEPTIONS )
-      Pipelines( Device const &                                 device,
-                 Optional<PipelineCache const> const &          pipelineCache,
-                 ArrayProxy<GraphicsPipelineCreateInfo> const & createInfos,
-                 Optional<AllocationCallbacks const>            allocator = nullptr )
-      {
-        *this = device.createGraphicsPipelines( pipelineCache, createInfos, allocator );
-      }
-#  endif
-
-#  if !defined( VULKAN_HPP_NO_EXCEPTIONS )
-      Pipelines( Device const &                                      device,
-                 Optional<DeferredOperationKHR const> const &        deferredOperation,
-                 Optional<PipelineCache const> const &               pipelineCache,
-                 ArrayProxy<RayTracingPipelineCreateInfoKHR> const & createInfos,
-                 Optional<AllocationCallbacks const>                 allocator = nullptr )
-      {
-        *this = device.createRayTracingPipelinesKHR( deferredOperation, pipelineCache, createInfos, allocator );
-      }
-#  endif
-
-#  if !defined( VULKAN_HPP_NO_EXCEPTIONS )
       Pipelines( Device const &                                     device,
+                 Optional<DeferredOperationKHR const> const &       deferredOperation,
                  Optional<PipelineCache const> const &              pipelineCache,
-                 ArrayProxy<RayTracingPipelineCreateInfoNV> const & createInfos,
+                 ArrayProxy<DataGraphPipelineCreateInfoARM> const & createInfos,
                  Optional<AllocationCallbacks const>                allocator = nullptr )
       {
-        *this = device.createRayTracingPipelinesNV( pipelineCache, createInfos, allocator );
+        *this = device.createDataGraphPipelinesARM( deferredOperation, pipelineCache, createInfos, allocator );
       }
 #  endif
 
@@ -13712,6 +13747,11 @@ VULKAN_HPP_EXPORT namespace VULKAN_HPP_NAMESPACE
 
       // wrapper function for command vkQueueNotifyOutOfBandNV, see https://registry.khronos.org/vulkan/specs/latest/man/html/vkQueueNotifyOutOfBandNV.html
       void notifyOutOfBandNV( OutOfBandQueueTypeInfoNV const & queueTypeInfo ) const VULKAN_HPP_NOEXCEPT;
+
+      //=== VK_NV_internal_handle ===
+
+      // wrapper function for command vkGetQueueInternalHandleNV, see https://registry.khronos.org/vulkan/specs/latest/man/html/vkGetQueueInternalHandleNV.html
+      VULKAN_HPP_NODISCARD InternalHandleNV getInternalHandleNV() const VULKAN_HPP_NOEXCEPT;
 
     private:
       VULKAN_HPP_NAMESPACE::Queue      m_queue      = {};
@@ -14723,83 +14763,6 @@ VULKAN_HPP_EXPORT namespace VULKAN_HPP_NAMESPACE
 #  endif
 
 #  if !defined( VULKAN_HPP_NO_EXCEPTIONS )
-#    if defined( VK_USE_PLATFORM_DIRECTFB_EXT )
-      SurfaceKHR( Instance const & instance, DirectFBSurfaceCreateInfoEXT const & createInfo, Optional<AllocationCallbacks const> allocator = nullptr )
-      {
-        *this = instance.createDirectFBSurfaceEXT( createInfo, allocator );
-      }
-#    endif /*VK_USE_PLATFORM_DIRECTFB_EXT*/
-#  endif
-
-#  if !defined( VULKAN_HPP_NO_EXCEPTIONS )
-      SurfaceKHR( Instance const & instance, DisplaySurfaceCreateInfoKHR const & createInfo, Optional<AllocationCallbacks const> allocator = nullptr )
-      {
-        *this = instance.createDisplayPlaneSurfaceKHR( createInfo, allocator );
-      }
-#  endif
-
-#  if !defined( VULKAN_HPP_NO_EXCEPTIONS )
-      SurfaceKHR( Instance const & instance, HeadlessSurfaceCreateInfoEXT const & createInfo, Optional<AllocationCallbacks const> allocator = nullptr )
-      {
-        *this = instance.createHeadlessSurfaceEXT( createInfo, allocator );
-      }
-#  endif
-
-#  if !defined( VULKAN_HPP_NO_EXCEPTIONS )
-#    if defined( VK_USE_PLATFORM_IOS_MVK )
-      SurfaceKHR( Instance const & instance, IOSSurfaceCreateInfoMVK const & createInfo, Optional<AllocationCallbacks const> allocator = nullptr )
-      {
-        *this = instance.createIOSSurfaceMVK( createInfo, allocator );
-      }
-#    endif /*VK_USE_PLATFORM_IOS_MVK*/
-#  endif
-
-#  if !defined( VULKAN_HPP_NO_EXCEPTIONS )
-#    if defined( VK_USE_PLATFORM_FUCHSIA )
-      SurfaceKHR( Instance const & instance, ImagePipeSurfaceCreateInfoFUCHSIA const & createInfo, Optional<AllocationCallbacks const> allocator = nullptr )
-      {
-        *this = instance.createImagePipeSurfaceFUCHSIA( createInfo, allocator );
-      }
-#    endif /*VK_USE_PLATFORM_FUCHSIA*/
-#  endif
-
-#  if !defined( VULKAN_HPP_NO_EXCEPTIONS )
-#    if defined( VK_USE_PLATFORM_MACOS_MVK )
-      SurfaceKHR( Instance const & instance, MacOSSurfaceCreateInfoMVK const & createInfo, Optional<AllocationCallbacks const> allocator = nullptr )
-      {
-        *this = instance.createMacOSSurfaceMVK( createInfo, allocator );
-      }
-#    endif /*VK_USE_PLATFORM_MACOS_MVK*/
-#  endif
-
-#  if !defined( VULKAN_HPP_NO_EXCEPTIONS )
-#    if defined( VK_USE_PLATFORM_METAL_EXT )
-      SurfaceKHR( Instance const & instance, MetalSurfaceCreateInfoEXT const & createInfo, Optional<AllocationCallbacks const> allocator = nullptr )
-      {
-        *this = instance.createMetalSurfaceEXT( createInfo, allocator );
-      }
-#    endif /*VK_USE_PLATFORM_METAL_EXT*/
-#  endif
-
-#  if !defined( VULKAN_HPP_NO_EXCEPTIONS )
-#    if defined( VK_USE_PLATFORM_SCREEN_QNX )
-      SurfaceKHR( Instance const & instance, ScreenSurfaceCreateInfoQNX const & createInfo, Optional<AllocationCallbacks const> allocator = nullptr )
-      {
-        *this = instance.createScreenSurfaceQNX( createInfo, allocator );
-      }
-#    endif /*VK_USE_PLATFORM_SCREEN_QNX*/
-#  endif
-
-#  if !defined( VULKAN_HPP_NO_EXCEPTIONS )
-#    if defined( VK_USE_PLATFORM_GGP )
-      SurfaceKHR( Instance const & instance, StreamDescriptorSurfaceCreateInfoGGP const & createInfo, Optional<AllocationCallbacks const> allocator = nullptr )
-      {
-        *this = instance.createStreamDescriptorSurfaceGGP( createInfo, allocator );
-      }
-#    endif /*VK_USE_PLATFORM_GGP*/
-#  endif
-
-#  if !defined( VULKAN_HPP_NO_EXCEPTIONS )
 #    if defined( VK_USE_PLATFORM_OHOS )
       SurfaceKHR( Instance const & instance, SurfaceCreateInfoOHOS const & createInfo, Optional<AllocationCallbacks const> allocator = nullptr )
       {
@@ -14809,12 +14772,10 @@ VULKAN_HPP_EXPORT namespace VULKAN_HPP_NAMESPACE
 #  endif
 
 #  if !defined( VULKAN_HPP_NO_EXCEPTIONS )
-#    if defined( VK_USE_PLATFORM_UBM_SEC )
-      SurfaceKHR( Instance const & instance, UbmSurfaceCreateInfoSEC const & createInfo, Optional<AllocationCallbacks const> allocator = nullptr )
+      SurfaceKHR( Instance const & instance, DisplaySurfaceCreateInfoKHR const & createInfo, Optional<AllocationCallbacks const> allocator = nullptr )
       {
-        *this = instance.createUbmSurfaceSEC( createInfo, allocator );
+        *this = instance.createDisplayPlaneSurfaceKHR( createInfo, allocator );
       }
-#    endif /*VK_USE_PLATFORM_UBM_SEC*/
 #  endif
 
 #  if !defined( VULKAN_HPP_NO_EXCEPTIONS )
@@ -14836,12 +14797,30 @@ VULKAN_HPP_EXPORT namespace VULKAN_HPP_NAMESPACE
 #  endif
 
 #  if !defined( VULKAN_HPP_NO_EXCEPTIONS )
+#    if defined( VK_USE_PLATFORM_UBM_SEC )
+      SurfaceKHR( Instance const & instance, UbmSurfaceCreateInfoSEC const & createInfo, Optional<AllocationCallbacks const> allocator = nullptr )
+      {
+        *this = instance.createUbmSurfaceSEC( createInfo, allocator );
+      }
+#    endif /*VK_USE_PLATFORM_UBM_SEC*/
+#  endif
+
+#  if !defined( VULKAN_HPP_NO_EXCEPTIONS )
 #    if defined( VK_USE_PLATFORM_WIN32_KHR )
       SurfaceKHR( Instance const & instance, Win32SurfaceCreateInfoKHR const & createInfo, Optional<AllocationCallbacks const> allocator = nullptr )
       {
         *this = instance.createWin32SurfaceKHR( createInfo, allocator );
       }
 #    endif /*VK_USE_PLATFORM_WIN32_KHR*/
+#  endif
+
+#  if !defined( VULKAN_HPP_NO_EXCEPTIONS )
+#    if defined( VK_USE_PLATFORM_XLIB_KHR )
+      SurfaceKHR( Instance const & instance, XlibSurfaceCreateInfoKHR const & createInfo, Optional<AllocationCallbacks const> allocator = nullptr )
+      {
+        *this = instance.createXlibSurfaceKHR( createInfo, allocator );
+      }
+#    endif /*VK_USE_PLATFORM_XLIB_KHR*/
 #  endif
 
 #  if !defined( VULKAN_HPP_NO_EXCEPTIONS )
@@ -14854,12 +14833,73 @@ VULKAN_HPP_EXPORT namespace VULKAN_HPP_NAMESPACE
 #  endif
 
 #  if !defined( VULKAN_HPP_NO_EXCEPTIONS )
-#    if defined( VK_USE_PLATFORM_XLIB_KHR )
-      SurfaceKHR( Instance const & instance, XlibSurfaceCreateInfoKHR const & createInfo, Optional<AllocationCallbacks const> allocator = nullptr )
+#    if defined( VK_USE_PLATFORM_DIRECTFB_EXT )
+      SurfaceKHR( Instance const & instance, DirectFBSurfaceCreateInfoEXT const & createInfo, Optional<AllocationCallbacks const> allocator = nullptr )
       {
-        *this = instance.createXlibSurfaceKHR( createInfo, allocator );
+        *this = instance.createDirectFBSurfaceEXT( createInfo, allocator );
       }
-#    endif /*VK_USE_PLATFORM_XLIB_KHR*/
+#    endif /*VK_USE_PLATFORM_DIRECTFB_EXT*/
+#  endif
+
+#  if !defined( VULKAN_HPP_NO_EXCEPTIONS )
+#    if defined( VK_USE_PLATFORM_FUCHSIA )
+      SurfaceKHR( Instance const & instance, ImagePipeSurfaceCreateInfoFUCHSIA const & createInfo, Optional<AllocationCallbacks const> allocator = nullptr )
+      {
+        *this = instance.createImagePipeSurfaceFUCHSIA( createInfo, allocator );
+      }
+#    endif /*VK_USE_PLATFORM_FUCHSIA*/
+#  endif
+
+#  if !defined( VULKAN_HPP_NO_EXCEPTIONS )
+#    if defined( VK_USE_PLATFORM_GGP )
+      SurfaceKHR( Instance const & instance, StreamDescriptorSurfaceCreateInfoGGP const & createInfo, Optional<AllocationCallbacks const> allocator = nullptr )
+      {
+        *this = instance.createStreamDescriptorSurfaceGGP( createInfo, allocator );
+      }
+#    endif /*VK_USE_PLATFORM_GGP*/
+#  endif
+
+#  if !defined( VULKAN_HPP_NO_EXCEPTIONS )
+#    if defined( VK_USE_PLATFORM_SCREEN_QNX )
+      SurfaceKHR( Instance const & instance, ScreenSurfaceCreateInfoQNX const & createInfo, Optional<AllocationCallbacks const> allocator = nullptr )
+      {
+        *this = instance.createScreenSurfaceQNX( createInfo, allocator );
+      }
+#    endif /*VK_USE_PLATFORM_SCREEN_QNX*/
+#  endif
+
+#  if !defined( VULKAN_HPP_NO_EXCEPTIONS )
+#    if defined( VK_USE_PLATFORM_IOS_MVK )
+      SurfaceKHR( Instance const & instance, IOSSurfaceCreateInfoMVK const & createInfo, Optional<AllocationCallbacks const> allocator = nullptr )
+      {
+        *this = instance.createIOSSurfaceMVK( createInfo, allocator );
+      }
+#    endif /*VK_USE_PLATFORM_IOS_MVK*/
+#  endif
+
+#  if !defined( VULKAN_HPP_NO_EXCEPTIONS )
+#    if defined( VK_USE_PLATFORM_MACOS_MVK )
+      SurfaceKHR( Instance const & instance, MacOSSurfaceCreateInfoMVK const & createInfo, Optional<AllocationCallbacks const> allocator = nullptr )
+      {
+        *this = instance.createMacOSSurfaceMVK( createInfo, allocator );
+      }
+#    endif /*VK_USE_PLATFORM_MACOS_MVK*/
+#  endif
+
+#  if !defined( VULKAN_HPP_NO_EXCEPTIONS )
+#    if defined( VK_USE_PLATFORM_METAL_EXT )
+      SurfaceKHR( Instance const & instance, MetalSurfaceCreateInfoEXT const & createInfo, Optional<AllocationCallbacks const> allocator = nullptr )
+      {
+        *this = instance.createMetalSurfaceEXT( createInfo, allocator );
+      }
+#    endif /*VK_USE_PLATFORM_METAL_EXT*/
+#  endif
+
+#  if !defined( VULKAN_HPP_NO_EXCEPTIONS )
+      SurfaceKHR( Instance const & instance, HeadlessSurfaceCreateInfoEXT const & createInfo, Optional<AllocationCallbacks const> allocator = nullptr )
+      {
+        *this = instance.createHeadlessSurfaceEXT( createInfo, allocator );
+      }
 #  endif
 
       SurfaceKHR( Instance const & instance, VkSurfaceKHR surface, Optional<AllocationCallbacks const> allocator = nullptr )
@@ -30227,6 +30267,57 @@ VULKAN_HPP_EXPORT namespace VULKAN_HPP_NAMESPACE
       return { result_, device };
     }
 #  endif /*VK_USE_PLATFORM_UBM_SEC*/
+
+    //=== VK_NV_internal_handle ===
+
+    // wrapper function for command vkGetPhysicalDeviceInternalHandleNV, see
+    // https://registry.khronos.org/vulkan/specs/latest/man/html/vkGetPhysicalDeviceInternalHandleNV.html
+    VULKAN_HPP_NODISCARD VULKAN_HPP_INLINE InternalHandleNV PhysicalDevice::getInternalHandleNV() const VULKAN_HPP_NOEXCEPT
+    {
+      VULKAN_HPP_ASSERT( getDispatcher()->vkGetPhysicalDeviceInternalHandleNV &&
+                         "Function <vkGetPhysicalDeviceInternalHandleNV> requires <VK_NV_internal_handle>" );
+
+      InternalHandleNV handle;
+      getDispatcher()->vkGetPhysicalDeviceInternalHandleNV( static_cast<VkPhysicalDevice>( m_physicalDevice ),
+                                                            reinterpret_cast<VkInternalHandleNV *>( &handle ) );
+
+      return handle;
+    }
+
+    // wrapper function for command vkGetDeviceInternalHandleNV, see https://registry.khronos.org/vulkan/specs/latest/man/html/vkGetDeviceInternalHandleNV.html
+    VULKAN_HPP_NODISCARD VULKAN_HPP_INLINE InternalHandleNV Device::getInternalHandleNV() const VULKAN_HPP_NOEXCEPT
+    {
+      VULKAN_HPP_ASSERT( getDispatcher()->vkGetDeviceInternalHandleNV && "Function <vkGetDeviceInternalHandleNV> requires <VK_NV_internal_handle>" );
+
+      InternalHandleNV handle;
+      getDispatcher()->vkGetDeviceInternalHandleNV( static_cast<VkDevice>( m_device ), reinterpret_cast<VkInternalHandleNV *>( &handle ) );
+
+      return handle;
+    }
+
+    // wrapper function for command vkGetQueueInternalHandleNV, see https://registry.khronos.org/vulkan/specs/latest/man/html/vkGetQueueInternalHandleNV.html
+    VULKAN_HPP_NODISCARD VULKAN_HPP_INLINE InternalHandleNV Queue::getInternalHandleNV() const VULKAN_HPP_NOEXCEPT
+    {
+      VULKAN_HPP_ASSERT( getDispatcher()->vkGetQueueInternalHandleNV && "Function <vkGetQueueInternalHandleNV> requires <VK_NV_internal_handle>" );
+
+      InternalHandleNV handle;
+      getDispatcher()->vkGetQueueInternalHandleNV( static_cast<VkQueue>( m_queue ), reinterpret_cast<VkInternalHandleNV *>( &handle ) );
+
+      return handle;
+    }
+
+    // wrapper function for command vkGetCommandBufferInternalHandleNV, see
+    // https://registry.khronos.org/vulkan/specs/latest/man/html/vkGetCommandBufferInternalHandleNV.html
+    VULKAN_HPP_NODISCARD VULKAN_HPP_INLINE InternalHandleNV CommandBuffer::getInternalHandleNV() const VULKAN_HPP_NOEXCEPT
+    {
+      VULKAN_HPP_ASSERT( getDispatcher()->vkGetCommandBufferInternalHandleNV &&
+                         "Function <vkGetCommandBufferInternalHandleNV> requires <VK_NV_internal_handle>" );
+
+      InternalHandleNV handle;
+      getDispatcher()->vkGetCommandBufferInternalHandleNV( static_cast<VkCommandBuffer>( m_commandBuffer ), reinterpret_cast<VkInternalHandleNV *>( &handle ) );
+
+      return handle;
+    }
 
     //=== VK_EXT_primitive_restart_index ===
 
