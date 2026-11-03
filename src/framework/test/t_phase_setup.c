@@ -23,6 +23,7 @@
 #include <inttypes.h>
 #include "test.h"
 #include "t_phase_setup.h"
+#include "t_features.h"
 
 /* Maximum supported physical devs. */
 #define MAX_PHYSICAL_DEVS 32
@@ -642,6 +643,16 @@ t_setup_vulkan(void)
         add_pnext(&device_info, &pdr2f);
     if (t->def->mesh_shader)
         add_pnext(&device_info, &pdmsf);
+
+    const char *missing_feature =
+        t_setup_required_features(&device_info, api_version);
+    if (missing_feature) {
+        free(qci);
+        free(ext_names);
+        free(priorities);
+        t_skipf("Required feature %s is not supported for this API version and extensions",
+                missing_feature);
+    }
 
     res = vkCreateDevice(t->vk.physical_dev, &device_info, NULL, &t->vk.device);
     free(qci);

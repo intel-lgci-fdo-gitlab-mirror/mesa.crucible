@@ -26,6 +26,7 @@ framework_sources = files(
   'test/t_cleanup.c',
   'test/t_data.c',
   'test/t_dump.c',
+  'test/t_features.c',
   'test/t_image.c',
   'test/t_phases.c',
   'test/t_phase_setup.c',

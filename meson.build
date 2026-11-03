@@ -41,12 +41,30 @@ add_project_arguments(
 # Generator to run *_gen.py to create *_gen.h
 
 src_root = meson.project_source_root()
-prog_python = import('python').find_installation('python3')
+prog_python = import('python').find_installation('python3', modules : ['mako'])
+if not prog_python.language_version().version_compare('>= 3.10')
+  error('Python 3.10 or newer is required')
+endif
+mako_version = run_command(
+  prog_python, '-c', 'import mako; print(mako.__version__)',
+  check : true
+).stdout().strip()
+if not mako_version.version_compare('>= 0.8')
+  error('Mako 0.8 or newer is required')
+endif
 
 gen_py_to_gen_h = generator(
   prog_python,
   output : '@BASENAME@.h',
   arguments : ['@INPUT@', '@OUTPUT@'],
+)
+
+feature_sources = custom_target(
+  'feature-descriptions',
+  input : 'include/vulkan/vk.xml',
+  output : ['t_features_gen.h', 't_features_gen.c'],
+  command : [prog_python, files('misc/gen_features.py'),
+             '@INPUT@', '@OUTPUT0@', '@OUTPUT1@'],
 )
 
 test_sources = []
@@ -104,7 +122,8 @@ dep_vulkan = dependency('vulkan')
 
 executable(
   'crucible',
-  [command_sources, data_outputs, framework_sources, qonos_sources, test_sources, util_sources],
+  [command_sources, data_outputs, feature_sources, framework_sources, qonos_sources,
+   test_sources, util_sources],
   include_directories : [inc_include],
   dependencies: [dep_libpng16, dep_libxml2, dep_m, dep_thread, dep_vulkan],
 )

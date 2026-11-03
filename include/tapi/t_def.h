@@ -24,6 +24,7 @@
 #include <stdbool.h>
 #include <stdint.h>
 
+#include "t_features_gen.h"
 #include "util/macros.h"
 #include "util/vk_wrapper.h"
 
@@ -90,6 +91,11 @@ struct test_def {
     enum test_queue_setup queue_setup;
 
     const uint32_t api_version;
+
+    /// Features required on the default logical device. Missing features skip
+    /// the test before device creation. Unset bits leave the legacy defaults
+    /// unchanged; they do not request that a feature be disabled.
+    const struct cru_features features;
 
     const bool robust_buffer_access;
 

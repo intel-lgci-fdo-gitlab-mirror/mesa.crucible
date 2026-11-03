@@ -40,6 +40,15 @@ __t_device(void)
     return &t->vk.device;
 }
 
+const struct cru_features *
+__t_enabled_features(void)
+{
+    ASSERT_TEST_IN_MAJOR_PHASE;
+    GET_CURRENT_TEST(t);
+
+    return &t->vk.enabled_features;
+}
+
 const VkPhysicalDevice *
 __t_physical_dev(void)
 {

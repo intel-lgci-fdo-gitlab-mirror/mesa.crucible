@@ -153,6 +153,7 @@ struct test {
         VkPhysicalDeviceProperties physical_dev_props;
         VkPhysicalDeviceMemoryProperties physical_dev_mem_props;
         VkDevice device;
+        struct cru_features enabled_features;
         uint32_t device_extension_count;
         VkExtensionProperties *device_extension_props;
         uint32_t queue_family_count;

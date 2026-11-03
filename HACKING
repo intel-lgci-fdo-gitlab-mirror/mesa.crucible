@@ -57,6 +57,41 @@ All images in the 'data' directory are available to tests. You can load an
 image with `t_new_cru_image_from_filename(filename)`, where filename is
 relative to the 'data' directory.
 
+Feature Requirements
+--------------------
+A test can require features on the default logical device:
+
+    test_define {
+        .name = "my-test",
+        .start = test,
+        .api_version = VK_API_VERSION_1_2,
+        .features = {
+            .variablePointersStorageBuffer = true,
+            .shaderInt8 = true,
+        },
+    };
+
+The framework queries support and skips the test, naming the missing feature,
+if the requirement cannot be met. It enables the requested bits before creating
+`t_device`. Core and extension aliases use the same field; unrelated vendor
+features have distinct names, for example `meshShader` and `meshShaderNV`.
+`t_enabled_features` reports what was enabled, unlike a physical-device query,
+including functionality enabled unconditionally by the selected core API.
+
+`bufferDeviceAddress` selects the core/KHR variant; `bufferDeviceAddressEXT`
+selects the EXT variant. These requirements exclude the incompatible extension
+from device creation. Do not request both variants.
+
+Unset bits leave feature enablement unchanged. Existing defaults and the
+`robust_buffer_access`, `robust_image_access`, and `mesh_shader` flags retain
+their old behavior. A test must also request any prerequisite feature bits not
+provided by those defaults, and must not request incompatible combinations.
+The framework does not change the test's API version or infer SPIR-V features.
+
+`misc/gen_features.py` generates the feature names and structure descriptions
+from the vendored `include/vulkan/vk.xml`, using Python and Mako. Keep the
+registry and Vulkan headers from the same Vulkan-Headers release. No Mesa
+headers, libraries, or build tools are needed.
 
 
 Generated Files
