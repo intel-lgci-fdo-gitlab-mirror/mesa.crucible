@@ -144,6 +144,7 @@ if with_VK_EXT_mesh_shader
 endif
 
 test_sources_with_spirv_asm = [
+  'func/compute/struct-phi.c',
 ]
 
 test_sources_with_gen = [
@@ -200,10 +201,8 @@ test_sources += test_spirv_headers_from_glsl
 
 # Process tests with SPIR-V assembly. Create *-spvasm.h.
 
-if test_sources_with_spirv_asm.length() > 0
-  test_spirv_headers_from_spirv_asm = c_to_spvasm_h.process(test_sources_with_spirv_asm, preserve_path_from : src_root)
-  test_sources += test_spirv_headers_from_spirv_asm
-endif
+test_spirv_headers_from_spirv_asm = c_to_spvasm_h.process(test_sources_with_spirv_asm, preserve_path_from : src_root)
+test_sources += test_spirv_headers_from_spirv_asm
 
 test_sources += files(test_sources_with_glsl)
 test_sources += files(test_sources_with_spirv_asm)
