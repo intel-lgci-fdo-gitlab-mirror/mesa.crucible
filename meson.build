@@ -133,3 +133,9 @@ test(
   files('src/tests/self/concurrent-output-test.py'),
   args : [crucible]
 )
+
+test(
+  'bad-test-names',
+  files('src/tests/self/bad-test-names-test.py'),
+  args : [crucible]
+)
