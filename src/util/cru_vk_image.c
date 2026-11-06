@@ -69,7 +69,7 @@ cleanup_map(cru_vk_image_t *self)
     if (self->map.vk_buffer != VK_NULL_HANDLE)
         vkDestroyBuffer(self->vk_dev, self->map.vk_buffer, NULL);
 
-    self->map = (typeof(self->map)) {0};
+    self->map = (__typeof__(self->map)) {0};
 }
 
 /// Setup cru_vk_image::map.

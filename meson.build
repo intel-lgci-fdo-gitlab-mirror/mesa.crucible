@@ -23,7 +23,7 @@ project(
   ['c'],
   license : 'MIT',
   meson_version : '>= 1.1',
-  default_options : ['buildtype=debugoptimized', 'b_ndebug=if-release']
+  default_options : ['buildtype=debugoptimized', 'b_ndebug=if-release', 'c_std=c11']
 )
 
 cc = meson.get_compiler('c')
