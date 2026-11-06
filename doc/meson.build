@@ -40,12 +40,7 @@ endif
 man_pages = []
 
 foreach a : man_sources
-  man_pages += custom_target(
-    a,
-    input : a,
-    output : a,
-    command : [prog_cp, '@INPUT@', '@OUTPUT@'],
-  )
+  man_pages += fs.copyfile(a, a)
 
   if with_man_pages
     dst = a.substring(0, -4)

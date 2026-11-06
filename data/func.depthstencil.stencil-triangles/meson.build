@@ -694,10 +694,5 @@ data_ref_files = [
 ]
 
 foreach a : data_ref_files
-  data_outputs += custom_target(
-    a,
-    input : a,
-    output : a,
-    command : [prog_cp, '@INPUT@', '@OUTPUT@'],
-  )
+  data_outputs += fs.copyfile(a, a)
 endforeach

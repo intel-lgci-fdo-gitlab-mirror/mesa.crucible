@@ -22,7 +22,7 @@ project(
   'crucible',
   ['c'],
   license : 'MIT',
-  meson_version : '>= 0.56',
+  meson_version : '>= 0.64',
   default_options : ['buildtype=debugoptimized', 'b_ndebug=if-release']
 )
 
@@ -51,8 +51,6 @@ gen_py_to_gen_h = generator(
 )
 
 test_sources = []
-
-prog_cp = find_program('cp')
 
 # Generator to create *-spirv.h.
 
@@ -86,6 +84,8 @@ c_to_spvasm_h = generator(
                '--with-spirv-as=' + prog_spirv_as.full_path(),
                '-o', '@OUTPUT@', '@INPUT@'],
 )
+
+fs = import('fs')
 
 subdir('data')
 subdir('doc')
