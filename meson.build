@@ -28,16 +28,15 @@ project(
 
 cc = meson.get_compiler('c')
 
-pre_args = [
-  '-D_DEFAULT_SOURCE',
-  '-D_GNU_SOURCE',
-  '-D_POSIX_C_SOURCE=200809L',
-  '-D_XOPEN_SOURCE=700',
-]
-
-foreach a : pre_args
-  add_project_arguments(a, language : ['c'])
-endforeach
+add_project_arguments(
+  [
+    '-D_DEFAULT_SOURCE',
+    '-D_GNU_SOURCE',
+    '-D_POSIX_C_SOURCE=200809L',
+    '-D_XOPEN_SOURCE=700',
+  ],
+  language : ['c']
+)
 
 # Generator to run *_gen.py to create *_gen.h
 
