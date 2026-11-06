@@ -20,8 +20,6 @@
 
 option(
   'man_pages',
-  type : 'combo',
-  value : 'auto',
-  choices : ['auto', 'disabled', 'enabled'],
+  type : 'feature',
   description : 'enable support for man pages'
 )

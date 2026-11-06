@@ -30,25 +30,17 @@ man_sources = [
 
 _man_pages = get_option('man_pages')
 
-if _man_pages == 'disabled'
-  with_man_pages = false
-else
-  a2x = find_program('a2x', required : _man_pages == 'enabled')
-  with_man_pages = a2x.found()
-endif
+a2x = find_program('a2x', required : _man_pages, disabler : true)
 
 man_pages = []
 
 foreach a : man_sources
   man_pages += fs.copyfile(a, a)
-
-  if with_man_pages
-    dst = a.substring(0, -4)
-    man_pages += custom_target(
-      dst,
-      input : a,
-      output : dst,
-      command : [a2x, '--format', 'manpage', '-D', '@OUTDIR@', '@INPUT@'],
-    )
-  endif
+  dst = a.substring(0, -4)
+  man_pages += custom_target(
+    dst,
+    input : a,
+    output : dst,
+    command : [a2x, '--format', 'manpage', '-D', '@OUTDIR@', '@INPUT@'],
+  )
 endforeach
