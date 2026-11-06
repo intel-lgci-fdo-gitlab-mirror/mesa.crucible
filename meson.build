@@ -22,7 +22,7 @@ project(
   'crucible',
   ['c'],
   license : 'MIT',
-  meson_version : '>= 0.64',
+  meson_version : '>= 1.1',
   default_options : ['buildtype=debugoptimized', 'b_ndebug=if-release']
 )
 
