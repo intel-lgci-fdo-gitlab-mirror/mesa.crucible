@@ -7,7 +7,7 @@
 variables:
   FDO_UPSTREAM_REPO: 'mesa/crucible'
   FDO_DISTRIBUTION_VERSION: 'trixie'
-  FDO_DISTRIBUTION_TAG: '2026-11-06.1'
+  FDO_DISTRIBUTION_TAG: '2026-11-06.2'
 
 include:
   - project: 'freedesktop/ci-templates'
@@ -20,7 +20,7 @@ stages:
 
 .build-debian-image:
   variables:
-    FDO_DISTRIBUTION_PACKAGES: 'build-essential ccache meson ninja-build pkg-config glslang-tools libpng-dev libxml2-dev libvulkan-dev asciidoc-base docbook-xml docbook-xsl'
+    FDO_DISTRIBUTION_PACKAGES: 'build-essential clang ccache meson ninja-build pkg-config glslang-tools libpng-dev libxml2-dev libvulkan-dev asciidoc-base docbook-xml docbook-xsl'
 
 .ci-run-policy:
   retry:
@@ -50,5 +50,14 @@ meson build:
     - .use-debian
   script:
     - meson setup builddir
+    - ninja -C builddir
+    - meson test -C builddir
+
+meson clang build:
+  stage: build
+  extends:
+    - .use-debian
+  script:
+    - CC=clang meson setup builddir
     - ninja -C builddir
     - meson test -C builddir
