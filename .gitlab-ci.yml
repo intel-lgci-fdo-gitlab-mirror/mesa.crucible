@@ -1,0 +1,54 @@
+# This CI uses the freedesktop.org ci-templates.
+# Please see the ci-templates documentation for details:
+# https://freedesktop.pages.freedesktop.org/ci-templates/
+
+.templates_sha: &template_sha d472159ceefa7d559a0586444469262882174c68
+
+variables:
+  FDO_UPSTREAM_REPO: 'mesa/crucible'
+  FDO_DISTRIBUTION_VERSION: 'trixie'
+  FDO_DISTRIBUTION_TAG: '2026-11-06.1'
+
+include:
+  - project: 'freedesktop/ci-templates'
+    ref: *template_sha
+    file: '/templates/debian.yml'
+
+stages:
+  - image
+  - build
+
+.build-debian-image:
+  variables:
+    FDO_DISTRIBUTION_PACKAGES: 'build-essential ccache meson ninja-build pkg-config glslang-tools libpng-dev libxml2-dev libvulkan-dev asciidoc-base docbook-xml docbook-xsl'
+
+.ci-run-policy:
+  retry:
+    max: 2
+    when:
+      - runner_system_failure
+  # Cancel CI run if a newer commit is pushed to the same branch
+  interruptible: true
+
+debian-image:
+  extends:
+    - .ci-run-policy
+    - .build-debian-image
+    - .fdo.container-build@debian
+  stage: image
+
+.use-debian:
+  extends:
+    - .ci-run-policy
+    - .fdo.distribution-image@debian
+  needs:
+    - debian-image
+
+meson build:
+  stage: build
+  extends:
+    - .use-debian
+  script:
+    - meson setup builddir
+    - ninja -C builddir
+    - meson test -C builddir
