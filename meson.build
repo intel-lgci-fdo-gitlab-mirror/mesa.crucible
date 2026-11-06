@@ -120,10 +120,16 @@ dep_m = cc.find_library('m', required : false)
 dep_thread = dependency('threads')
 dep_vulkan = dependency('vulkan')
 
-executable(
+crucible = executable(
   'crucible',
   [command_sources, data_outputs, feature_sources, framework_sources, qonos_sources,
    test_sources, util_sources],
   include_directories : [inc_include],
   dependencies: [dep_libpng16, dep_libxml2, dep_m, dep_thread, dep_vulkan],
+)
+
+test(
+  'concurrent-output',
+  files('src/tests/self/concurrent-output-test.py'),
+  args : [crucible]
 )
