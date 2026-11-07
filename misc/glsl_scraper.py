@@ -84,8 +84,7 @@ class Shader:
         args += ['-o', out_file.name, in_file.name]
         with subprocess.Popen(args,
                               stdout = subprocess.PIPE,
-                              stderr = subprocess.PIPE,
-                              stdin = subprocess.PIPE) as proc:
+                              stderr = subprocess.PIPE) as proc:
 
             out, err = proc.communicate(timeout=30)
             in_file.close()
