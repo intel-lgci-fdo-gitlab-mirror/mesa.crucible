@@ -35,7 +35,6 @@ a2x = find_program('a2x', required : _man_pages, disabler : true)
 man_pages = []
 
 foreach a : man_sources
-  man_pages += fs.copyfile(a, a)
   dst = a.substring(0, -4)
   man_pages += custom_target(
     dst,
