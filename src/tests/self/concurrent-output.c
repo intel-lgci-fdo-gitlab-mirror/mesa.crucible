@@ -26,6 +26,9 @@
 /// test itself, though, cannot verify that its output is not corrupted. That
 /// requires external inspection.
 
+#include <sched.h>
+#include <stdio.h>
+
 #include "tapi/t.h"
 
 /// Make a big string filled with a repeated character.
@@ -40,6 +43,37 @@ mk_big_str(char c)
 }
 
 static void
+test_fragmented_output(char fill)
+{
+    char payload[8192];
+    FILE *streams[] = { stdout, stderr };
+
+    memset(payload, fill, sizeof(payload));
+    for (unsigned stream = 0; stream < ARRAY_LENGTH(streams); ++stream) {
+        FILE *file = streams[stream];
+        for (int iteration = 0; iteration < 16; ++iteration) {
+            fprintf(file, "split-%c:", fill);
+            fwrite(payload, 1, sizeof(payload) / 2, file);
+            fflush(file);
+            // Give the dispatcher a chance to read a line before it is complete.
+            sched_yield();
+            fwrite(payload, 1, sizeof(payload) / 2, file);
+            fputc('\n', file);
+            fflush(file);
+        }
+    }
+
+    // Exceed the buffering limit without a newline to exercise chunked output.
+    memset(payload, fill == 'a' ? 'x' : 'y', sizeof(payload));
+    for (int iteration = 0; iteration < 16; ++iteration)
+        fwrite(payload, 1, sizeof(payload), stderr);
+    fputc('\n', stderr);
+    // This final partial line must be forwarded when the worker closes stderr.
+    fprintf(stderr, "tail-%c", fill);
+    fflush(stderr);
+}
+
+static void
 test_logi_a(void)
 {
     char *a = mk_big_str('a');
@@ -47,6 +81,7 @@ test_logi_a(void)
     for (int i = 0; i < 1024; ++i) {
         logi("%s", a);
     }
+    test_fragmented_output('a');
 }
 
 test_define {
@@ -63,6 +98,7 @@ test_logi_b(void)
     for (int i = 0; i < 1024; ++i) {
         logi("%s", b);
     }
+    test_fragmented_output('b');
 }
 
 test_define {

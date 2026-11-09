@@ -43,6 +43,19 @@ def main() -> None:
     if b'aabb' in result.stderr:
         die('interleaved output in stderr')
 
+    for fill, large_fill in ((b'a', b'x'), (b'b', b'y')):
+        line = b'split-' + fill + b':' + fill * 8192 + b'\n'
+        for name, output in (('stdout', result.stdout),
+                             ('stderr', result.stderr)):
+            if output.count(line) != 16:
+                die(f'missing or corrupted fragmented lines in {name}')
+
+        if result.stderr.count(b'tail-' + fill) != 1:
+            die('missing or corrupted unterminated stderr output')
+        # Oversized lines may interleave, but their bytes must not be lost or repeated.
+        if result.stderr.count(large_fill) != 16 * 8192:
+            die('missing or duplicated oversized stderr output')
+
 
 if __name__ == '__main__':
     main()

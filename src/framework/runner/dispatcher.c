@@ -22,6 +22,7 @@
 /// \file
 /// \brief The runner's dispatcher process
 
+#include <errno.h>
 #include <limits.h>
 #include <signal.h>
 #include <stdatomic.h>
@@ -65,6 +66,7 @@ struct worker_pipe {
 
     /// A reference to the pipe's containing worker. Used by epoll handlers.
     worker_t *worker;
+    string_t pending_output;
 };
 
 /// \brief A worker process's proxy in the dispatcher process.
@@ -1323,6 +1325,7 @@ worker_pipe_init(worker_t *worker, worker_pipe_t *pipe)
     }
 
     pipe->worker = worker;
+    pipe->pending_output = STRING_INIT;
 
     return true;
 }
@@ -1330,6 +1333,9 @@ worker_pipe_init(worker_t *worker, worker_pipe_t *pipe)
 static void
 worker_pipe_finish(worker_pipe_t *pipe)
 {
+    string_finish(&pipe->pending_output);
+    pipe->pending_output = STRING_INIT;
+
     for (int i = 0; i < 2; ++i) {
         if (pipe->fd[i] != -1) {
             close(pipe->fd[i]);
@@ -1379,30 +1385,53 @@ static void
 worker_pipe_drain_to_fd(worker_pipe_t *pipe, int fd)
 {
     char buf[4096];
+    const size_t output_limit = 64 * 1024;
+    string_t *pending = &pipe->pending_output;
 
     for (;;) {
-        ssize_t nread = 0;
-        ssize_t nwrite = 0;
-
         if (dispatcher.goto_next_phase)
             return;
 
-        nread = read(pipe->read_fd, buf, sizeof(buf));
-        if (nread <= 0)
+        size_t read_size = output_limit - pending->len;
+        if (read_size > sizeof(buf))
+            read_size = sizeof(buf);
+        ssize_t nread = read(pipe->read_fd, buf, read_size);
+        if (nread < 0) {
+            if (errno == EINTR)
+                continue;
+            // leave incomplete lines in the buffer for the next read.
             return;
+        }
 
-        while (nread > 0) {
+        string_append_raw(pending, buf, nread);
+        char *data = string_data(pending);
+        // Forward complete lines together so other workers cannot split them.
+        const char *newline = memrchr(data, '\n', pending->len);
+        size_t output_len = newline ? (size_t) (newline - data + 1) : 0;
+
+        if (nread == 0 || pending->len == output_limit)
+            output_len = pending->len;
+
+        size_t offset = 0;
+        while (offset < output_len) {
             if (dispatcher.goto_next_phase)
                 return;
 
-            nwrite = write(fd, buf, nread);
-            if (nwrite < 0) {
-                // Even on write errors, we must continue to drain the worker's
-                // pipe. Otherwise the worker may block on a full pipe.
+            ssize_t nwrite = write(fd, data + offset, output_len - offset);
+            if (nwrite < 0 && errno == EINTR)
                 continue;
-            }
+            // Discard failed output but keep draining to avoid blocking workers.
+            if (nwrite <= 0)
+                break;
 
-            nread -= nwrite;
+            offset += nwrite;
         }
+
+        // Retain only the unfinished suffix for a later read or EOF.
+        size_t remaining = pending->len - output_len;
+        memmove(data, data + output_len, remaining);
+        string_set_len(pending, remaining);
+        if (nread == 0)
+            return;
     }
 }
