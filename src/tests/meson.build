@@ -68,6 +68,7 @@ test_sources_with_glsl = [
   'bug/gitlab-14348.c',
   'bug/gitlab-15029.c',
   'bug/gitlab-16722.c',
+  'bug/gitlab-16764.c',
   'bug/intel-max-buffer-size.c',
   'func/4-vertex-buffers.c',
   'func/depthstencil/basic.c',
