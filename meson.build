@@ -104,8 +104,7 @@ dep_vulkan = dependency('vulkan')
 
 executable(
   'crucible',
-  [command_sources, data_outputs, framework_sources, man_pages, qonos_sources,
-   test_sources, util_sources],
+  [command_sources, data_outputs, framework_sources, qonos_sources, test_sources, util_sources],
   include_directories : [inc_include],
   dependencies: [dep_libpng16, dep_libxml2, dep_m, dep_thread, dep_vulkan],
 )

@@ -32,14 +32,13 @@ _man_pages = get_option('man_pages')
 
 a2x = find_program('a2x', required : _man_pages, disabler : true)
 
-man_pages = []
-
 foreach a : man_sources
   dst = a.substring(0, -4)
-  man_pages += custom_target(
+  custom_target(
     dst,
     input : a,
     output : dst,
     command : [a2x, '--format', 'manpage', '-D', '@OUTDIR@', '@INPUT@'],
+    build_by_default : true,
   )
 endforeach
