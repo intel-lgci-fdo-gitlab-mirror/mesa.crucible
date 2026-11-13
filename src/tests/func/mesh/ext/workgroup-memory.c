@@ -87,7 +87,9 @@ test_define {
     .name = "func.mesh.ext.workgroup_memory.mesh_uint",
     .start = workgroup_memory_mesh_uint,
     .no_image = true,
-    .mesh_shader = true,
+    .features = {
+        .meshShader = true,
+    },
 };
 
 static void
@@ -163,5 +165,8 @@ test_define {
     .name = "func.mesh.ext.workgroup_memory.task_uint",
     .start = workgroup_memory_task_uint,
     .no_image = true,
-    .mesh_shader = true,
+    .features = {
+        .meshShader = true,
+        .taskShader = true,
+    },
 };

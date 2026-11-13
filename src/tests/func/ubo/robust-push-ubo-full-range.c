@@ -244,7 +244,9 @@ test_define {
     .name = "func.ubo.robust-push-ubo-full-range",
     .start = test,
     .image_filename = "func.ubo.robust-push-ubo-full-range.ref.png",
-    .robust_buffer_access = true,
+    .features = {
+        .robustBufferAccess = true,
+    },
     .descriptor_count = {
         [VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER] = 128
     },

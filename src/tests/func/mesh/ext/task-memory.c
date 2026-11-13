@@ -110,7 +110,10 @@ test_define {
     .name = "func.mesh.ext.task_memory.uint",
     .start = task_memory_uint,
     .no_image = true,
-    .mesh_shader = true,
+    .features = {
+        .meshShader = true,
+        .taskShader = true,
+    },
 };
 
 
@@ -190,7 +193,10 @@ test_define {
     .name = "func.mesh.ext.task_memory.uint64",
     .start = task_memory_uint64,
     .no_image = true,
-    .mesh_shader = true,
+    .features = {
+        .meshShader = true,
+        .taskShader = true,
+    },
 };
 
 static void
@@ -262,7 +268,10 @@ test_define {
     .name = "func.mesh.ext.task_memory.uint8.single",
     .start = task_memory_uint8_single,
     .no_image = true,
-    .mesh_shader = true,
+    .features = {
+        .meshShader = true,
+        .taskShader = true,
+    },
 };
 
 static void
@@ -346,7 +355,10 @@ test_define {
     .name = "func.mesh.ext.task_memory.uint8.many",
     .start = task_memory_uint8_many,
     .no_image = true,
-    .mesh_shader = true,
+    .features = {
+        .meshShader = true,
+        .taskShader = true,
+    },
 };
 
 static void
@@ -418,7 +430,10 @@ test_define {
     .name = "func.mesh.ext.task_memory.uint16.single",
     .start = task_memory_uint16_single,
     .no_image = true,
-    .mesh_shader = true,
+    .features = {
+        .meshShader = true,
+        .taskShader = true,
+    },
 };
 
 static void
@@ -502,7 +517,10 @@ test_define {
     .name = "func.mesh.ext.task_memory.uint16.many",
     .start = task_memory_uint16_many,
     .no_image = true,
-    .mesh_shader = true,
+    .features = {
+        .meshShader = true,
+        .taskShader = true,
+    },
 };
 
 static void
@@ -586,7 +604,10 @@ test_define {
     .name = "func.mesh.ext.task_memory.uvec4",
     .start = task_memory_uvec4,
     .no_image = true,
-    .mesh_shader = true,
+    .features = {
+        .meshShader = true,
+        .taskShader = true,
+    },
 };
 
 static void
@@ -685,7 +706,10 @@ test_define {
     .name = "func.mesh.ext.task_memory.array_direct",
     .start = task_memory_array_direct,
     .no_image = true,
-    .mesh_shader = true,
+    .features = {
+        .meshShader = true,
+        .taskShader = true,
+    },
 };
 
 
@@ -769,7 +793,10 @@ test_define {
     .name = "func.mesh.ext.task_memory.array_indirect",
     .start = task_memory_array_indirect,
     .no_image = true,
-    .mesh_shader = true,
+    .features = {
+        .meshShader = true,
+        .taskShader = true,
+    },
 };
 
 static void
@@ -888,7 +915,10 @@ test_define {
     .name = "func.mesh.ext.task_memory.vec4_array_indirect",
     .start = task_memory_vec4_array_indirect,
     .no_image = true,
-    .mesh_shader = true,
+    .features = {
+        .meshShader = true,
+        .taskShader = true,
+    },
 };
 
 static void
@@ -1016,7 +1046,10 @@ test_define {
     .name = "func.mesh.ext.task_memory.vec4_array_unaligned_indirect",
     .start = task_memory_vec4_array_unaligned_indirect,
     .no_image = true,
-    .mesh_shader = true,
+    .features = {
+        .meshShader = true,
+        .taskShader = true,
+    },
 };
 
 static void
@@ -1123,7 +1156,10 @@ test_define {
     .name = "func.mesh.ext.task_memory.many",
     .start = task_memory_many,
     .no_image = true,
-    .mesh_shader = true,
+    .features = {
+        .meshShader = true,
+        .taskShader = true,
+    },
 };
 
 static void
@@ -1238,7 +1274,10 @@ test_define {
     .name = "func.mesh.ext.task_memory.struct",
     .start = task_memory_struct,
     .no_image = true,
-    .mesh_shader = true,
+    .features = {
+        .meshShader = true,
+        .taskShader = true,
+    },
 };
 
 static void
@@ -1352,7 +1391,10 @@ test_define {
     .name = "func.mesh.ext.task_memory.some_not_used",
     .start = task_memory_some_not_used,
     .no_image = true,
-    .mesh_shader = true,
+    .features = {
+        .meshShader = true,
+        .taskShader = true,
+    },
 };
 
 static void
@@ -1480,7 +1522,10 @@ test_define {
     .name = "func.mesh.ext.task_memory.load_output_struct",
     .start = task_memory_load_output_struct,
     .no_image = true,
-    .mesh_shader = true,
+    .features = {
+        .meshShader = true,
+        .taskShader = true,
+    },
 };
 
 
@@ -1560,7 +1605,10 @@ test_define {
     .name = "func.mesh.ext.task_memory.many_meshes",
     .start = task_memory_many_meshes,
     .no_image = true,
-    .mesh_shader = true,
+    .features = {
+        .meshShader = true,
+        .taskShader = true,
+    },
 };
 
 
@@ -1643,7 +1691,10 @@ test_define {
     .name = "func.mesh.ext.task_memory.many_tasks",
     .start = task_memory_many_tasks,
     .no_image = true,
-    .mesh_shader = true,
+    .features = {
+        .meshShader = true,
+        .taskShader = true,
+    },
 };
 
 
@@ -1733,7 +1784,10 @@ test_define {
     .name = "func.mesh.ext.task_memory.many_tasks_and_meshes",
     .start = task_memory_many_tasks_and_meshes,
     .no_image = true,
-    .mesh_shader = true,
+    .features = {
+        .meshShader = true,
+        .taskShader = true,
+    },
 };
 
 
@@ -1823,7 +1877,10 @@ test_define {
     .name = "func.mesh.ext.task_memory.large_array",
     .start = task_memory_large_array,
     .no_image = true,
-    .mesh_shader = true,
+    .features = {
+        .meshShader = true,
+        .taskShader = true,
+    },
 };
 
 /* https://gitlab.freedesktop.org/mesa/mesa/-/issues/7141 */
@@ -1900,5 +1957,8 @@ test_define {
     .name = "func.mesh.ext.task_memory.issue7141",
     .start = task_memory_issue7141,
     .no_image = true,
-    .mesh_shader = true,
+    .features = {
+        .meshShader = true,
+        .taskShader = true,
+    },
 };

@@ -101,7 +101,9 @@ test_define {
     .name = "func.mesh.ext.clipdistance.1",
     .start = clipdistance_1,
     .image_filename = "func.mesh.clipdistance.ref.png",
-    .mesh_shader = true,
+    .features = {
+        .meshShader = true,
+    },
 };
 
 static void
@@ -180,7 +182,9 @@ test_define {
     .name = "func.mesh.ext.clipdistance.5",
     .start = clipdistance_5,
     .image_filename = "func.mesh.clipdistance.ref.png",
-    .mesh_shader = true,
+    .features = {
+        .meshShader = true,
+    },
 };
 
 static void
@@ -252,7 +256,9 @@ test_define {
     .name = "func.mesh.ext.culldistance.1",
     .start = culldistance_1,
     .image_filename = "func.mesh.culldistance.ref.png",
-    .mesh_shader = true,
+    .features = {
+        .meshShader = true,
+    },
 };
 
 static void
@@ -331,7 +337,9 @@ test_define {
     .name = "func.mesh.ext.culldistance.5",
     .start = culldistance_5,
     .image_filename = "func.mesh.culldistance.ref.png",
-    .mesh_shader = true,
+    .features = {
+        .meshShader = true,
+    },
 };
 
 static void
@@ -420,7 +428,9 @@ test_define {
     .name = "func.mesh.ext.clipdistance_culldistance.1",
     .start = clipdistance_1_culldistance_1,
     .image_filename = "func.mesh.clipdistance_culldistance.ref.png",
-    .mesh_shader = true,
+    .features = {
+        .meshShader = true,
+    },
 };
 
 static void
@@ -455,5 +465,7 @@ test_define {
     .name = "func.mesh.ext.clipdistance.1.fs",
     .start = clipdistance_1_fs,
     .image_filename = "func.mesh.clipdistance.fs.ref.png",
-    .mesh_shader = true,
+    .features = {
+        .meshShader = true,
+    },
 };

@@ -93,5 +93,7 @@ test_define {
     .name = "func.mesh.ext.primitive_id.fs",
     .start = primitive_id_fs,
     .image_filename = "func.mesh.primitive_id.fs.ref.png",
-    .mesh_shader = true,
+    .features = {
+        .meshShader = true,
+    },
 };

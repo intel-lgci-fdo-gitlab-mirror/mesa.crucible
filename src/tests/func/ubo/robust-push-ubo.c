@@ -247,7 +247,9 @@ test_define {
     .name = "func.ubo.robust-push-ubo.vs",
     .start = test_vs,
     .image_filename = "32x32-green.ref.png",
-    .robust_buffer_access = true,
+    .features = {
+        .robustBufferAccess = true,
+    },
 };
 
 static void
@@ -260,7 +262,9 @@ test_define {
     .name = "func.ubo.robust-push-ubo.fs",
     .start = test_fs,
     .image_filename = "32x32-green.ref.png",
-    .robust_buffer_access = true,
+    .features = {
+        .robustBufferAccess = true,
+    },
 };
 
 static void
@@ -345,7 +349,9 @@ test_define {
     .name = "func.ubo.robust-push-ubo-dynamic.vs",
     .start = test_dynamic_vs,
     .image_filename = "32x32-green.ref.png",
-    .robust_buffer_access = true,
+    .features = {
+        .robustBufferAccess = true,
+    },
 };
 
 static void
@@ -358,5 +364,7 @@ test_define {
     .name = "func.ubo.robust-push-ubo-dynamic.fs",
     .start = test_dynamic_fs,
     .image_filename = "32x32-green.ref.png",
-    .robust_buffer_access = true,
+    .features = {
+        .robustBufferAccess = true,
+    },
 };

@@ -298,5 +298,7 @@ test_define {
   .name = "bug.gitlab-5711",
   .start = test_gitlab_5711,
   .no_image = true,
-  .robust_image_access = true,
+  .features = {
+    .robustImageAccess2 = true,
+  },
 };

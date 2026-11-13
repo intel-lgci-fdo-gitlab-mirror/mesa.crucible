@@ -91,35 +91,45 @@ test_define {
     .name = "func.mesh.ext.basic.mesh",
     .start = basic_mesh,
     .image_filename = "func.mesh.basic.ref.png",
-    .mesh_shader = true,
+    .features = {
+        .meshShader = true,
+    },
 };
 
 test_define {
     .name = "func.mesh.ext.basic.mesh_require8",
     .start = basic_mesh,
     .image_filename = "func.mesh.basic.ref.png",
-    .mesh_shader = true,
+    .features = {
+        .meshShader = true,
+    },
 };
 
 test_define {
     .name = "func.mesh.ext.basic.mesh_require16",
     .start = basic_mesh,
     .image_filename = "func.mesh.basic.ref.png",
-    .mesh_shader = true,
+    .features = {
+        .meshShader = true,
+    },
 };
 
 test_define {
     .name = "func.mesh.ext.basic.mesh_require32",
     .start = basic_mesh,
     .image_filename = "func.mesh.basic.ref.png",
-    .mesh_shader = true,
+    .features = {
+        .meshShader = true,
+    },
 };
 
 test_define {
     .name = "func.mesh.ext.basic.mesh_require64",
     .start = basic_mesh,
     .image_filename = "func.mesh.basic.ref.png",
-    .mesh_shader = true,
+    .features = {
+        .meshShader = true,
+    },
 };
 
 
@@ -208,33 +218,48 @@ test_define {
     .name = "func.mesh.ext.basic.task",
     .start = basic_task,
     .image_filename = "func.mesh.basic.ref.png",
-    .mesh_shader = true,
+    .features = {
+        .meshShader = true,
+        .taskShader = true,
+    },
 };
 
 test_define {
     .name = "func.mesh.ext.basic.task_require8",
     .start = basic_task,
     .image_filename = "func.mesh.basic.ref.png",
-    .mesh_shader = true,
+    .features = {
+        .meshShader = true,
+        .taskShader = true,
+    },
 };
 
 test_define {
     .name = "func.mesh.ext.basic.task_require16",
     .start = basic_task,
     .image_filename = "func.mesh.basic.ref.png",
-    .mesh_shader = true,
+    .features = {
+        .meshShader = true,
+        .taskShader = true,
+    },
 };
 
 test_define {
     .name = "func.mesh.ext.basic.task_require32",
     .start = basic_task,
     .image_filename = "func.mesh.basic.ref.png",
-    .mesh_shader = true,
+    .features = {
+        .meshShader = true,
+        .taskShader = true,
+    },
 };
 
 test_define {
     .name = "func.mesh.ext.basic.task_require64",
     .start = basic_task,
     .image_filename = "func.mesh.basic.ref.png",
-    .mesh_shader = true,
+    .features = {
+        .meshShader = true,
+        .taskShader = true,
+    },
 };

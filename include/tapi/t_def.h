@@ -97,12 +97,6 @@ struct test_def {
     /// unchanged; they do not request that a feature be disabled.
     const struct cru_features features;
 
-    const bool robust_buffer_access;
-
-    const bool robust_image_access;
-
-    const bool mesh_shader;
-
     /// \brief Number of each descriptor type required
     ///
     /// If the elements of this array are all zero, the default descriptor

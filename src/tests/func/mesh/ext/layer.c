@@ -265,5 +265,7 @@ test_define {
     .name = "func.mesh.ext.layer",
     .start = layer,
     .no_image = true,
-    .mesh_shader = true,
+    .features = {
+        .meshShader = true,
+    },
 };

@@ -82,10 +82,9 @@ including functionality enabled unconditionally by the selected core API.
 selects the EXT variant. These requirements exclude the incompatible extension
 from device creation. Do not request both variants.
 
-Unset bits leave feature enablement unchanged. Existing defaults and the
-`robust_buffer_access`, `robust_image_access`, and `mesh_shader` flags retain
-their old behavior. A test must also request any prerequisite feature bits not
-provided by those defaults, and must not request incompatible combinations.
+Unset bits leave feature enablement unchanged. A test must also request any
+prerequisite feature bits not provided by the framework's defaults, and must
+not request incompatible combinations.
 The framework does not change the test's API version or infer SPIR-V features.
 
 `misc/gen_features.py` generates the feature names and structure descriptions
