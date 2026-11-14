@@ -144,6 +144,7 @@ test()
             .layerCount = 1,
         },
         .pNext = &(VkImageViewUsageCreateInfo) {
+            .sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_USAGE_CREATE_INFO,
             .usage = VK_IMAGE_USAGE_TRANSFER_SRC_BIT |
                      VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT,
         });
