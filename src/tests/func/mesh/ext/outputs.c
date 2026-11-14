@@ -28,6 +28,7 @@ static void
 outputs_per_vertex_basic(void)
 {
     t_require_ext("VK_EXT_mesh_shader");
+    t_require_ext("VK_KHR_spirv_1_4");
 
     VkShaderModule mesh = qoCreateShaderModuleGLSL(t_device, MESH,
         QO_EXTENSION GL_EXT_mesh_shader : require
@@ -74,6 +75,7 @@ outputs_per_vertex_basic(void)
 
 test_define {
     .name = "func.mesh.ext.outputs.per_vertex.basic",
+    .api_version = VK_API_VERSION_1_1,
     .start = outputs_per_vertex_basic,
     .image_filename = "func.mesh.basic.ref.png",
     .features = {
@@ -86,6 +88,7 @@ static void
 outputs_per_vertex_block(void)
 {
     t_require_ext("VK_EXT_mesh_shader");
+    t_require_ext("VK_KHR_spirv_1_4");
 
     VkShaderModule mesh = qoCreateShaderModuleGLSL(t_device, MESH,
         QO_EXTENSION GL_EXT_mesh_shader : require
@@ -134,6 +137,7 @@ outputs_per_vertex_block(void)
 
 test_define {
     .name = "func.mesh.ext.outputs.per_vertex.block",
+    .api_version = VK_API_VERSION_1_1,
     .start = outputs_per_vertex_block,
     .image_filename = "func.mesh.basic.ref.png",
     .features = {
@@ -146,6 +150,7 @@ static void
 outputs_per_primitive_basic(void)
 {
     t_require_ext("VK_EXT_mesh_shader");
+    t_require_ext("VK_KHR_spirv_1_4");
 
     VkShaderModule mesh = qoCreateShaderModuleGLSL(t_device, MESH,
         QO_EXTENSION GL_EXT_mesh_shader : require
@@ -217,6 +222,7 @@ outputs_per_primitive_basic(void)
 
 test_define {
     .name = "func.mesh.ext.outputs.per_primitive.basic",
+    .api_version = VK_API_VERSION_1_1,
     .start = outputs_per_primitive_basic,
     .image_filename = "func.mesh.basic.ref.png",
     .features = {
@@ -229,6 +235,7 @@ static void
 outputs_per_primitive_block(void)
 {
     t_require_ext("VK_EXT_mesh_shader");
+    t_require_ext("VK_KHR_spirv_1_4");
 
     VkShaderModule mesh = qoCreateShaderModuleGLSL(t_device, MESH,
         QO_EXTENSION GL_EXT_mesh_shader : require
@@ -302,6 +309,7 @@ outputs_per_primitive_block(void)
 
 test_define {
     .name = "func.mesh.ext.outputs.per_primitive.block",
+    .api_version = VK_API_VERSION_1_1,
     .start = outputs_per_primitive_block,
     .image_filename = "func.mesh.basic.ref.png",
     .features = {
@@ -314,6 +322,7 @@ static void
 outputs_per_primitive_unused(void)
 {
     t_require_ext("VK_EXT_mesh_shader");
+    t_require_ext("VK_KHR_spirv_1_4");
 
     VkShaderModule mesh = qoCreateShaderModuleGLSL(t_device, MESH,
         QO_EXTENSION GL_EXT_mesh_shader : require
@@ -392,6 +401,7 @@ outputs_per_primitive_unused(void)
 
 test_define {
     .name = "func.mesh.ext.outputs.per_primitive.unused",
+    .api_version = VK_API_VERSION_1_1,
     .start = outputs_per_primitive_unused,
     .image_filename = "func.mesh.basic.ref.png",
     .features = {
@@ -403,6 +413,7 @@ static void
 outputs_per_primitive_some_unused(void)
 {
     t_require_ext("VK_EXT_mesh_shader");
+    t_require_ext("VK_KHR_spirv_1_4");
 
     VkShaderModule mesh = qoCreateShaderModuleGLSL(t_device, MESH,
         QO_EXTENSION GL_EXT_mesh_shader : require
@@ -478,6 +489,7 @@ outputs_per_primitive_some_unused(void)
 
 test_define {
     .name = "func.mesh.ext.outputs.per_primitive.some_unused",
+    .api_version = VK_API_VERSION_1_1,
     .start = outputs_per_primitive_some_unused,
     .image_filename = "func.mesh.basic.ref.png",
     .features = {
@@ -489,6 +501,7 @@ static void
 outputs_per_vertex_block_compact_layout(void)
 {
     t_require_ext("VK_EXT_mesh_shader");
+    t_require_ext("VK_KHR_spirv_1_4");
 
     VkShaderModule mesh = qoCreateShaderModuleGLSL(t_device, MESH,
         QO_EXTENSION GL_EXT_mesh_shader : require
@@ -578,6 +591,7 @@ outputs_per_vertex_block_compact_layout(void)
 
 test_define {
     .name = "func.mesh.ext.outputs.per_vertex.block_compact_layout",
+    .api_version = VK_API_VERSION_1_1,
     .start = outputs_per_vertex_block_compact_layout,
     .image_filename = "func.mesh.basic.ref.png",
     .features = {
@@ -589,6 +603,7 @@ static void
 outputs_per_vertex_block_compact_layout_flat(void)
 {
     t_require_ext("VK_EXT_mesh_shader");
+    t_require_ext("VK_KHR_spirv_1_4");
 
     VkShaderModule mesh = qoCreateShaderModuleGLSL(t_device, MESH,
         QO_EXTENSION GL_EXT_mesh_shader : require
@@ -683,6 +698,7 @@ outputs_per_vertex_block_compact_layout_flat(void)
 
 test_define {
     .name = "func.mesh.ext.outputs.per_vertex.block_compact_layout_flat",
+    .api_version = VK_API_VERSION_1_1,
     .start = outputs_per_vertex_block_compact_layout_flat,
     .image_filename = "func.mesh.basic.ref.png",
     .features = {
@@ -694,6 +710,7 @@ static void
 outputs_per_primitive_block_compact_layout(void)
 {
     t_require_ext("VK_EXT_mesh_shader");
+    t_require_ext("VK_KHR_spirv_1_4");
 
     VkShaderModule mesh = qoCreateShaderModuleGLSL(t_device, MESH,
         QO_EXTENSION GL_EXT_mesh_shader : require
@@ -780,6 +797,7 @@ outputs_per_primitive_block_compact_layout(void)
 
 test_define {
     .name = "func.mesh.ext.outputs.per_primitive.block_compact_layout",
+    .api_version = VK_API_VERSION_1_1,
     .start = outputs_per_primitive_block_compact_layout,
     .image_filename = "func.mesh.basic.ref.png",
     .features = {
@@ -791,6 +809,7 @@ static void
 outputs_per_primitive_indirect_array(void)
 {
     t_require_ext("VK_EXT_mesh_shader");
+    t_require_ext("VK_KHR_spirv_1_4");
 
     VkShaderModule task = qoCreateShaderModuleGLSL(t_device, TASK,
         QO_EXTENSION GL_EXT_mesh_shader : require
@@ -899,6 +918,7 @@ outputs_per_primitive_indirect_array(void)
 
 test_define {
     .name = "func.mesh.ext.outputs.per_primitive.indirect_array",
+    .api_version = VK_API_VERSION_1_1,
     .start = outputs_per_primitive_indirect_array,
     .image_filename = "func.mesh.basic.ref.png",
     .features = {
@@ -911,6 +931,7 @@ static void
 outputs_per_vertex_indirect_array(void)
 {
     t_require_ext("VK_EXT_mesh_shader");
+    t_require_ext("VK_KHR_spirv_1_4");
 
     VkShaderModule task = qoCreateShaderModuleGLSL(t_device, TASK,
         QO_EXTENSION GL_EXT_mesh_shader : require
@@ -1019,6 +1040,7 @@ outputs_per_vertex_indirect_array(void)
 
 test_define {
     .name = "func.mesh.ext.outputs.per_vertex.indirect_array",
+    .api_version = VK_API_VERSION_1_1,
     .start = outputs_per_vertex_indirect_array,
     .image_filename = "func.mesh.basic.ref.png",
     .features = {

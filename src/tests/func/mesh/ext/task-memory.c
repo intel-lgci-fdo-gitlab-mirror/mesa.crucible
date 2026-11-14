@@ -36,6 +36,7 @@ static void
 task_memory_uint(void)
 {
     t_require_ext("VK_EXT_mesh_shader");
+    t_require_ext("VK_KHR_spirv_1_4");
 
     VkShaderModule task = qoCreateShaderModuleGLSL(t_device, TASK,
         QO_EXTENSION GL_EXT_mesh_shader : require
@@ -108,6 +109,7 @@ task_memory_uint(void)
 
 test_define {
     .name = "func.mesh.ext.task_memory.uint",
+    .api_version = VK_API_VERSION_1_1,
     .start = task_memory_uint,
     .no_image = true,
     .features = {
@@ -121,6 +123,7 @@ static void
 task_memory_uint64(void)
 {
     t_require_ext("VK_EXT_mesh_shader");
+    t_require_ext("VK_KHR_spirv_1_4");
 
     VkShaderModule task = qoCreateShaderModuleGLSL(t_device, TASK,
         QO_EXTENSION GL_EXT_mesh_shader : require
@@ -191,6 +194,7 @@ task_memory_uint64(void)
 
 test_define {
     .name = "func.mesh.ext.task_memory.uint64",
+    .api_version = VK_API_VERSION_1_1,
     .start = task_memory_uint64,
     .no_image = true,
     .features = {
@@ -203,6 +207,7 @@ static void
 task_memory_uint8_single(void)
 {
     t_require_ext("VK_EXT_mesh_shader");
+    t_require_ext("VK_KHR_spirv_1_4");
 
     VkShaderModule task = qoCreateShaderModuleGLSL(t_device, TASK,
         QO_EXTENSION GL_EXT_mesh_shader : require
@@ -266,6 +271,7 @@ task_memory_uint8_single(void)
 
 test_define {
     .name = "func.mesh.ext.task_memory.uint8.single",
+    .api_version = VK_API_VERSION_1_1,
     .start = task_memory_uint8_single,
     .no_image = true,
     .features = {
@@ -279,6 +285,7 @@ static void
 task_memory_uint8_many(void)
 {
     t_require_ext("VK_EXT_mesh_shader");
+    t_require_ext("VK_KHR_spirv_1_4");
 
     VkShaderModule task = qoCreateShaderModuleGLSL(t_device, TASK,
         QO_EXTENSION GL_EXT_mesh_shader : require
@@ -354,6 +361,7 @@ task_memory_uint8_many(void)
 
 test_define {
     .name = "func.mesh.ext.task_memory.uint8.many",
+    .api_version = VK_API_VERSION_1_1,
     .start = task_memory_uint8_many,
     .no_image = true,
     .features = {
@@ -367,6 +375,7 @@ static void
 task_memory_uint16_single(void)
 {
     t_require_ext("VK_EXT_mesh_shader");
+    t_require_ext("VK_KHR_spirv_1_4");
 
     VkShaderModule task = qoCreateShaderModuleGLSL(t_device, TASK,
         QO_EXTENSION GL_EXT_mesh_shader : require
@@ -430,6 +439,7 @@ task_memory_uint16_single(void)
 
 test_define {
     .name = "func.mesh.ext.task_memory.uint16.single",
+    .api_version = VK_API_VERSION_1_1,
     .start = task_memory_uint16_single,
     .no_image = true,
     .features = {
@@ -442,6 +452,7 @@ static void
 task_memory_uint16_many(void)
 {
     t_require_ext("VK_EXT_mesh_shader");
+    t_require_ext("VK_KHR_spirv_1_4");
 
     VkShaderModule task = qoCreateShaderModuleGLSL(t_device, TASK,
         QO_EXTENSION GL_EXT_mesh_shader : require
@@ -517,6 +528,7 @@ task_memory_uint16_many(void)
 
 test_define {
     .name = "func.mesh.ext.task_memory.uint16.many",
+    .api_version = VK_API_VERSION_1_1,
     .start = task_memory_uint16_many,
     .no_image = true,
     .features = {
@@ -529,6 +541,7 @@ static void
 task_memory_uvec4(void)
 {
     t_require_ext("VK_EXT_mesh_shader");
+    t_require_ext("VK_KHR_spirv_1_4");
 
     VkShaderModule task = qoCreateShaderModuleGLSL(t_device, TASK,
         QO_EXTENSION GL_EXT_mesh_shader : require
@@ -604,6 +617,7 @@ task_memory_uvec4(void)
 
 test_define {
     .name = "func.mesh.ext.task_memory.uvec4",
+    .api_version = VK_API_VERSION_1_1,
     .start = task_memory_uvec4,
     .no_image = true,
     .features = {
@@ -616,6 +630,7 @@ static void
 task_memory_array_direct(void)
 {
     t_require_ext("VK_EXT_mesh_shader");
+    t_require_ext("VK_KHR_spirv_1_4");
 
     VkShaderModule task = qoCreateShaderModuleGLSL(t_device, TASK,
         QO_EXTENSION GL_EXT_mesh_shader : require
@@ -706,6 +721,7 @@ task_memory_array_direct(void)
 
 test_define {
     .name = "func.mesh.ext.task_memory.array_direct",
+    .api_version = VK_API_VERSION_1_1,
     .start = task_memory_array_direct,
     .no_image = true,
     .features = {
@@ -719,6 +735,7 @@ static void
 task_memory_array_indirect(void)
 {
     t_require_ext("VK_EXT_mesh_shader");
+    t_require_ext("VK_KHR_spirv_1_4");
 
     VkShaderModule task = qoCreateShaderModuleGLSL(t_device, TASK,
         QO_EXTENSION GL_EXT_mesh_shader : require
@@ -793,6 +810,7 @@ task_memory_array_indirect(void)
 
 test_define {
     .name = "func.mesh.ext.task_memory.array_indirect",
+    .api_version = VK_API_VERSION_1_1,
     .start = task_memory_array_indirect,
     .no_image = true,
     .features = {
@@ -805,6 +823,7 @@ static void
 task_memory_vec4_array_indirect(void)
 {
     t_require_ext("VK_EXT_mesh_shader");
+    t_require_ext("VK_KHR_spirv_1_4");
 
     VkShaderModule task = qoCreateShaderModuleGLSL(t_device, TASK,
         QO_EXTENSION GL_EXT_mesh_shader : require
@@ -915,6 +934,7 @@ task_memory_vec4_array_indirect(void)
 
 test_define {
     .name = "func.mesh.ext.task_memory.vec4_array_indirect",
+    .api_version = VK_API_VERSION_1_1,
     .start = task_memory_vec4_array_indirect,
     .no_image = true,
     .features = {
@@ -927,6 +947,7 @@ static void
 task_memory_vec4_array_unaligned_indirect(void)
 {
     t_require_ext("VK_EXT_mesh_shader");
+    t_require_ext("VK_KHR_spirv_1_4");
 
     VkShaderModule task = qoCreateShaderModuleGLSL(t_device, TASK,
         QO_EXTENSION GL_EXT_mesh_shader : require
@@ -1046,6 +1067,7 @@ task_memory_vec4_array_unaligned_indirect(void)
 
 test_define {
     .name = "func.mesh.ext.task_memory.vec4_array_unaligned_indirect",
+    .api_version = VK_API_VERSION_1_1,
     .start = task_memory_vec4_array_unaligned_indirect,
     .no_image = true,
     .features = {
@@ -1058,6 +1080,7 @@ static void
 task_memory_many(void)
 {
     t_require_ext("VK_EXT_mesh_shader");
+    t_require_ext("VK_KHR_spirv_1_4");
 
     VkShaderModule task = qoCreateShaderModuleGLSL(t_device, TASK,
         QO_EXTENSION GL_EXT_mesh_shader : require
@@ -1156,6 +1179,7 @@ task_memory_many(void)
 
 test_define {
     .name = "func.mesh.ext.task_memory.many",
+    .api_version = VK_API_VERSION_1_1,
     .start = task_memory_many,
     .no_image = true,
     .features = {
@@ -1168,6 +1192,7 @@ static void
 task_memory_struct(void)
 {
     t_require_ext("VK_EXT_mesh_shader");
+    t_require_ext("VK_KHR_spirv_1_4");
 
     VkShaderModule task = qoCreateShaderModuleGLSL(t_device, TASK,
         QO_EXTENSION GL_EXT_mesh_shader : require
@@ -1274,6 +1299,7 @@ task_memory_struct(void)
 
 test_define {
     .name = "func.mesh.ext.task_memory.struct",
+    .api_version = VK_API_VERSION_1_1,
     .start = task_memory_struct,
     .no_image = true,
     .features = {
@@ -1286,6 +1312,7 @@ static void
 task_memory_some_not_used(void)
 {
     t_require_ext("VK_EXT_mesh_shader");
+    t_require_ext("VK_KHR_spirv_1_4");
 
     VkShaderModule task = qoCreateShaderModuleGLSL(t_device, TASK,
         QO_EXTENSION GL_EXT_mesh_shader : require
@@ -1391,6 +1418,7 @@ task_memory_some_not_used(void)
 
 test_define {
     .name = "func.mesh.ext.task_memory.some_not_used",
+    .api_version = VK_API_VERSION_1_1,
     .start = task_memory_some_not_used,
     .no_image = true,
     .features = {
@@ -1403,6 +1431,7 @@ static void
 task_memory_load_output_struct(void)
 {
     t_require_ext("VK_EXT_mesh_shader");
+    t_require_ext("VK_KHR_spirv_1_4");
 
     VkShaderModule task = qoCreateShaderModuleGLSL(t_device, TASK,
         QO_EXTENSION GL_EXT_mesh_shader : require
@@ -1522,6 +1551,7 @@ task_memory_load_output_struct(void)
 
 test_define {
     .name = "func.mesh.ext.task_memory.load_output_struct",
+    .api_version = VK_API_VERSION_1_1,
     .start = task_memory_load_output_struct,
     .no_image = true,
     .features = {
@@ -1535,6 +1565,7 @@ static void
 task_memory_many_meshes(void)
 {
     t_require_ext("VK_EXT_mesh_shader");
+    t_require_ext("VK_KHR_spirv_1_4");
 
     VkShaderModule task = qoCreateShaderModuleGLSL(t_device, TASK,
         QO_EXTENSION GL_EXT_mesh_shader : require
@@ -1605,6 +1636,7 @@ task_memory_many_meshes(void)
 
 test_define {
     .name = "func.mesh.ext.task_memory.many_meshes",
+    .api_version = VK_API_VERSION_1_1,
     .start = task_memory_many_meshes,
     .no_image = true,
     .features = {
@@ -1618,6 +1650,7 @@ static void
 task_memory_many_tasks(void)
 {
     t_require_ext("VK_EXT_mesh_shader");
+    t_require_ext("VK_KHR_spirv_1_4");
 
     VkShaderModule task = qoCreateShaderModuleGLSL(t_device, TASK,
         QO_EXTENSION GL_EXT_mesh_shader : require
@@ -1691,6 +1724,7 @@ task_memory_many_tasks(void)
 
 test_define {
     .name = "func.mesh.ext.task_memory.many_tasks",
+    .api_version = VK_API_VERSION_1_1,
     .start = task_memory_many_tasks,
     .no_image = true,
     .features = {
@@ -1704,6 +1738,7 @@ static void
 task_memory_many_tasks_and_meshes(void)
 {
     t_require_ext("VK_EXT_mesh_shader");
+    t_require_ext("VK_KHR_spirv_1_4");
 
     VkShaderModule task = qoCreateShaderModuleGLSL(t_device, TASK,
         QO_EXTENSION GL_EXT_mesh_shader : require
@@ -1784,6 +1819,7 @@ task_memory_many_tasks_and_meshes(void)
 
 test_define {
     .name = "func.mesh.ext.task_memory.many_tasks_and_meshes",
+    .api_version = VK_API_VERSION_1_1,
     .start = task_memory_many_tasks_and_meshes,
     .no_image = true,
     .features = {
@@ -1797,6 +1833,7 @@ static void
 task_memory_large_array(void)
 {
     t_require_ext("VK_EXT_mesh_shader");
+    t_require_ext("VK_KHR_spirv_1_4");
 
     VkShaderModule task = qoCreateShaderModuleGLSL(t_device, TASK,
         QO_EXTENSION GL_EXT_mesh_shader : require
@@ -1877,6 +1914,7 @@ task_memory_large_array(void)
 
 test_define {
     .name = "func.mesh.ext.task_memory.large_array",
+    .api_version = VK_API_VERSION_1_1,
     .start = task_memory_large_array,
     .no_image = true,
     .features = {
@@ -1890,6 +1928,7 @@ static void
 task_memory_issue7141(void)
 {
     t_require_ext("VK_EXT_mesh_shader");
+    t_require_ext("VK_KHR_spirv_1_4");
 
     VkShaderModule task = qoCreateShaderModuleGLSL(t_device, TASK,
         QO_EXTENSION GL_EXT_mesh_shader : require
@@ -1957,6 +1996,7 @@ task_memory_issue7141(void)
 
 test_define {
     .name = "func.mesh.ext.task_memory.issue7141",
+    .api_version = VK_API_VERSION_1_1,
     .start = task_memory_issue7141,
     .no_image = true,
     .features = {

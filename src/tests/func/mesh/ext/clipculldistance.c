@@ -91,6 +91,7 @@ static void
 clipdistance_1(void)
 {
     t_require_ext("VK_EXT_mesh_shader");
+    t_require_ext("VK_KHR_spirv_1_4");
 
     VkShaderModule mesh = get_clipdistance_1_shader();
 
@@ -99,6 +100,7 @@ clipdistance_1(void)
 
 test_define {
     .name = "func.mesh.ext.clipdistance.1",
+    .api_version = VK_API_VERSION_1_1,
     .start = clipdistance_1,
     .image_filename = "func.mesh.clipdistance.ref.png",
     .features = {
@@ -110,6 +112,7 @@ static void
 clipdistance_5(void)
 {
     t_require_ext("VK_EXT_mesh_shader");
+    t_require_ext("VK_KHR_spirv_1_4");
 
     VkShaderModule mesh = qoCreateShaderModuleGLSL(t_device, MESH,
         QO_EXTENSION GL_EXT_mesh_shader : require
@@ -180,6 +183,7 @@ clipdistance_5(void)
 
 test_define {
     .name = "func.mesh.ext.clipdistance.5",
+    .api_version = VK_API_VERSION_1_1,
     .start = clipdistance_5,
     .image_filename = "func.mesh.clipdistance.ref.png",
     .features = {
@@ -191,6 +195,7 @@ static void
 culldistance_1(void)
 {
     t_require_ext("VK_EXT_mesh_shader");
+    t_require_ext("VK_KHR_spirv_1_4");
 
     VkShaderModule mesh = qoCreateShaderModuleGLSL(t_device, MESH,
         QO_EXTENSION GL_EXT_mesh_shader : require
@@ -254,6 +259,7 @@ culldistance_1(void)
 
 test_define {
     .name = "func.mesh.ext.culldistance.1",
+    .api_version = VK_API_VERSION_1_1,
     .start = culldistance_1,
     .image_filename = "func.mesh.culldistance.ref.png",
     .features = {
@@ -265,6 +271,7 @@ static void
 culldistance_5(void)
 {
     t_require_ext("VK_EXT_mesh_shader");
+    t_require_ext("VK_KHR_spirv_1_4");
 
     VkShaderModule mesh = qoCreateShaderModuleGLSL(t_device, MESH,
         QO_EXTENSION GL_EXT_mesh_shader : require
@@ -335,6 +342,7 @@ culldistance_5(void)
 
 test_define {
     .name = "func.mesh.ext.culldistance.5",
+    .api_version = VK_API_VERSION_1_1,
     .start = culldistance_5,
     .image_filename = "func.mesh.culldistance.ref.png",
     .features = {
@@ -346,6 +354,7 @@ static void
 clipdistance_1_culldistance_1(void)
 {
     t_require_ext("VK_EXT_mesh_shader");
+    t_require_ext("VK_KHR_spirv_1_4");
 
     VkShaderModule mesh = qoCreateShaderModuleGLSL(t_device, MESH,
         QO_EXTENSION GL_EXT_mesh_shader : require
@@ -426,6 +435,7 @@ clipdistance_1_culldistance_1(void)
 
 test_define {
     .name = "func.mesh.ext.clipdistance_culldistance.1",
+    .api_version = VK_API_VERSION_1_1,
     .start = clipdistance_1_culldistance_1,
     .image_filename = "func.mesh.clipdistance_culldistance.ref.png",
     .features = {
@@ -437,6 +447,7 @@ static void
 clipdistance_1_fs(void)
 {
     t_require_ext("VK_EXT_mesh_shader");
+    t_require_ext("VK_KHR_spirv_1_4");
 
     VkShaderModule mesh = get_clipdistance_1_shader();
 
@@ -463,6 +474,7 @@ clipdistance_1_fs(void)
 
 test_define {
     .name = "func.mesh.ext.clipdistance.1.fs",
+    .api_version = VK_API_VERSION_1_1,
     .start = clipdistance_1_fs,
     .image_filename = "func.mesh.clipdistance.fs.ref.png",
     .features = {

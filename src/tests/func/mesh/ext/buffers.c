@@ -28,6 +28,7 @@ static void
 buffers_mesh_ssbo_read(void)
 {
     t_require_ext("VK_EXT_mesh_shader");
+    t_require_ext("VK_KHR_spirv_1_4");
 
     VkShaderModule mesh = qoCreateShaderModuleGLSL(t_device, MESH,
         QO_EXTENSION GL_EXT_mesh_shader : require
@@ -91,6 +92,7 @@ buffers_mesh_ssbo_read(void)
 
 test_define {
     .name = "func.mesh.ext.buffers.mesh_ssbo_read",
+    .api_version = VK_API_VERSION_1_1,
     .start = buffers_mesh_ssbo_read,
     .image_filename = "func.mesh.basic.ref.png",
     .features = {
@@ -103,6 +105,7 @@ static void
 buffers_mesh_ssbo_write(void)
 {
     t_require_ext("VK_EXT_mesh_shader");
+    t_require_ext("VK_KHR_spirv_1_4");
 
     VkShaderModule mesh = qoCreateShaderModuleGLSL(t_device, MESH,
         QO_EXTENSION GL_EXT_mesh_shader : require
@@ -170,6 +173,7 @@ buffers_mesh_ssbo_write(void)
 
 test_define {
     .name = "func.mesh.ext.buffers.mesh_ssbo_write",
+    .api_version = VK_API_VERSION_1_1,
     .start = buffers_mesh_ssbo_write,
     .image_filename = "func.mesh.basic.ref.png",
     .features = {
@@ -182,6 +186,7 @@ static void
 buffers_mesh_ubo_read(void)
 {
     t_require_ext("VK_EXT_mesh_shader");
+    t_require_ext("VK_KHR_spirv_1_4");
 
     VkShaderModule mesh = qoCreateShaderModuleGLSL(t_device, MESH,
         QO_EXTENSION GL_EXT_mesh_shader : require
@@ -246,6 +251,7 @@ buffers_mesh_ubo_read(void)
 
 test_define {
     .name = "func.mesh.ext.buffers.mesh_ubo_read",
+    .api_version = VK_API_VERSION_1_1,
     .start = buffers_mesh_ubo_read,
     .image_filename = "func.mesh.basic.ref.png",
     .features = {
@@ -259,6 +265,7 @@ static void
 buffers_task_ssbo_read(void)
 {
     t_require_ext("VK_EXT_mesh_shader");
+    t_require_ext("VK_KHR_spirv_1_4");
 
     VkShaderModule task = qoCreateShaderModuleGLSL(t_device, TASK,
         QO_EXTENSION GL_EXT_mesh_shader : require
@@ -346,6 +353,7 @@ buffers_task_ssbo_read(void)
 
 test_define {
     .name = "func.mesh.ext.buffers.task_ssbo_read",
+    .api_version = VK_API_VERSION_1_1,
     .start = buffers_task_ssbo_read,
     .image_filename = "func.mesh.basic.ref.png",
     .features = {
@@ -359,6 +367,7 @@ static void
 buffers_task_ubo_read(void)
 {
     t_require_ext("VK_EXT_mesh_shader");
+    t_require_ext("VK_KHR_spirv_1_4");
 
     VkShaderModule task = qoCreateShaderModuleGLSL(t_device, TASK,
         QO_EXTENSION GL_EXT_mesh_shader : require
@@ -446,6 +455,7 @@ buffers_task_ubo_read(void)
 
 test_define {
     .name = "func.mesh.ext.buffers.task_ubo_read",
+    .api_version = VK_API_VERSION_1_1,
     .start = buffers_task_ubo_read,
     .image_filename = "func.mesh.basic.ref.png",
     .features = {
@@ -459,6 +469,7 @@ static void
 buffers_task_ubo_read_ssbo_write(void)
 {
     t_require_ext("VK_EXT_mesh_shader");
+    t_require_ext("VK_KHR_spirv_1_4");
 
     VkShaderModule task = qoCreateShaderModuleGLSL(t_device, TASK,
         QO_EXTENSION GL_EXT_mesh_shader : require
@@ -560,6 +571,7 @@ buffers_task_ubo_read_ssbo_write(void)
 
 test_define {
     .name = "func.mesh.ext.buffers.task_ubo_read_ssbo_write",
+    .api_version = VK_API_VERSION_1_1,
     .start = buffers_task_ubo_read_ssbo_write,
     .image_filename = "func.mesh.basic.ref.png",
     .features = {

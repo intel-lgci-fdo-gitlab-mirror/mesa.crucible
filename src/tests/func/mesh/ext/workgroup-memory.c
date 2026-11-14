@@ -28,6 +28,7 @@ static void
 workgroup_memory_mesh_uint(void)
 {
     t_require_ext("VK_EXT_mesh_shader");
+    t_require_ext("VK_KHR_spirv_1_4");
 
     VkShaderModule mesh = qoCreateShaderModuleGLSL(t_device, MESH,
         QO_EXTENSION GL_EXT_mesh_shader : require
@@ -85,6 +86,7 @@ workgroup_memory_mesh_uint(void)
 
 test_define {
     .name = "func.mesh.ext.workgroup_memory.mesh_uint",
+    .api_version = VK_API_VERSION_1_1,
     .start = workgroup_memory_mesh_uint,
     .no_image = true,
     .features = {
@@ -96,6 +98,7 @@ static void
 workgroup_memory_task_uint(void)
 {
     t_require_ext("VK_EXT_mesh_shader");
+    t_require_ext("VK_KHR_spirv_1_4");
 
     VkShaderModule task = qoCreateShaderModuleGLSL(t_device, TASK,
         QO_EXTENSION GL_EXT_mesh_shader : require
@@ -163,6 +166,7 @@ workgroup_memory_task_uint(void)
 
 test_define {
     .name = "func.mesh.ext.workgroup_memory.task_uint",
+    .api_version = VK_API_VERSION_1_1,
     .start = workgroup_memory_task_uint,
     .no_image = true,
     .features = {

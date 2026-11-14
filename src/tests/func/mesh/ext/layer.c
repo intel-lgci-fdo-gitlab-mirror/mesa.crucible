@@ -39,6 +39,7 @@ run_layer_mesh_pipeline(VkShaderModule mesh,
                         const struct layer_mesh_pipeline_options *_opts)
 {
     t_require_ext("VK_EXT_mesh_shader");
+    t_require_ext("VK_KHR_spirv_1_4");
 
     const unsigned width = 128;
     const unsigned height = 128;
@@ -197,6 +198,7 @@ static void
 layer(void)
 {
     t_require_ext("VK_EXT_mesh_shader");
+    t_require_ext("VK_KHR_spirv_1_4");
 
     VkShaderModule mesh = qoCreateShaderModuleGLSL(t_device, MESH,
         QO_EXTENSION GL_EXT_mesh_shader : require
@@ -263,6 +265,7 @@ layer(void)
 
 test_define {
     .name = "func.mesh.ext.layer",
+    .api_version = VK_API_VERSION_1_1,
     .start = layer,
     .no_image = true,
     .features = {

@@ -28,6 +28,7 @@ static void
 primitive_id_fs(void)
 {
     t_require_ext("VK_EXT_mesh_shader");
+    t_require_ext("VK_KHR_spirv_1_4");
 
     VkShaderModule mesh = qoCreateShaderModuleGLSL(t_device, MESH,
         QO_EXTENSION GL_EXT_mesh_shader : require
@@ -91,6 +92,7 @@ primitive_id_fs(void)
 
 test_define {
     .name = "func.mesh.ext.primitive_id.fs",
+    .api_version = VK_API_VERSION_1_1,
     .start = primitive_id_fs,
     .image_filename = "func.mesh.primitive_id.fs.ref.png",
     .features = {

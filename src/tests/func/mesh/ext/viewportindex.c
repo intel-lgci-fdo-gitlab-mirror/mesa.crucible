@@ -80,6 +80,7 @@ static void
 viewport_index(void)
 {
     t_require_ext("VK_EXT_mesh_shader");
+    t_require_ext("VK_KHR_spirv_1_4");
 
     VkShaderModule mesh = get_mesh_shader();
 
@@ -131,6 +132,7 @@ viewport_index(void)
 
 test_define {
     .name = "func.mesh.ext.viewport_index",
+    .api_version = VK_API_VERSION_1_1,
     .start = viewport_index,
     .image_filename = "func.mesh.viewport_index.ref.png",
     .features = {
@@ -142,6 +144,7 @@ static void
 viewport_index_fs(void)
 {
     t_require_ext("VK_EXT_mesh_shader");
+    t_require_ext("VK_KHR_spirv_1_4");
 
     VkShaderModule mesh = get_mesh_shader();
 
@@ -207,6 +210,7 @@ viewport_index_fs(void)
 
 test_define {
     .name = "func.mesh.ext.viewport_index.fs",
+    .api_version = VK_API_VERSION_1_1,
     .start = viewport_index_fs,
     .image_filename = "func.mesh.viewport_index.fs.ref.png",
     .features = {
@@ -218,6 +222,7 @@ static void
 viewport_index_primitive_id_fs(void)
 {
     t_require_ext("VK_EXT_mesh_shader");
+    t_require_ext("VK_KHR_spirv_1_4");
 
     VkShaderModule mesh = qoCreateShaderModuleGLSL(t_device, MESH,
         QO_EXTENSION GL_EXT_mesh_shader : require
@@ -332,6 +337,7 @@ viewport_index_primitive_id_fs(void)
 
 test_define {
     .name = "func.mesh.ext.viewport_index.primitive_id.fs",
+    .api_version = VK_API_VERSION_1_1,
     .start = viewport_index_primitive_id_fs,
     .image_filename = "func.mesh.viewport_index.fs.ref.png",
     .features = {
@@ -424,6 +430,7 @@ static void
 viewport_index_wg_1(void)
 {
     t_require_ext("VK_EXT_mesh_shader");
+    t_require_ext("VK_KHR_spirv_1_4");
 
     VkShaderModule mesh = qoCreateShaderModuleGLSL(t_device, MESH,
         QO_EXTENSION GL_EXT_mesh_shader : require
@@ -480,6 +487,7 @@ viewport_index_wg_1(void)
 
 test_define {
     .name = "func.mesh.ext.viewport_index.wg.1",
+    .api_version = VK_API_VERSION_1_1,
     .start = viewport_index_wg_1,
     .image_filename = "func.mesh.viewport_index.wg.ref.png",
     .features = {
@@ -491,6 +499,7 @@ static void
 viewport_index_wg_32(void)
 {
     t_require_ext("VK_EXT_mesh_shader");
+    t_require_ext("VK_KHR_spirv_1_4");
 
     VkShaderModule mesh = qoCreateShaderModuleGLSL(t_device, MESH,
         QO_EXTENSION GL_EXT_mesh_shader : require
@@ -550,6 +559,7 @@ viewport_index_wg_32(void)
 
 test_define {
     .name = "func.mesh.ext.viewport_index.wg.32",
+    .api_version = VK_API_VERSION_1_1,
     .start = viewport_index_wg_32,
     .image_filename = "func.mesh.viewport_index.wg.ref.png",
     .features = {
@@ -561,6 +571,7 @@ static void
 viewport_index_wg_gen(void)
 {
     t_require_ext("VK_EXT_mesh_shader");
+    t_require_ext("VK_KHR_spirv_1_4");
 
     VkShaderModule mesh = qoCreateShaderModuleGLSL(t_device, MESH,
         QO_EXTENSION GL_EXT_mesh_shader : require
@@ -645,6 +656,7 @@ viewport_index_wg_gen(void)
 
 test_define {
     .name = "func.mesh.ext.viewport_index.wg.gen.1",
+    .api_version = VK_API_VERSION_1_1,
     .start = viewport_index_wg_gen,
     .image_filename = "func.mesh.viewport_index.wg.ref.png",
     .user_data = &(uint32_t){ 1 },
@@ -655,6 +667,7 @@ test_define {
 
 test_define {
     .name = "func.mesh.ext.viewport_index.wg.gen.2",
+    .api_version = VK_API_VERSION_1_1,
     .start = viewport_index_wg_gen,
     .image_filename = "func.mesh.viewport_index.wg.ref.png",
     .user_data = &(uint32_t){ 2 },
@@ -665,6 +678,7 @@ test_define {
 
 test_define {
     .name = "func.mesh.ext.viewport_index.wg.gen.3",
+    .api_version = VK_API_VERSION_1_1,
     .start = viewport_index_wg_gen,
     .image_filename = "func.mesh.viewport_index.wg.ref.png",
     .user_data = &(uint32_t){ 3 },
@@ -676,6 +690,7 @@ test_define {
 
 test_define {
     .name = "func.mesh.ext.viewport_index.wg.gen.7",
+    .api_version = VK_API_VERSION_1_1,
     .start = viewport_index_wg_gen,
     .image_filename = "func.mesh.viewport_index.wg.ref.png",
     .user_data = &(uint32_t){ 7 },
@@ -686,6 +701,7 @@ test_define {
 
 test_define {
     .name = "func.mesh.ext.viewport_index.wg.gen.8",
+    .api_version = VK_API_VERSION_1_1,
     .start = viewport_index_wg_gen,
     .image_filename = "func.mesh.viewport_index.wg.ref.png",
     .user_data = &(uint32_t){ 8 },
@@ -696,6 +712,7 @@ test_define {
 
 test_define {
     .name = "func.mesh.ext.viewport_index.wg.gen.11",
+    .api_version = VK_API_VERSION_1_1,
     .start = viewport_index_wg_gen,
     .image_filename = "func.mesh.viewport_index.wg.ref.png",
     .user_data = &(uint32_t){ 11 },
@@ -706,6 +723,7 @@ test_define {
 
 test_define {
     .name = "func.mesh.ext.viewport_index.wg.gen.15",
+    .api_version = VK_API_VERSION_1_1,
     .start = viewport_index_wg_gen,
     .image_filename = "func.mesh.viewport_index.wg.ref.png",
     .user_data = &(uint32_t){ 15 },
@@ -716,6 +734,7 @@ test_define {
 
 test_define {
     .name = "func.mesh.ext.viewport_index.wg.gen.16",
+    .api_version = VK_API_VERSION_1_1,
     .start = viewport_index_wg_gen,
     .image_filename = "func.mesh.viewport_index.wg.ref.png",
     .user_data = &(uint32_t){ 16 },
@@ -726,6 +745,7 @@ test_define {
 
 test_define {
     .name = "func.mesh.ext.viewport_index.wg.gen.17",
+    .api_version = VK_API_VERSION_1_1,
     .start = viewport_index_wg_gen,
     .image_filename = "func.mesh.viewport_index.wg.ref.png",
     .user_data = &(uint32_t){ 17 },
@@ -736,6 +756,7 @@ test_define {
 
 test_define {
     .name = "func.mesh.ext.viewport_index.wg.gen.27",
+    .api_version = VK_API_VERSION_1_1,
     .start = viewport_index_wg_gen,
     .image_filename = "func.mesh.viewport_index.wg.ref.png",
     .user_data = &(uint32_t){ 27 },
@@ -746,6 +767,7 @@ test_define {
 
 test_define {
     .name = "func.mesh.ext.viewport_index.wg.gen.31",
+    .api_version = VK_API_VERSION_1_1,
     .start = viewport_index_wg_gen,
     .image_filename = "func.mesh.viewport_index.wg.ref.png",
     .user_data = &(uint32_t){ 31 },
@@ -756,6 +778,7 @@ test_define {
 
 test_define {
     .name = "func.mesh.ext.viewport_index.wg.gen.32",
+    .api_version = VK_API_VERSION_1_1,
     .start = viewport_index_wg_gen,
     .image_filename = "func.mesh.viewport_index.wg.ref.png",
     .user_data = &(uint32_t){ 32 },
@@ -766,6 +789,7 @@ test_define {
 
 test_define {
     .name = "func.mesh.ext.viewport_index.wg.gen.33",
+    .api_version = VK_API_VERSION_1_1,
     .start = viewport_index_wg_gen,
     .image_filename = "func.mesh.viewport_index.wg.ref.png",
     .user_data = &(uint32_t){ 33 },
@@ -776,6 +800,7 @@ test_define {
 
 test_define {
     .name = "func.mesh.ext.viewport_index.wg.gen.63",
+    .api_version = VK_API_VERSION_1_1,
     .start = viewport_index_wg_gen,
     .image_filename = "func.mesh.viewport_index.wg.ref.png",
     .user_data = &(uint32_t){ 63 },
@@ -786,6 +811,7 @@ test_define {
 
 test_define {
     .name = "func.mesh.ext.viewport_index.wg.gen.64",
+    .api_version = VK_API_VERSION_1_1,
     .start = viewport_index_wg_gen,
     .image_filename = "func.mesh.viewport_index.wg.ref.png",
     .user_data = &(uint32_t){ 64 },
@@ -796,6 +822,7 @@ test_define {
 
 test_define {
     .name = "func.mesh.ext.viewport_index.wg.gen.65",
+    .api_version = VK_API_VERSION_1_1,
     .start = viewport_index_wg_gen,
     .image_filename = "func.mesh.viewport_index.wg.ref.png",
     .user_data = &(uint32_t){ 65 },

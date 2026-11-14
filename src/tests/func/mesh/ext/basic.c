@@ -38,6 +38,7 @@ static void
 basic_mesh(void)
 {
     t_require_ext("VK_EXT_mesh_shader");
+    t_require_ext("VK_KHR_spirv_1_4");
 
     VkShaderModule mesh = qoCreateShaderModuleGLSL(t_device, MESH,
         QO_EXTENSION GL_EXT_mesh_shader : require
@@ -89,6 +90,7 @@ basic_mesh(void)
 
 test_define {
     .name = "func.mesh.ext.basic.mesh",
+    .api_version = VK_API_VERSION_1_1,
     .start = basic_mesh,
     .image_filename = "func.mesh.basic.ref.png",
     .features = {
@@ -98,6 +100,7 @@ test_define {
 
 test_define {
     .name = "func.mesh.ext.basic.mesh_require8",
+    .api_version = VK_API_VERSION_1_1,
     .start = basic_mesh,
     .image_filename = "func.mesh.basic.ref.png",
     .features = {
@@ -108,6 +111,7 @@ test_define {
 
 test_define {
     .name = "func.mesh.ext.basic.mesh_require16",
+    .api_version = VK_API_VERSION_1_1,
     .start = basic_mesh,
     .image_filename = "func.mesh.basic.ref.png",
     .features = {
@@ -118,6 +122,7 @@ test_define {
 
 test_define {
     .name = "func.mesh.ext.basic.mesh_require32",
+    .api_version = VK_API_VERSION_1_1,
     .start = basic_mesh,
     .image_filename = "func.mesh.basic.ref.png",
     .features = {
@@ -128,6 +133,7 @@ test_define {
 
 test_define {
     .name = "func.mesh.ext.basic.mesh_require64",
+    .api_version = VK_API_VERSION_1_1,
     .start = basic_mesh,
     .image_filename = "func.mesh.basic.ref.png",
     .features = {
@@ -142,6 +148,7 @@ static void
 basic_task(void)
 {
     t_require_ext("VK_EXT_mesh_shader");
+    t_require_ext("VK_KHR_spirv_1_4");
 
     VkShaderModule task = qoCreateShaderModuleGLSL(t_device, TASK,
         QO_EXTENSION GL_EXT_mesh_shader : require
@@ -220,6 +227,7 @@ basic_task(void)
 
 test_define {
     .name = "func.mesh.ext.basic.task",
+    .api_version = VK_API_VERSION_1_1,
     .start = basic_task,
     .image_filename = "func.mesh.basic.ref.png",
     .features = {
@@ -230,6 +238,7 @@ test_define {
 
 test_define {
     .name = "func.mesh.ext.basic.task_require8",
+    .api_version = VK_API_VERSION_1_1,
     .start = basic_task,
     .image_filename = "func.mesh.basic.ref.png",
     .features = {
@@ -241,6 +250,7 @@ test_define {
 
 test_define {
     .name = "func.mesh.ext.basic.task_require16",
+    .api_version = VK_API_VERSION_1_1,
     .start = basic_task,
     .image_filename = "func.mesh.basic.ref.png",
     .features = {
@@ -252,6 +262,7 @@ test_define {
 
 test_define {
     .name = "func.mesh.ext.basic.task_require32",
+    .api_version = VK_API_VERSION_1_1,
     .start = basic_task,
     .image_filename = "func.mesh.basic.ref.png",
     .features = {
@@ -263,6 +274,7 @@ test_define {
 
 test_define {
     .name = "func.mesh.ext.basic.task_require64",
+    .api_version = VK_API_VERSION_1_1,
     .start = basic_task,
     .image_filename = "func.mesh.basic.ref.png",
     .features = {
