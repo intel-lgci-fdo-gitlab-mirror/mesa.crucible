@@ -18,6 +18,8 @@
 static void
 test(void)
 {
+    t_require_ext("VK_KHR_spirv_1_4");
+
     VkShaderModule cs = qoCreateShaderModuleGLSL(t_device, COMPUTE,
         QO_TARGET_ENV spirv1.4
         layout(push_constant, std430) uniform Push {
@@ -63,6 +65,7 @@ test(void)
 
 test_define {
     .name = "bug.gitlab-15029",
+    .api_version = VK_API_VERSION_1_1,
     .start = test,
     .no_image = true,
 };

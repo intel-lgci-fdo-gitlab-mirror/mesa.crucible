@@ -13,6 +13,8 @@
 static void
 test(void)
 {
+    t_require_ext("VK_KHR_spirv_1_4");
+
     VkShaderModule vs = qoCreateShaderModuleGLSL(t_device, VERTEX,
         QO_TARGET_ENV spirv1.4
 
@@ -158,6 +160,7 @@ test(void)
 
 test_define {
     .name = "bug.gitlab-14054",
+    .api_version = VK_API_VERSION_1_1,
     .features = {
         .runtimeDescriptorArray = true,
         .shaderStorageImageArrayNonUniformIndexing = true,

@@ -30,6 +30,8 @@ test(void)
 {
     const struct test_params *params = t_user_data;
 
+    t_require_ext("VK_KHR_spirv_1_4");
+
     VkShaderModule cs = qoCreateShaderModuleGLSL(t_device, COMPUTE,
         QO_TARGET_ENV spirv1.4
         QO_EXTENSION GL_KHR_shader_subgroup_basic: require
@@ -76,6 +78,7 @@ test(void)
 
 test_define {
     .name = "bug.gitlab-12927.lane0",
+    .api_version = VK_API_VERSION_1_1,
     .features = {
         .subgroupSizeControl = true,
     },
@@ -86,6 +89,7 @@ test_define {
 
 test_define {
     .name = "bug.gitlab-12927.lane3",
+    .api_version = VK_API_VERSION_1_1,
     .features = {
         .subgroupSizeControl = true,
     },
@@ -96,6 +100,7 @@ test_define {
 
 test_define {
     .name = "bug.gitlab-12927.lane17",
+    .api_version = VK_API_VERSION_1_1,
     .features = {
         .subgroupSizeControl = true,
     },
@@ -106,6 +111,7 @@ test_define {
 
 test_define {
     .name = "bug.gitlab-12927.lane30",
+    .api_version = VK_API_VERSION_1_1,
     .features = {
         .subgroupSizeControl = true,
     },
