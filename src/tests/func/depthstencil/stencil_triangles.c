@@ -155,9 +155,6 @@ draw_triangle(void)
             },
         },
         VK_SUBPASS_CONTENTS_INLINE);
-    vkCmdBindVertexBuffers(t_cmd_buffer,
-                           /*startBinding*/ 0, /*bindingCount*/ 0,
-                           NULL, NULL);
     vkCmdBindPipeline(t_cmd_buffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipeline);
     vkCmdSetStencilCompareMask(t_cmd_buffer,
                                VK_STENCIL_FACE_FRONT_BIT |
