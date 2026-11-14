@@ -370,6 +370,9 @@ miptree_calc_buffer_size(void)
     const uint32_t width = p->width;
     const uint32_t height = p->height;
     const uint32_t depth = p->depth;
+    const VkImageType linear_image_type =
+        image_type_from_image_view_type(p->view_type) == VK_IMAGE_TYPE_1D ?
+        VK_IMAGE_TYPE_1D : VK_IMAGE_TYPE_2D;
     bool need_img_size = false;
     switch (p->view_type) {
         case VK_IMAGE_VIEW_TYPE_1D:
@@ -395,7 +398,7 @@ miptree_calc_buffer_size(void)
         if (need_img_size) {
             VkImageCreateInfo info = {
                 .sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO,
-                .imageType = VK_IMAGE_TYPE_2D,
+                .imageType = linear_image_type,
                 .format = p->format,
                 .mipLevels = 1,
                 .arrayLayers = 1,
@@ -411,7 +414,7 @@ miptree_calc_buffer_size(void)
                          VK_IMAGE_USAGE_SAMPLED_BIT
             };
 
-            can_create_image(VK_IMAGE_TYPE_2D, VK_IMAGE_TILING_LINEAR,
+            can_create_image(linear_image_type, VK_IMAGE_TILING_LINEAR,
                              VK_IMAGE_USAGE_TRANSFER_SRC_BIT, p->format);
             VkImage test_vk_image;
             vkCreateImage(t_device, &info, NULL, &test_vk_image);
@@ -526,6 +529,8 @@ miptree_create(void)
     const uint32_t array_length = params->array_length;
     const size_t buffer_size = miptree_calc_buffer_size();
     VkImageType image_type = image_type_from_image_view_type(params->view_type);
+    VkImageType linear_image_type = image_type == VK_IMAGE_TYPE_1D ?
+                                   VK_IMAGE_TYPE_1D : VK_IMAGE_TYPE_2D;
     bool create_intermediate = false;
     uint32_t usage_bits = 0, intermediate_usage_bits = 0;
     switch (params->upload_method) {
@@ -677,10 +682,11 @@ miptree_create(void)
                 }
 
                 // Determine if an image can be created with this combination
-                can_create_image(VK_IMAGE_TYPE_2D, VK_IMAGE_TILING_LINEAR,
+                can_create_image(linear_image_type, VK_IMAGE_TILING_LINEAR,
                                  src_usage, format);
 
                 src_vk_image = qoCreateImage(t_device,
+                    .imageType = linear_image_type,
                     .format = format,
                     .mipLevels = 1,
                     .arrayLayers = 1,
@@ -732,10 +738,11 @@ miptree_create(void)
                 }
 
                 // Determine if an image can be created with this combination
-                can_create_image(VK_IMAGE_TYPE_2D, VK_IMAGE_TILING_LINEAR,
+                can_create_image(linear_image_type, VK_IMAGE_TILING_LINEAR,
                                  dest_usage, dest_format);
 
                 dest_vk_image = qoCreateImage(t_device,
+                    .imageType = linear_image_type,
                     .format = dest_format,
                     .mipLevels = 1,
                     .arrayLayers = 1,
