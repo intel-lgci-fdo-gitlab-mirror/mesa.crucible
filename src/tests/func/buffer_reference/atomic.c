@@ -29,7 +29,7 @@
 static void
 test_common(VkShaderModule cs, bool int64, unsigned num_values, void *init, void *ref)
 {
-    GET_DEVICE_FUNCTION_PTR(GetBufferDeviceAddressEXT);
+    GET_DEVICE_FUNCTION_PTR(GetBufferDeviceAddressKHR);
 
     /* create pipeline */
     VkPipelineLayout pipeline_layout = qoCreatePipelineLayout(t_device,
@@ -61,8 +61,13 @@ test_common(VkShaderModule cs, bool int64, unsigned num_values, void *init, void
 
     /* create and map buffers */
     unsigned buffer_size = num_values * (int64 ? 8 : 4);
-    VkBuffer buffer = qoCreateBuffer(t_device, .usage = VK_BUFFER_USAGE_STORAGE_BUFFER_BIT | VK_BUFFER_USAGE_SHADER_DEVICE_ADDRESS_BIT_EXT, .size = buffer_size);
+    VkBuffer buffer = qoCreateBuffer(t_device, .usage = VK_BUFFER_USAGE_STORAGE_BUFFER_BIT | VK_BUFFER_USAGE_SHADER_DEVICE_ADDRESS_BIT_KHR, .size = buffer_size);
+    VkMemoryAllocateFlagsInfo flags_info = {
+        .sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_FLAGS_INFO,
+        .flags = VK_MEMORY_ALLOCATE_DEVICE_ADDRESS_BIT_KHR,
+    };
     VkDeviceMemory memory = qoAllocBufferMemory(t_device, buffer,
+        .pNext = &flags_info,
         .properties = VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
 
     void *map = qoMapMemory(t_device, memory, 0, buffer_size, 0);
@@ -71,9 +76,9 @@ test_common(VkShaderModule cs, bool int64, unsigned num_values, void *init, void
     qoBindBufferMemory(t_device, buffer, memory, 0);
 
     /* initialize push constants with buffer pointers */
-    VkDeviceAddress addr = GetBufferDeviceAddressEXT(t_device,
-        &(VkBufferDeviceAddressInfoEXT) {
-            .sType = VK_STRUCTURE_TYPE_BUFFER_DEVICE_ADDRESS_INFO_EXT,
+    VkDeviceAddress addr = GetBufferDeviceAddressKHR(t_device,
+        &(VkBufferDeviceAddressInfoKHR) {
+            .sType = VK_STRUCTURE_TYPE_BUFFER_DEVICE_ADDRESS_INFO_KHR,
             .pNext = NULL,
             .buffer = buffer
         });
@@ -130,7 +135,7 @@ test_common(VkShaderModule cs, bool int64, unsigned num_values, void *init, void
 static void
 test32()
 {
-    t_require_ext("VK_EXT_buffer_device_address");
+    t_require_ext("VK_KHR_buffer_device_address");
     t_require_ext("VK_KHR_shader_atomic_int64");
 
     VkShaderModule cs = qoCreateShaderModuleGLSL(t_device, COMPUTE,
@@ -288,12 +293,15 @@ test_define {
     .name = "func.buffer_reference.atomic32",
     .start = test32,
     .image_filename = "32x32-green.ref.png",
+    .features = {
+        .bufferDeviceAddress = true,
+    },
 };
 
 static void
 test64()
 {
-    t_require_ext("VK_EXT_buffer_device_address");
+    t_require_ext("VK_KHR_buffer_device_address");
     t_require_ext("VK_KHR_shader_atomic_int64");
 
     VkShaderModule cs = qoCreateShaderModuleGLSL(t_device, COMPUTE,
@@ -463,5 +471,10 @@ test_define {
     .name = "func.buffer_reference.atomic64",
     .start = test64,
     .image_filename = "32x32-green.ref.png",
+    .features = {
+        .bufferDeviceAddress = true,
+        .shaderInt64 = true,
+        .shaderBufferInt64Atomics = true,
+    },
 };
 

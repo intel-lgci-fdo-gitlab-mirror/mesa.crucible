@@ -58,7 +58,12 @@ simple(void)
         .usage = VK_BUFFER_USAGE_STORAGE_BUFFER_BIT |
                  VK_BUFFER_USAGE_SHADER_DEVICE_ADDRESS_BIT_KHR,
         .size = buffer_size);
+    VkMemoryAllocateFlagsInfo flags_info = {
+        .sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_FLAGS_INFO,
+        .flags = VK_MEMORY_ALLOCATE_DEVICE_ADDRESS_BIT_KHR,
+    };
     VkDeviceMemory memory = qoAllocBufferMemory(t_device, buffer,
+        .pNext = &flags_info,
         .properties = VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
 
     void *map = qoMapMemory(t_device, memory, 0, buffer_size, 0);
@@ -89,67 +94,7 @@ test_define {
     .name = "func.buffer_reference.simple",
     .start = simple,
     .no_image = true,
-};
-
-
-static void
-simple_ext(void)
-{
-    t_require_ext("VK_EXT_buffer_device_address");
-
-    GET_DEVICE_FUNCTION_PTR(vkGetBufferDeviceAddressEXT);
-
-    VkShaderModule cs = qoCreateShaderModuleGLSL(t_device, COMPUTE,
-        QO_EXTENSION GL_EXT_buffer_reference : require
-
-        layout(local_size_x = 1) in;
-
-        layout(buffer_reference) buffer ValueRef {
-            uint val;
-        };
-
-        layout(push_constant, std430) uniform Push {
-            ValueRef value_ref;
-        };
-
-        void main() {
-            value_ref.val = 42;
-        }
-    );
-
-    unsigned buffer_size = sizeof(unsigned);
-    VkBuffer buffer = qoCreateBuffer(t_device,
-        .usage = VK_BUFFER_USAGE_STORAGE_BUFFER_BIT | VK_BUFFER_USAGE_SHADER_DEVICE_ADDRESS_BIT_EXT,
-        .size = buffer_size);
-    VkDeviceMemory memory = qoAllocBufferMemory(t_device, buffer,
-        .properties = VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
-
-    void *map = qoMapMemory(t_device, memory, 0, buffer_size, 0);
-    memset(map, 0, buffer_size);
-
-    qoBindBufferMemory(t_device, buffer, memory, 0);
-
-    VkBufferDeviceAddressInfoEXT addr_info = {
-        .sType = VK_STRUCTURE_TYPE_BUFFER_DEVICE_ADDRESS_INFO_EXT,
-        .buffer = buffer,
-    };
-
-    VkDeviceAddress addr = vkGetBufferDeviceAddressEXT(t_device, &addr_info);
-
-    simple_compute_pipeline_options_t opts = {
-        .push_constants = &addr,
-        .push_constants_size = sizeof(addr),
-    };
-    run_simple_compute_pipeline(cs, &opts);
-
-    unsigned val = *((unsigned *)map);
-    t_assert(val == 42);
-
-    t_pass();
-}
-
-test_define {
-    .name = "func.buffer_reference.simple_ext",
-    .start = simple_ext,
-    .no_image = true,
+    .features = {
+        .bufferDeviceAddress = true,
+    },
 };
