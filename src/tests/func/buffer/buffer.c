@@ -97,7 +97,7 @@ copy_buffers(struct copy_buffer_test *buf_test, int buffer_size, bool two_region
     VkCommandBuffer cmdBuffer = qoAllocateCommandBuffer(t_device, t_cmd_pool);
     qoBeginCommandBuffer(cmdBuffer);
 
-    vkCmdPipelineBarrier(cmdBuffer, 0, VK_PIPELINE_STAGE_TRANSFER_BIT, false,
+    vkCmdPipelineBarrier(cmdBuffer, VK_PIPELINE_STAGE_HOST_BIT, VK_PIPELINE_STAGE_TRANSFER_BIT, false,
                          0, NULL, 2,
         (VkBufferMemoryBarrier[]) {
             {
@@ -131,7 +131,7 @@ copy_buffers(struct copy_buffer_test *buf_test, int buffer_size, bool two_region
     vkCmdCopyBuffer(cmdBuffer, buf_test->buffer1, buf_test->buffer2, two_regions ? 2 : 1,
                     regions);
 
-    vkCmdPipelineBarrier(cmdBuffer, VK_PIPELINE_STAGE_TRANSFER_BIT, 0, true,
+    vkCmdPipelineBarrier(cmdBuffer, VK_PIPELINE_STAGE_TRANSFER_BIT, VK_PIPELINE_STAGE_HOST_BIT, true,
                          0, NULL, 1,
         &(VkBufferMemoryBarrier) {
             .sType = VK_STRUCTURE_TYPE_BUFFER_MEMORY_BARRIER,
@@ -229,7 +229,7 @@ fill_buffer(struct fill_buffer_test *buf_test, int buffer_size, uint32_t offset,
     VkCommandBuffer cmdBuffer = qoAllocateCommandBuffer(t_device, t_cmd_pool);
     qoBeginCommandBuffer(cmdBuffer);
 
-    vkCmdPipelineBarrier(cmdBuffer, 0, VK_PIPELINE_STAGE_TRANSFER_BIT, false,
+    vkCmdPipelineBarrier(cmdBuffer, VK_PIPELINE_STAGE_HOST_BIT, VK_PIPELINE_STAGE_TRANSFER_BIT, false,
                          0, NULL, 1,
         (VkBufferMemoryBarrier[]) {
             {
@@ -244,7 +244,7 @@ fill_buffer(struct fill_buffer_test *buf_test, int buffer_size, uint32_t offset,
 
     vkCmdFillBuffer(cmdBuffer, buf_test->buffer1, offset, whole_size ? VK_WHOLE_SIZE : buffer_size - offset, fill_val);
 
-    vkCmdPipelineBarrier(cmdBuffer, VK_PIPELINE_STAGE_TRANSFER_BIT, 0, true,
+    vkCmdPipelineBarrier(cmdBuffer, VK_PIPELINE_STAGE_TRANSFER_BIT, VK_PIPELINE_STAGE_HOST_BIT, true,
                          0, NULL, 1,
         &(VkBufferMemoryBarrier) {
             .sType = VK_STRUCTURE_TYPE_BUFFER_MEMORY_BARRIER,
@@ -354,7 +354,7 @@ update_buffer(struct copy_buffer_test *buf_test, int buffer_size, uint32_t offse
     VkCommandBuffer cmdBuffer = qoAllocateCommandBuffer(t_device, t_cmd_pool);
     qoBeginCommandBuffer(cmdBuffer);
 
-    vkCmdPipelineBarrier(cmdBuffer, 0, VK_PIPELINE_STAGE_TRANSFER_BIT, false,
+    vkCmdPipelineBarrier(cmdBuffer, VK_PIPELINE_STAGE_HOST_BIT, VK_PIPELINE_STAGE_TRANSFER_BIT, false,
                          0, NULL, 1,
         (VkBufferMemoryBarrier[]) {
             {
@@ -369,7 +369,7 @@ update_buffer(struct copy_buffer_test *buf_test, int buffer_size, uint32_t offse
 
     vkCmdUpdateBuffer(cmdBuffer, buf_test->buffer2, offset, buffer_size - offset, map + offset);
 
-    vkCmdPipelineBarrier(cmdBuffer, VK_PIPELINE_STAGE_TRANSFER_BIT, 0, true,
+    vkCmdPipelineBarrier(cmdBuffer, VK_PIPELINE_STAGE_TRANSFER_BIT, VK_PIPELINE_STAGE_HOST_BIT, true,
                          0, NULL, 1,
         &(VkBufferMemoryBarrier) {
             .sType = VK_STRUCTURE_TYPE_BUFFER_MEMORY_BARRIER,
