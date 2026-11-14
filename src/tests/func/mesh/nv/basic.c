@@ -92,30 +92,49 @@ basic_mesh(void)
 
 test_define {
     .name = "func.mesh.nv.basic.mesh",
+    .features = {
+        .meshShaderNV = true,
+    },
     .start = basic_mesh,
     .image_filename = "func.mesh.basic.ref.png",
 };
 
 test_define {
     .name = "func.mesh.nv.basic.mesh_require8",
+    .features = {
+        .meshShaderNV = true,
+        .subgroupSizeControl = true,
+    },
     .start = basic_mesh,
     .image_filename = "func.mesh.basic.ref.png",
 };
 
 test_define {
     .name = "func.mesh.nv.basic.mesh_require16",
+    .features = {
+        .meshShaderNV = true,
+        .subgroupSizeControl = true,
+    },
     .start = basic_mesh,
     .image_filename = "func.mesh.basic.ref.png",
 };
 
 test_define {
     .name = "func.mesh.nv.basic.mesh_require32",
+    .features = {
+        .meshShaderNV = true,
+        .subgroupSizeControl = true,
+    },
     .start = basic_mesh,
     .image_filename = "func.mesh.basic.ref.png",
 };
 
 test_define {
     .name = "func.mesh.nv.basic.mesh_require64",
+    .features = {
+        .meshShaderNV = true,
+        .subgroupSizeControl = true,
+    },
     .start = basic_mesh,
     .image_filename = "func.mesh.basic.ref.png",
 };
@@ -202,30 +221,54 @@ basic_task(void)
 
 test_define {
     .name = "func.mesh.nv.basic.task",
+    .features = {
+        .meshShaderNV = true,
+        .taskShaderNV = true,
+    },
     .start = basic_task,
     .image_filename = "func.mesh.basic.ref.png",
 };
 
 test_define {
     .name = "func.mesh.nv.basic.task_require8",
+    .features = {
+        .meshShaderNV = true,
+        .taskShaderNV = true,
+        .subgroupSizeControl = true,
+    },
     .start = basic_task,
     .image_filename = "func.mesh.basic.ref.png",
 };
 
 test_define {
     .name = "func.mesh.nv.basic.task_require16",
+    .features = {
+        .meshShaderNV = true,
+        .taskShaderNV = true,
+        .subgroupSizeControl = true,
+    },
     .start = basic_task,
     .image_filename = "func.mesh.basic.ref.png",
 };
 
 test_define {
     .name = "func.mesh.nv.basic.task_require32",
+    .features = {
+        .meshShaderNV = true,
+        .taskShaderNV = true,
+        .subgroupSizeControl = true,
+    },
     .start = basic_task,
     .image_filename = "func.mesh.basic.ref.png",
 };
 
 test_define {
     .name = "func.mesh.nv.basic.task_require64",
+    .features = {
+        .meshShaderNV = true,
+        .taskShaderNV = true,
+        .subgroupSizeControl = true,
+    },
     .start = basic_task,
     .image_filename = "func.mesh.basic.ref.png",
 };

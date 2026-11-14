@@ -298,6 +298,9 @@ test()
 
 test_define {
     .name = "bug.gitlab-16722",
+    .features = {
+        .dynamicRendering = true,
+    },
     .start = test,
     .no_image = true,
 };

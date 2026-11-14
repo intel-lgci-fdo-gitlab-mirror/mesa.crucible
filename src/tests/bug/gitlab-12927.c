@@ -76,6 +76,9 @@ test(void)
 
 test_define {
     .name = "bug.gitlab-12927.lane0",
+    .features = {
+        .subgroupSizeControl = true,
+    },
     .start = test,
     .user_data = &(struct test_params) { .lane = 0, },
     .no_image = true,
@@ -83,6 +86,9 @@ test_define {
 
 test_define {
     .name = "bug.gitlab-12927.lane3",
+    .features = {
+        .subgroupSizeControl = true,
+    },
     .start = test,
     .user_data = &(struct test_params) { .lane = 3, },
     .no_image = true,
@@ -90,6 +96,9 @@ test_define {
 
 test_define {
     .name = "bug.gitlab-12927.lane17",
+    .features = {
+        .subgroupSizeControl = true,
+    },
     .start = test,
     .user_data = &(struct test_params) { .lane = 17, },
     .no_image = true,
@@ -97,6 +106,9 @@ test_define {
 
 test_define {
     .name = "bug.gitlab-12927.lane30",
+    .features = {
+        .subgroupSizeControl = true,
+    },
     .start = test,
     .user_data = &(struct test_params) { .lane = 30, },
     .no_image = true,

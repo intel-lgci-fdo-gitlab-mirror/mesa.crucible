@@ -84,6 +84,9 @@ workgroup_memory_mesh_uint(void)
 
 test_define {
     .name = "func.mesh.nv.workgroup_memory.mesh_uint",
+    .features = {
+        .meshShaderNV = true,
+    },
     .start = workgroup_memory_mesh_uint,
     .no_image = true,
 };
@@ -157,6 +160,10 @@ workgroup_memory_task_uint(void)
 
 test_define {
     .name = "func.mesh.nv.workgroup_memory.task_uint",
+    .features = {
+        .meshShaderNV = true,
+        .taskShaderNV = true,
+    },
     .start = workgroup_memory_task_uint,
     .no_image = true,
 };

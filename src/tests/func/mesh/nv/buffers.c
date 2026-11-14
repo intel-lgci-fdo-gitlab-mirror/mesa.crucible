@@ -88,6 +88,9 @@ buffers_mesh_ssbo_read(void)
 
 test_define {
     .name = "func.mesh.nv.buffers.mesh_ssbo_read",
+    .features = {
+        .meshShaderNV = true,
+    },
     .start = buffers_mesh_ssbo_read,
     .image_filename = "func.mesh.basic.ref.png",
 };
@@ -167,6 +170,9 @@ buffers_mesh_ssbo_write(void)
 
 test_define {
     .name = "func.mesh.nv.buffers.mesh_ssbo_write",
+    .features = {
+        .meshShaderNV = true,
+    },
     .start = buffers_mesh_ssbo_write,
     .image_filename = "func.mesh.basic.ref.png",
 };
@@ -237,6 +243,10 @@ buffers_mesh_ubo_read(void)
 
 test_define {
     .name = "func.mesh.nv.buffers.mesh_ubo_read",
+    .features = {
+        .meshShaderNV = true,
+        .uniformBufferStandardLayout = true,
+    },
     .start = buffers_mesh_ubo_read,
     .image_filename = "func.mesh.basic.ref.png",
 };
@@ -331,6 +341,10 @@ buffers_task_ssbo_read(void)
 
 test_define {
     .name = "func.mesh.nv.buffers.task_ssbo_read",
+    .features = {
+        .meshShaderNV = true,
+        .taskShaderNV = true,
+    },
     .start = buffers_task_ssbo_read,
     .image_filename = "func.mesh.basic.ref.png",
 };
@@ -425,6 +439,10 @@ buffers_task_ubo_read(void)
 
 test_define {
     .name = "func.mesh.nv.buffers.task_ubo_read",
+    .features = {
+        .meshShaderNV = true,
+        .taskShaderNV = true,
+    },
     .start = buffers_task_ubo_read,
     .image_filename = "func.mesh.basic.ref.png",
 };
@@ -532,6 +550,10 @@ buffers_task_ubo_read_ssbo_write(void)
 
 test_define {
     .name = "func.mesh.nv.buffers.task_ubo_read_ssbo_write",
+    .features = {
+        .meshShaderNV = true,
+        .taskShaderNV = true,
+    },
     .start = buffers_task_ubo_read_ssbo_write,
     .image_filename = "func.mesh.basic.ref.png",
 };

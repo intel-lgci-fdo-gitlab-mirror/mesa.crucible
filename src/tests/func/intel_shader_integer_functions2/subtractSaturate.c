@@ -165,6 +165,10 @@ subtractSaturate_int16(void)
 
 test_define {
     .name = "func.shader.subtractSaturate.int16_t",
+    .features = {
+        .shaderIntegerFunctions2 = true,
+        .shaderInt16 = true,
+    },
     .start = subtractSaturate_int16,
     .image_filename = "128x128-green.ref.png",
 };
@@ -237,6 +241,10 @@ subtractSaturate_uint16(void)
 
 test_define {
     .name = "func.shader.subtractSaturate.uint16_t",
+    .features = {
+        .shaderIntegerFunctions2 = true,
+        .shaderInt16 = true,
+    },
     .start = subtractSaturate_uint16,
     .image_filename = "128x128-green.ref.png",
 };
@@ -336,6 +344,9 @@ subtractSaturate_int32(void)
 
 test_define {
     .name = "func.shader.subtractSaturate.int",
+    .features = {
+        .shaderIntegerFunctions2 = true,
+    },
     .start = subtractSaturate_int32,
     .image_filename = "64x64-green.ref.png",
 };
@@ -400,6 +411,9 @@ subtractSaturate_uint32(void)
 
 test_define {
     .name = "func.shader.subtractSaturate.uint",
+    .features = {
+        .shaderIntegerFunctions2 = true,
+    },
     .start = subtractSaturate_uint32,
     .image_filename = "64x64-green.ref.png",
 };
@@ -509,6 +523,10 @@ subtractSaturate_int64(void)
 
 test_define {
     .name = "func.shader.subtractSaturate.int64_t",
+    .features = {
+        .shaderIntegerFunctions2 = true,
+        .shaderInt64 = true,
+    },
     .start = subtractSaturate_int64,
     .image_filename = "64x64-green.ref.png",
 };
@@ -580,6 +598,10 @@ subtractSaturate_uint64(void)
 
 test_define {
     .name = "func.shader.subtractSaturate.uint64_t",
+    .features = {
+        .shaderIntegerFunctions2 = true,
+        .shaderInt64 = true,
+    },
     .start = subtractSaturate_uint64,
     .image_filename = "64x64-green.ref.png",
 };

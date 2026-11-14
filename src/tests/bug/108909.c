@@ -125,6 +125,9 @@ test(void)
 
 test_define {
     .name = "bug.108909",
+    .features = {
+        .hostQueryReset = true,
+    },
     .start = test,
     .no_image = true,
     .api_version = VK_MAKE_VERSION(1, 2, 0), // For vkResetQueuePool

@@ -309,12 +309,21 @@ test(void)
     t_pass();
 }
 
+// The shader declares all types, regardless of specialization values.
 #define _TEST_DEF(bit_size, reduce, reduce_name, func, func_name) \
 test_define { \
     .name = "func.uniform-subgroup." #reduce_name "." #func_name #bit_size, \
     .start = test, \
     .user_data = &(test_params_t) {reduce, bit_size, func}, \
     .no_image = true, \
+    .features = { \
+        .shaderInt8 = true, \
+        .shaderInt16 = true, \
+        .shaderInt64 = true, \
+        .shaderFloat16 = true, \
+        .shaderFloat64 = true, \
+        .shaderSubgroupExtendedTypes = true, \
+    }, \
 };
 
 #define _TEST(bit_size, func, func_name) \

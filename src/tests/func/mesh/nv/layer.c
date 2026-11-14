@@ -262,6 +262,9 @@ layer(void)
 
 test_define {
     .name = "func.mesh.nv.layer",
+    .features = {
+        .meshShaderNV = true,
+    },
     .start = layer,
     .no_image = true,
 };

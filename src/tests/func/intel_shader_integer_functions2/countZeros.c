@@ -75,6 +75,9 @@ countLeadingZeros_uint32(void)
 
 test_define {
     .name = "func.shader.countLeadingZeros.uint",
+    .features = {
+        .shaderIntegerFunctions2 = true,
+    },
     .start = countLeadingZeros_uint32,
     .image_filename = "64x64-green.ref.png",
 };
@@ -128,6 +131,9 @@ countTrailingZeros_uint32(void)
 
 test_define {
     .name = "func.shader.countTrailingZeros.uint",
+    .features = {
+        .shaderIntegerFunctions2 = true,
+    },
     .start = countTrailingZeros_uint32,
     .image_filename = "64x64-green.ref.png",
 };

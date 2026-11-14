@@ -428,6 +428,10 @@ static const enum test_queue_setup transfer = QUEUE_SETUP_TRANSFER;
         .queue_setup = queue, \
         .no_image = true, \
         .api_version = VK_API_VERSION_1_3, \
+        .features = { \
+            .bufferDeviceAddress = true, \
+            .indirectMemoryCopy = true, \
+        }, \
         .user_data = &use_tiling_val ## _ ## dim ## x ## dim, \
     };
 

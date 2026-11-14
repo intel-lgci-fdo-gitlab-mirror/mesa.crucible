@@ -271,6 +271,7 @@ test_define {
     .features = {
         .meshShader = true,
         .taskShader = true,
+        .shaderInt8 = true,
     },
 };
 
@@ -358,6 +359,7 @@ test_define {
     .features = {
         .meshShader = true,
         .taskShader = true,
+        .shaderInt8 = true,
     },
 };
 

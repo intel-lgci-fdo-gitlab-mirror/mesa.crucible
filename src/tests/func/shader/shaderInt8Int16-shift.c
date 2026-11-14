@@ -394,6 +394,9 @@ test_shift_int8_t(void)
 
 test_define {
     .name = "func.shader.shift.int8_t",
+    .features = {
+        .shaderInt8 = true,
+    },
     .start = test_shift_int8_t,
     .image_filename = "32x32-green.ref.png",
 };

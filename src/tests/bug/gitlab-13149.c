@@ -285,6 +285,9 @@ test(void)
 
 test_define {
     .name = "bug.gitlab-13149",
+    .features = {
+        .storageBuffer16BitAccess = true,
+    },
     .start = test,
     .no_image = true,
 };

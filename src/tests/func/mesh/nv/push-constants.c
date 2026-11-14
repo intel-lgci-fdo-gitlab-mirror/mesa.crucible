@@ -88,6 +88,9 @@ push_constants_mesh_read(void)
 
 test_define {
     .name = "func.mesh.nv.push_constants.mesh_read",
+    .features = {
+        .meshShaderNV = true,
+    },
     .start = push_constants_mesh_read,
     .image_filename = "func.mesh.basic.ref.png",
 };

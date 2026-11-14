@@ -209,6 +209,10 @@ test_sm_builtins(void)
 
 test_define {
     .name = "func.nv.shader-sm-builtins",
+    .features = {
+        .shaderSMBuiltins = true,
+        .computeFullSubgroups = true,
+    },
     .start = test_sm_builtins,
     .no_image = true,
     .queue_setup = QUEUE_SETUP_COMPUTE,

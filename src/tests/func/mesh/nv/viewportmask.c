@@ -147,6 +147,9 @@ viewport_mask_simple(void)
 
 test_define {
     .name = "func.mesh.nv.viewport_mask.simple",
+    .features = {
+        .meshShaderNV = true,
+    },
     .start = viewport_mask_simple,
     .image_filename = "func.mesh.viewport_mask.simple.ref.png",
 };
@@ -274,6 +277,9 @@ viewport_mask_mixed(void)
 
 test_define {
     .name = "func.mesh.nv.viewport_mask.mixed",
+    .features = {
+        .meshShaderNV = true,
+    },
     .start = viewport_mask_mixed,
     .image_filename = "func.mesh.viewport_mask.mixed.ref.png",
 };

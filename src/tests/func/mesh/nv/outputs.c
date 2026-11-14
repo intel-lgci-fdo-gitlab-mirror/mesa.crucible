@@ -74,6 +74,9 @@ outputs_per_vertex(void)
 
 test_define {
     .name = "func.mesh.nv.outputs.per_vertex",
+    .features = {
+        .meshShaderNV = true,
+    },
     .start = outputs_per_vertex,
     .image_filename = "func.mesh.basic.ref.png",
 };
@@ -130,6 +133,9 @@ outputs_per_vertex_block(void)
 
 test_define {
     .name = "func.mesh.nv.outputs.per_vertex_block",
+    .features = {
+        .meshShaderNV = true,
+    },
     .start = outputs_per_vertex_block,
     .image_filename = "func.mesh.basic.ref.png",
 };
@@ -209,6 +215,9 @@ outputs_per_primitive(void)
 
 test_define {
     .name = "func.mesh.nv.outputs.per_primitive",
+    .features = {
+        .meshShaderNV = true,
+    },
     .start = outputs_per_primitive,
     .image_filename = "func.mesh.basic.ref.png",
 };
@@ -290,6 +299,9 @@ outputs_per_primitive_block(void)
 
 test_define {
     .name = "func.mesh.nv.outputs.per_primitive_block",
+    .features = {
+        .meshShaderNV = true,
+    },
     .start = outputs_per_primitive_block,
     .image_filename = "func.mesh.basic.ref.png",
 };
@@ -346,6 +358,9 @@ outputs_write_packed_indices(void)
 
 test_define {
     .name = "func.mesh.nv.outputs.write_packed_indices",
+    .features = {
+        .meshShaderNV = true,
+    },
     .start = outputs_write_packed_indices,
     .image_filename = "func.mesh.basic.ref.png",
 };
@@ -431,6 +446,9 @@ outputs_per_primitive_unused(void)
 
 test_define {
     .name = "func.mesh.nv.outputs.per_primitive.unused",
+    .features = {
+        .meshShaderNV = true,
+    },
     .start = outputs_per_primitive_unused,
     .image_filename = "func.mesh.basic.ref.png",
 };

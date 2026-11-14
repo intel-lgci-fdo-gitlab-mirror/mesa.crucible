@@ -98,6 +98,9 @@ clipdistance_1(void)
 
 test_define {
     .name = "func.mesh.nv.clipdistance.1",
+    .features = {
+        .meshShaderNV = true,
+    },
     .start = clipdistance_1,
     .image_filename = "func.mesh.clipdistance.ref.png",
 };
@@ -175,6 +178,9 @@ clipdistance_5(void)
 
 test_define {
     .name = "func.mesh.nv.clipdistance.5",
+    .features = {
+        .meshShaderNV = true,
+    },
     .start = clipdistance_5,
     .image_filename = "func.mesh.clipdistance.ref.png",
 };
@@ -245,6 +251,9 @@ culldistance_1(void)
 
 test_define {
     .name = "func.mesh.nv.culldistance.1",
+    .features = {
+        .meshShaderNV = true,
+    },
     .start = culldistance_1,
     .image_filename = "func.mesh.culldistance.ref.png",
 };
@@ -322,6 +331,9 @@ culldistance_5(void)
 
 test_define {
     .name = "func.mesh.nv.culldistance.5",
+    .features = {
+        .meshShaderNV = true,
+    },
     .start = culldistance_5,
     .image_filename = "func.mesh.culldistance.ref.png",
 };
@@ -409,6 +421,9 @@ clipdistance_1_culldistance_1(void)
 
 test_define {
     .name = "func.mesh.nv.clipdistance_culldistance.1",
+    .features = {
+        .meshShaderNV = true,
+    },
     .start = clipdistance_1_culldistance_1,
     .image_filename = "func.mesh.clipdistance_culldistance.ref.png",
 };
@@ -443,6 +458,9 @@ clipdistance_1_fs(void)
 
 test_define {
     .name = "func.mesh.nv.clipdistance.1.fs",
+    .features = {
+        .meshShaderNV = true,
+    },
     .start = clipdistance_1_fs,
     .image_filename = "func.mesh.clipdistance.fs.ref.png",
 };

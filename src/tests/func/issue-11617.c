@@ -253,5 +253,8 @@ test(void)
 
 test_define {
     .name = "func.issue-11617",
+    .features = {
+        .shaderFloat16 = true,
+    },
     .start = test,
 };

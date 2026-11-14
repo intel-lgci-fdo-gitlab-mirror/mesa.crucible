@@ -250,6 +250,7 @@ test_define {
     .image_filename = "func.mesh.basic.ref.png",
     .features = {
         .meshShader = true,
+        .uniformBufferStandardLayout = true,
     },
 };
 

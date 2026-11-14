@@ -424,6 +424,10 @@ test(void)
 
 test_define {
     .name = "bug.intel-max-buffer-size",
+    .features = {
+        .sparseBinding = true,
+        .sparseResidencyBuffer = true,
+    },
     .start = test,
     .no_image = true,
     .queue_setup = QUEUE_SETUP_COMPUTE,

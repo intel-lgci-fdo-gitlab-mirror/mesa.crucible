@@ -102,6 +102,7 @@ test_define {
     .image_filename = "func.mesh.basic.ref.png",
     .features = {
         .meshShader = true,
+        .subgroupSizeControl = true,
     },
 };
 
@@ -111,6 +112,7 @@ test_define {
     .image_filename = "func.mesh.basic.ref.png",
     .features = {
         .meshShader = true,
+        .subgroupSizeControl = true,
     },
 };
 
@@ -120,6 +122,7 @@ test_define {
     .image_filename = "func.mesh.basic.ref.png",
     .features = {
         .meshShader = true,
+        .subgroupSizeControl = true,
     },
 };
 
@@ -129,6 +132,7 @@ test_define {
     .image_filename = "func.mesh.basic.ref.png",
     .features = {
         .meshShader = true,
+        .subgroupSizeControl = true,
     },
 };
 
@@ -231,6 +235,7 @@ test_define {
     .features = {
         .meshShader = true,
         .taskShader = true,
+        .subgroupSizeControl = true,
     },
 };
 
@@ -241,6 +246,7 @@ test_define {
     .features = {
         .meshShader = true,
         .taskShader = true,
+        .subgroupSizeControl = true,
     },
 };
 
@@ -251,6 +257,7 @@ test_define {
     .features = {
         .meshShader = true,
         .taskShader = true,
+        .subgroupSizeControl = true,
     },
 };
 
@@ -261,5 +268,6 @@ test_define {
     .features = {
         .meshShader = true,
         .taskShader = true,
+        .subgroupSizeControl = true,
     },
 };

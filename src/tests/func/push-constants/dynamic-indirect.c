@@ -257,6 +257,9 @@ test(void)
 
 test_define {
     .name = "func.push-constants.dynamic-indirect",
+    .features = {
+        .uniformBufferStandardLayout = true,
+    },
     .start = test,
     .image_filename = "32x32-smile.ref.png",
 };

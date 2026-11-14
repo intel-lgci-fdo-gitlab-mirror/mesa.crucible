@@ -113,6 +113,9 @@ multiply32x16_int32(void)
 
 test_define {
     .name = "func.shader.multiply32x16.int",
+    .features = {
+        .shaderIntegerFunctions2 = true,
+    },
     .start = multiply32x16_int32,
     .image_filename = "128x128-green.ref.png",
 };
@@ -168,6 +171,9 @@ multiply32x16_uint32(void)
 
 test_define {
     .name = "func.shader.multiply32x16.uint",
+    .features = {
+        .shaderIntegerFunctions2 = true,
+    },
     .start = multiply32x16_uint32,
     .image_filename = "128x128-green.ref.png",
 };
@@ -241,6 +247,9 @@ multiply32x16_int32_large_constant(void)
 
 test_define {
     .name = "func.shader.multiply32x16.large_int_constant",
+    .features = {
+        .shaderIntegerFunctions2 = true,
+    },
     .start = multiply32x16_int32_large_constant,
     .image_filename = "128x128-green.ref.png",
 };
@@ -314,6 +323,9 @@ multiply32x16_uint32_large_constant(void)
 
 test_define {
     .name = "func.shader.multiply32x16.large_uint_constant",
+    .features = {
+        .shaderIntegerFunctions2 = true,
+    },
     .start = multiply32x16_uint32_large_constant,
     .image_filename = "128x128-green.ref.png",
 };

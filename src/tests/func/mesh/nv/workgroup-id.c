@@ -97,6 +97,9 @@ workgroup_id_mesh(void)
 
 test_define {
     .name = "func.mesh.nv.workgroup_id.mesh",
+    .features = {
+        .meshShaderNV = true,
+    },
     .start = workgroup_id_mesh,
     .image_filename = "func.mesh.basic.ref.png",
 };
@@ -194,6 +197,10 @@ workgroup_id_task(void)
 
 test_define {
     .name = "func.mesh.nv.workgroup_id.task",
+    .features = {
+        .meshShaderNV = true,
+        .taskShaderNV = true,
+    },
     .start = workgroup_id_task,
     .image_filename = "func.mesh.basic.ref.png",
 };

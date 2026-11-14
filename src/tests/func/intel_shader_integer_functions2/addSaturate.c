@@ -170,6 +170,10 @@ addSaturate_int16(void)
 
 test_define {
     .name = "func.shader.addSaturate.int16_t",
+    .features = {
+        .shaderIntegerFunctions2 = true,
+        .shaderInt16 = true,
+    },
     .start = addSaturate_int16,
     .image_filename = "128x128-green.ref.png",
 };
@@ -242,6 +246,10 @@ addSaturate_uint16(void)
 
 test_define {
     .name = "func.shader.addSaturate.uint16_t",
+    .features = {
+        .shaderIntegerFunctions2 = true,
+        .shaderInt16 = true,
+    },
     .start = addSaturate_uint16,
     .image_filename = "128x128-green.ref.png",
 };
@@ -340,6 +348,9 @@ addSaturate_int32(void)
 
 test_define {
     .name = "func.shader.addSaturate.int",
+    .features = {
+        .shaderIntegerFunctions2 = true,
+    },
     .start = addSaturate_int32,
     .image_filename = "128x128-green.ref.png",
 };
@@ -399,6 +410,9 @@ addSaturate_uint32(void)
 
 test_define {
     .name = "func.shader.addSaturate.uint",
+    .features = {
+        .shaderIntegerFunctions2 = true,
+    },
     .start = addSaturate_uint32,
     .image_filename = "128x128-green.ref.png",
 };
@@ -509,6 +523,10 @@ addSaturate_int64(void)
 
 test_define {
     .name = "func.shader.addSaturate.int64_t",
+    .features = {
+        .shaderIntegerFunctions2 = true,
+        .shaderInt64 = true,
+    },
     .start = addSaturate_int64,
     .image_filename = "64x64-green.ref.png",
 };
@@ -575,6 +593,10 @@ addSaturate_uint64(void)
 
 test_define {
     .name = "func.shader.addSaturate.uint64_t",
+    .features = {
+        .shaderIntegerFunctions2 = true,
+        .shaderInt64 = true,
+    },
     .start = addSaturate_uint64,
     .image_filename = "64x64-green.ref.png",
 };

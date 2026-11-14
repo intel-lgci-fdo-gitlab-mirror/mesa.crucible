@@ -251,6 +251,10 @@ test(void)
 
 test_define {
     .name = "bug.gitlab-12794",
+    .features = {
+        .shaderFloat16 = true,
+        .storageBuffer16BitAccess = true,
+    },
     .start = test,
     .no_image = true,
 };

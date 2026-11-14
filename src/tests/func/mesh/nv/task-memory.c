@@ -106,6 +106,10 @@ task_memory_uint(void)
 
 test_define {
     .name = "func.mesh.nv.task_memory.uint",
+    .features = {
+        .meshShaderNV = true,
+        .taskShaderNV = true,
+    },
     .start = task_memory_uint,
     .no_image = true,
 };
@@ -183,6 +187,10 @@ task_memory_uint64(void)
 
 test_define {
     .name = "func.mesh.nv.task_memory.uint64",
+    .features = {
+        .meshShaderNV = true,
+        .taskShaderNV = true,
+    },
     .start = task_memory_uint64,
     .no_image = true,
 };
@@ -264,6 +272,10 @@ task_memory_uvec4(void)
 
 test_define {
     .name = "func.mesh.nv.task_memory.uvec4",
+    .features = {
+        .meshShaderNV = true,
+        .taskShaderNV = true,
+    },
     .start = task_memory_uvec4,
     .no_image = true,
 };
@@ -360,6 +372,10 @@ task_memory_array_direct(void)
 
 test_define {
     .name = "func.mesh.nv.task_memory.array_direct",
+    .features = {
+        .meshShaderNV = true,
+        .taskShaderNV = true,
+    },
     .start = task_memory_array_direct,
     .no_image = true,
 };
@@ -441,6 +457,10 @@ task_memory_array_indirect(void)
 
 test_define {
     .name = "func.mesh.nv.task_memory.array_indirect",
+    .features = {
+        .meshShaderNV = true,
+        .taskShaderNV = true,
+    },
     .start = task_memory_array_indirect,
     .no_image = true,
 };
@@ -545,6 +565,10 @@ task_memory_many(void)
 
 test_define {
     .name = "func.mesh.nv.task_memory.many",
+    .features = {
+        .meshShaderNV = true,
+        .taskShaderNV = true,
+    },
     .start = task_memory_many,
     .no_image = true,
 };
@@ -657,6 +681,10 @@ task_memory_struct(void)
 
 test_define {
     .name = "func.mesh.nv.task_memory.struct",
+    .features = {
+        .meshShaderNV = true,
+        .taskShaderNV = true,
+    },
     .start = task_memory_struct,
     .no_image = true,
 };
@@ -768,6 +796,10 @@ task_memory_some_not_used(void)
 
 test_define {
     .name = "func.mesh.nv.task_memory.some_not_used",
+    .features = {
+        .meshShaderNV = true,
+        .taskShaderNV = true,
+    },
     .start = task_memory_some_not_used,
     .no_image = true,
 };
@@ -893,6 +925,10 @@ task_memory_load_output_struct(void)
 
 test_define {
     .name = "func.mesh.nv.task_memory.load_output_struct",
+    .features = {
+        .meshShaderNV = true,
+        .taskShaderNV = true,
+    },
     .start = task_memory_load_output_struct,
     .no_image = true,
 };
@@ -970,6 +1006,10 @@ task_memory_many_meshes(void)
 
 test_define {
     .name = "func.mesh.nv.task_memory.many_meshes",
+    .features = {
+        .meshShaderNV = true,
+        .taskShaderNV = true,
+    },
     .start = task_memory_many_meshes,
     .no_image = true,
 };
@@ -1050,6 +1090,10 @@ task_memory_many_tasks(void)
 
 test_define {
     .name = "func.mesh.nv.task_memory.many_tasks",
+    .features = {
+        .meshShaderNV = true,
+        .taskShaderNV = true,
+    },
     .start = task_memory_many_tasks,
     .no_image = true,
 };
@@ -1137,6 +1181,10 @@ task_memory_many_tasks_and_meshes(void)
 
 test_define {
     .name = "func.mesh.nv.task_memory.many_tasks_and_meshes",
+    .features = {
+        .meshShaderNV = true,
+        .taskShaderNV = true,
+    },
     .start = task_memory_many_tasks_and_meshes,
     .no_image = true,
 };
@@ -1224,6 +1272,10 @@ task_memory_large_array(void)
 
 test_define {
     .name = "func.mesh.nv.task_memory.large_array",
+    .features = {
+        .meshShaderNV = true,
+        .taskShaderNV = true,
+    },
     .start = task_memory_large_array,
     .no_image = true,
 };
@@ -1298,6 +1350,10 @@ task_memory_issue7141(void)
 
 test_define {
     .name = "func.mesh.nv.task_memory.issue7141",
+    .features = {
+        .meshShaderNV = true,
+        .taskShaderNV = true,
+    },
     .start = task_memory_issue7141,
     .no_image = true,
 };

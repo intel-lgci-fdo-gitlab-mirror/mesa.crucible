@@ -219,6 +219,9 @@ test_gitlab_6680(void)
 
 test_define {
     .name = "bug.gitlab.6680",
+    .features = {
+        .transformFeedback = true,
+    },
     .start = test_gitlab_6680,
     .no_image = true,
 };

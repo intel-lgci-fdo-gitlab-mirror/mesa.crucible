@@ -306,30 +306,50 @@ multiview(void)
 
 test_define {
     .name = "func.mesh.nv.multiview.3.111",
+    .features = {
+        .meshShaderNV = true,
+        .multiview = true,
+    },
     .start = multiview,
     .no_image = true,
 };
 
 test_define {
     .name = "func.mesh.nv.multiview.3.110",
+    .features = {
+        .meshShaderNV = true,
+        .multiview = true,
+    },
     .start = multiview,
     .no_image = true,
 };
 
 test_define {
     .name = "func.mesh.nv.multiview.2.10",
+    .features = {
+        .meshShaderNV = true,
+        .multiview = true,
+    },
     .start = multiview,
     .no_image = true,
 };
 
 test_define {
     .name = "func.mesh.nv.multiview.2.11",
+    .features = {
+        .meshShaderNV = true,
+        .multiview = true,
+    },
     .start = multiview,
     .no_image = true,
 };
 
 test_define {
     .name = "func.mesh.nv.multiview.1.1",
+    .features = {
+        .meshShaderNV = true,
+        .multiview = true,
+    },
     .start = multiview,
     .no_image = true,
 };
@@ -407,6 +427,10 @@ multiview_perview_nonblock(void)
 
 test_define {
     .name = "func.mesh.nv.multiview.perview.nonblock.2.11",
+    .features = {
+        .meshShaderNV = true,
+        .multiview = true,
+    },
     .start = multiview_perview_nonblock,
     .no_image = true,
 };
@@ -487,6 +511,10 @@ multiview_perview_block(void)
 
 test_define {
     .name = "func.mesh.nv.multiview.perview.block.2.11",
+    .features = {
+        .meshShaderNV = true,
+        .multiview = true,
+    },
     .start = multiview_perview_block,
     .no_image = true,
 };
@@ -604,6 +632,10 @@ multiview_clipdistance(void)
 
 test_define {
     .name = "func.mesh.nv.multiview.clipdistance.2.11",
+    .features = {
+        .meshShaderNV = true,
+        .multiview = true,
+    },
     .start = multiview_clipdistance,
     .no_image = true,
 };
@@ -721,6 +753,10 @@ multiview_culldistance(void)
 
 test_define {
     .name = "func.mesh.nv.multiview.culldistance.2.11",
+    .features = {
+        .meshShaderNV = true,
+        .multiview = true,
+    },
     .start = multiview_culldistance,
     .no_image = true,
 };
@@ -863,6 +899,10 @@ multiview_viewportmask_perview(void)
 
 test_define {
     .name = "func.mesh.nv.multiview.viewportmask_perview.2.11",
+    .features = {
+        .meshShaderNV = true,
+        .multiview = true,
+    },
     .start = multiview_viewportmask_perview,
     .no_image = true,
 };

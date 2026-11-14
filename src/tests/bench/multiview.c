@@ -483,6 +483,10 @@ test()
 
 test_define {
     .name = "bench.multiview",
+    .features = {
+        .multiview = true,
+        .uniformBufferStandardLayout = true,
+    },
     .start = test,
     .no_image = true,
 };

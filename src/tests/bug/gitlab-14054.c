@@ -158,6 +158,10 @@ test(void)
 
 test_define {
     .name = "bug.gitlab-14054",
+    .features = {
+        .runtimeDescriptorArray = true,
+        .shaderStorageImageArrayNonUniformIndexing = true,
+    },
     .start = test,
     .no_image = true,
 };

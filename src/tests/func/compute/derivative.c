@@ -171,6 +171,9 @@ group_linear(void)
 
 test_define {
     .name = "func.compute.derivative.group-linear",
+    .features = {
+        .computeDerivativeGroupLinear = true,
+    },
     .start = group_linear,
     .no_image = true,
     .queue_setup = QUEUE_SETUP_COMPUTE,
@@ -247,6 +250,9 @@ group_quads(void)
 
 test_define {
     .name = "func.compute.derivative.group-quads",
+    .features = {
+        .computeDerivativeGroupQuads = true,
+    },
     .start = group_quads,
     .no_image = true,
     .queue_setup = QUEUE_SETUP_COMPUTE,
@@ -329,6 +335,9 @@ group_quads_multiple_subgroups(void)
 
 test_define {
     .name = "func.compute.derivative.group-quads-multiple-subgroups",
+    .features = {
+        .computeDerivativeGroupQuads = true,
+    },
     .start = group_quads_multiple_subgroups,
     .no_image = true,
     .queue_setup = QUEUE_SETUP_COMPUTE,

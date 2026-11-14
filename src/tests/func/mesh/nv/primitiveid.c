@@ -90,6 +90,9 @@ primitive_id_fs(void)
 
 test_define {
     .name = "func.mesh.nv.primitive_id.fs",
+    .features = {
+        .meshShaderNV = true,
+    },
     .start = primitive_id_fs,
     .image_filename = "func.mesh.primitive_id.fs.ref.png",
 };

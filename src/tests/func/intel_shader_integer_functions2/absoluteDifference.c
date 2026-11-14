@@ -153,6 +153,10 @@ absoluteDifference_int16(void)
 
 test_define {
     .name = "func.shader.absoluteDifference.int16_t",
+    .features = {
+        .shaderIntegerFunctions2 = true,
+        .shaderInt16 = true,
+    },
     .start = absoluteDifference_int16,
     .image_filename = "128x128-green.ref.png",
 };
@@ -230,6 +234,10 @@ absoluteDifference_uint16(void)
 
 test_define {
     .name = "func.shader.absoluteDifference.uint16_t",
+    .features = {
+        .shaderIntegerFunctions2 = true,
+        .shaderInt16 = true,
+    },
     .start = absoluteDifference_uint16,
     .image_filename = "128x128-green.ref.png",
 };
@@ -340,6 +348,9 @@ absoluteDifference_int32(void)
 
 test_define {
     .name = "func.shader.absoluteDifference.int",
+    .features = {
+        .shaderIntegerFunctions2 = true,
+    },
     .start = absoluteDifference_int32,
     .image_filename = "128x128-green.ref.png",
 };
@@ -405,6 +416,9 @@ absoluteDifference_uint32(void)
 
 test_define {
     .name = "func.shader.absoluteDifference.uint",
+    .features = {
+        .shaderIntegerFunctions2 = true,
+    },
     .start = absoluteDifference_uint32,
     .image_filename = "128x128-green.ref.png",
 };
@@ -526,6 +540,10 @@ absoluteDifference_int64(void)
 
 test_define {
     .name = "func.shader.absoluteDifference.int64_t",
+    .features = {
+        .shaderIntegerFunctions2 = true,
+        .shaderInt64 = true,
+    },
     .start = absoluteDifference_int64,
     .image_filename = "64x64-green.ref.png",
 };
@@ -596,6 +614,10 @@ absoluteDifference_uint64(void)
 
 test_define {
     .name = "func.shader.absoluteDifference.uint64_t",
+    .features = {
+        .shaderIntegerFunctions2 = true,
+        .shaderInt64 = true,
+    },
     .start = absoluteDifference_uint64,
     .image_filename = "64x64-green.ref.png",
 };
@@ -692,6 +714,10 @@ average_int16(void)
 
 test_define {
     .name = "func.shader.average.int16_t",
+    .features = {
+        .shaderIntegerFunctions2 = true,
+        .shaderInt16 = true,
+    },
     .start = average_int16,
     .image_filename = "128x128-green.ref.png",
 };
@@ -768,6 +794,10 @@ average_uint16(void)
 
 test_define {
     .name = "func.shader.average.uint16_t",
+    .features = {
+        .shaderIntegerFunctions2 = true,
+        .shaderInt16 = true,
+    },
     .start = average_uint16,
     .image_filename = "128x128-green.ref.png",
 };
@@ -837,6 +867,9 @@ average_int32(void)
 
 test_define {
     .name = "func.shader.average.int",
+    .features = {
+        .shaderIntegerFunctions2 = true,
+    },
     .start = average_int32,
     .image_filename = "128x128-green.ref.png",
 };
@@ -906,6 +939,9 @@ average_uint32(void)
 
 test_define {
     .name = "func.shader.average.uint",
+    .features = {
+        .shaderIntegerFunctions2 = true,
+    },
     .start = average_uint32,
     .image_filename = "128x128-green.ref.png",
 };
@@ -980,6 +1016,10 @@ average_int64(void)
 
 test_define {
     .name = "func.shader.average.int64_t",
+    .features = {
+        .shaderIntegerFunctions2 = true,
+        .shaderInt64 = true,
+    },
     .start = average_int64,
     .image_filename = "64x64-green.ref.png",
 };
@@ -1054,6 +1094,10 @@ average_uint64(void)
 
 test_define {
     .name = "func.shader.average.uint64_t",
+    .features = {
+        .shaderIntegerFunctions2 = true,
+        .shaderInt64 = true,
+    },
     .start = average_uint64,
     .image_filename = "64x64-green.ref.png",
 };
@@ -1150,6 +1194,10 @@ averageRounded_int16(void)
 
 test_define {
     .name = "func.shader.averageRounded.int16_t",
+    .features = {
+        .shaderIntegerFunctions2 = true,
+        .shaderInt16 = true,
+    },
     .start = averageRounded_int16,
     .image_filename = "128x128-green.ref.png",
 };
@@ -1226,6 +1274,10 @@ averageRounded_uint16(void)
 
 test_define {
     .name = "func.shader.averageRounded.uint16_t",
+    .features = {
+        .shaderIntegerFunctions2 = true,
+        .shaderInt16 = true,
+    },
     .start = averageRounded_uint16,
     .image_filename = "128x128-green.ref.png",
 };
@@ -1295,6 +1347,9 @@ averageRounded_int32(void)
 
 test_define {
     .name = "func.shader.averageRounded.int",
+    .features = {
+        .shaderIntegerFunctions2 = true,
+    },
     .start = averageRounded_int32,
     .image_filename = "128x128-green.ref.png",
 };
@@ -1364,6 +1419,9 @@ averageRounded_uint32(void)
 
 test_define {
     .name = "func.shader.averageRounded.uint",
+    .features = {
+        .shaderIntegerFunctions2 = true,
+    },
     .start = averageRounded_uint32,
     .image_filename = "128x128-green.ref.png",
 };
@@ -1438,6 +1496,10 @@ averageRounded_int64(void)
 
 test_define {
     .name = "func.shader.averageRounded.int64_t",
+    .features = {
+        .shaderIntegerFunctions2 = true,
+        .shaderInt64 = true,
+    },
     .start = averageRounded_int64,
     .image_filename = "64x64-green.ref.png",
 };
@@ -1512,6 +1574,10 @@ averageRounded_uint64(void)
 
 test_define {
     .name = "func.shader.averageRounded.uint64_t",
+    .features = {
+        .shaderIntegerFunctions2 = true,
+        .shaderInt64 = true,
+    },
     .start = averageRounded_uint64,
     .image_filename = "64x64-green.ref.png",
 };

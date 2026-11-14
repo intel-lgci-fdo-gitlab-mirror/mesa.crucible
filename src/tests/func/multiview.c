@@ -325,6 +325,9 @@ test_multiview()
 
 test_define {
     .name = "func.multiview.count_2",
+    .features = {
+        .multiview = true,
+    },
     .start = test_multiview,
     .no_image = true,
     .user_data = &(struct params) {
@@ -335,6 +338,9 @@ test_define {
 
 test_define {
     .name = "func.multiview.count_2.masked_0",
+    .features = {
+        .multiview = true,
+    },
     .start = test_multiview,
     .no_image = true,
     .user_data = &(struct params) {
@@ -345,6 +351,9 @@ test_define {
 
 test_define {
     .name = "func.multiview.count_2.masked_1",
+    .features = {
+        .multiview = true,
+    },
     .start = test_multiview,
     .no_image = true,
     .user_data = &(struct params) {
@@ -355,6 +364,9 @@ test_define {
 
 test_define {
     .name = "func.multiview.count_6",
+    .features = {
+        .multiview = true,
+    },
     .start = test_multiview,
     .no_image = true,
     .user_data = &(struct params) {
@@ -365,6 +377,9 @@ test_define {
 
 test_define {
     .name = "func.multiview.count_6.masked_0_2",
+    .features = {
+        .multiview = true,
+    },
     .start = test_multiview,
     .no_image = true,
     .user_data = &(struct params) {
@@ -375,6 +390,9 @@ test_define {
 
 test_define {
     .name = "func.multiview.count_6.masked_1_3_5",
+    .features = {
+        .multiview = true,
+    },
     .start = test_multiview,
     .no_image = true,
     .user_data = &(struct params) {
@@ -385,6 +403,9 @@ test_define {
 
 test_define {
     .name = "func.multiview.count_6.masked_3_4",
+    .features = {
+        .multiview = true,
+    },
     .start = test_multiview,
     .no_image = true,
     .user_data = &(struct params) {

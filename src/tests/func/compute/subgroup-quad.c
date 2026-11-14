@@ -170,6 +170,9 @@ subgroup_quad_swap_vertical_grid(void)
 
 test_define {
     .name = "func.compute.subgroup.swap_vertical.grid",
+    .features = {
+        .computeDerivativeGroupQuads = true,
+    },
     .start = subgroup_quad_swap_vertical_grid,
     .no_image = true,
     .queue_setup = QUEUE_SETUP_COMPUTE,
