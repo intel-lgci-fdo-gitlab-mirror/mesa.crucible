@@ -53,6 +53,7 @@ test_gitlab_6680(void)
         void main()
         {
             out0 = a_position;
+            gl_PointSize = 1.0;
         }
     );
 

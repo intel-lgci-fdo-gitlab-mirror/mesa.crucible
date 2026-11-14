@@ -323,6 +323,7 @@ test_lots_of_surface_state_vs(bool use_dynamic_offsets)
 
             v_color = vec4(zero, one, zero, one);
             gl_Position = a_position;
+            gl_PointSize = 1.0;
         }
     );
 
@@ -371,6 +372,7 @@ test_lots_of_surface_state_fs(bool use_dynamic_offsets)
         void main()
         {
             gl_Position = a_position;
+            gl_PointSize = 1.0;
         }
     );
 

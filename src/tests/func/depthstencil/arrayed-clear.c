@@ -142,6 +142,8 @@ test(void)
 	    vec4 color2 =  texelFetch(depth_tex, ivec3(0,0,1),0);
 	    buf_out.x = color1.x;
 	    buf_out.y = color2.x;
+            gl_Position = vec4(0.0, 0.0, 0.0, 1.0);
+            gl_PointSize = 1.0;
         }
     );
     VkShaderModule fs = qoCreateShaderModuleGLSL(t_device, FRAGMENT,

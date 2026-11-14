@@ -230,6 +230,7 @@ qoCreateGraphicsPipeline(VkDevice device,
                 void main()
                 {
                     gl_Position = a_position;
+                    gl_PointSize = 1.0;
                     v_color = a_color;
                 }
             );
