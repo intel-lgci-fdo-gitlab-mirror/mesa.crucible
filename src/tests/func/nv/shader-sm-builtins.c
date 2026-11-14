@@ -213,6 +213,7 @@ test_define {
         .shaderSMBuiltins = true,
         .computeFullSubgroups = true,
     },
+    .api_version = VK_API_VERSION_1_1,
     .start = test_sm_builtins,
     .no_image = true,
     .queue_setup = QUEUE_SETUP_COMPUTE,

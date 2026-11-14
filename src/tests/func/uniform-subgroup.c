@@ -316,6 +316,7 @@ test_define { \
     .start = test, \
     .user_data = &(test_params_t) {reduce, bit_size, func}, \
     .no_image = true, \
+    .api_version = VK_API_VERSION_1_1, \
     .features = { \
         .shaderInt8 = true, \
         .shaderInt16 = true, \

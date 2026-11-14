@@ -101,6 +101,7 @@ test_define {
 
 test_define {
     .name = "func.mesh.nv.basic.mesh_require8",
+    .api_version = VK_API_VERSION_1_1,
     .features = {
         .meshShaderNV = true,
         .subgroupSizeControl = true,
@@ -111,6 +112,7 @@ test_define {
 
 test_define {
     .name = "func.mesh.nv.basic.mesh_require16",
+    .api_version = VK_API_VERSION_1_1,
     .features = {
         .meshShaderNV = true,
         .subgroupSizeControl = true,
@@ -121,6 +123,7 @@ test_define {
 
 test_define {
     .name = "func.mesh.nv.basic.mesh_require32",
+    .api_version = VK_API_VERSION_1_1,
     .features = {
         .meshShaderNV = true,
         .subgroupSizeControl = true,
@@ -131,6 +134,7 @@ test_define {
 
 test_define {
     .name = "func.mesh.nv.basic.mesh_require64",
+    .api_version = VK_API_VERSION_1_1,
     .features = {
         .meshShaderNV = true,
         .subgroupSizeControl = true,
@@ -231,6 +235,7 @@ test_define {
 
 test_define {
     .name = "func.mesh.nv.basic.task_require8",
+    .api_version = VK_API_VERSION_1_1,
     .features = {
         .meshShaderNV = true,
         .taskShaderNV = true,
@@ -242,6 +247,7 @@ test_define {
 
 test_define {
     .name = "func.mesh.nv.basic.task_require16",
+    .api_version = VK_API_VERSION_1_1,
     .features = {
         .meshShaderNV = true,
         .taskShaderNV = true,
@@ -253,6 +259,7 @@ test_define {
 
 test_define {
     .name = "func.mesh.nv.basic.task_require32",
+    .api_version = VK_API_VERSION_1_1,
     .features = {
         .meshShaderNV = true,
         .taskShaderNV = true,
@@ -264,6 +271,7 @@ test_define {
 
 test_define {
     .name = "func.mesh.nv.basic.task_require64",
+    .api_version = VK_API_VERSION_1_1,
     .features = {
         .meshShaderNV = true,
         .taskShaderNV = true,
