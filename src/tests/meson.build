@@ -65,6 +65,7 @@ test_sources_with_glsl = [
   'bug/gitlab-12927.c',
   'bug/gitlab-13149.c',
   'bug/gitlab-14054.c',
+  'bug/gitlab-14348.c',
   'bug/gitlab-15029.c',
   'bug/gitlab-16722.c',
   'bug/intel-max-buffer-size.c',
